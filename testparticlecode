@@ -1,0 +1,177 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+# sun position vector is generally assumed to be of the form [x, y, z]
+
+
+# INITIAL CONDITIONS   
+x0 = 1000000
+y0 = 100000
+z0 = 0
+
+vx0 = 0
+vy0 = 0#2000000*np.sqrt(35)
+vz0 = 0
+
+steps = 200000
+msolar = 2*10**30 # mass of the sun
+G = 7*10**(-11) # value for gravitational constant
+#dt = .00001 # length of a time step
+ptcl = np.zeros((6,steps)) # storing position and velocity values for a single particle over a certain number of time steps
+
+def getDistance(object1, sunPos, sn):
+    # calculating distance from an object from the sun
+    r = np.sqrt((object1[0,sn]-sunPos[0])**2 + (object1[1,sn]-sunPos[1])**2 + (object1[2,sn]-sunPos[2])**2)
+    #print(r)
+    return r
+
+def calcL(r,v,theta):
+    # calculates the angular momentum given a radius/velocity magnitude and the angle between them
+    return r*v*np.sin(theta)
+
+
+def radPressure(t):
+    # dummy function to model radiation pressure
+    # return (np.sin(t))**2
+    return 0
+
+def gravFieldMagt(object1, sunPos, sn, t):
+    # calculating magnitude of total gravitational field at object1's location, considering radiation pressure, divided by r**2
+    return msolar*G*(1-radPressure(t))/(getDistance(object1, sunPos, sn))**3
+
+def potentialConstant(t):
+    # returns the value of the potential constant at time t
+    return msolar*G*(1-radPressure(t))
+
+def step(object1, sunPos, stepnumber):
+    #print(stepnumber)
+    # stepping a particle through time step dt
+
+    # initializing using initial values
+    if stepnumber == 1:
+        object1[0,0:2] = x0
+        object1[1,0:2] = y0
+        object1[2,0:2] = z0
+        object1[3,0:2] = vx0
+        object1[4,0:2] = vy0
+        object1[5,0:2] = vz0
+
+    # attempting to scale the time step dt by the radial distance to prevent issues with energy conservation breaking for unbound orbits near the sun
+    if getDistance(object1, sunPos, stepnumber) < 100000:
+        #print(stepnumber)
+        dt = getDistance(object1, sunPos, stepnumber)/1000000000000000000 # dividing by large number to get dt~=1e_6 at around 1 au
+        # dt = .000000000001
+    else:
+        dt = .00001
+
+    t = stepnumber*dt
+    
+    xold = object1[0,stepnumber-1]
+    xcurrent = object1[0,stepnumber]
+    yold = object1[1,stepnumber-1]
+    ycurrent = object1[1,stepnumber]
+    zold = object1[2,stepnumber-1]
+    zcurrent = object1[2,stepnumber]
+
+    vxc = object1[3,stepnumber]
+    vyc = object1[4,stepnumber]
+    vzc = object1[5,stepnumber]
+
+    sunx = sunPos[0]
+    suny = sunPos[1]
+    sunz = sunPos[2]
+
+    g = gravFieldMagt(object1, sunPos, stepnumber, t)
+    #print(g)
+    # finite difference method for calculating new particle position
+    if stepnumber == 1:
+        xnew = xcurrent + vxc*dt + 1/2*g*(sunx-xcurrent)*dt**2
+        ynew = ycurrent + vyc*dt + 1/2*g*(suny-ycurrent)*dt**2
+        znew = zcurrent + vzc*dt + 1/2*g*(sunz-zcurrent)*dt**2
+    else:
+        xnew = 2*xcurrent - xold + dt**2*g*(sunx-xcurrent)
+        ynew = 2*ycurrent - yold + dt**2*g*(suny-ycurrent)
+        znew = 2*zcurrent - zold + dt**2*g*(sunz-zcurrent)
+
+    #xnew = xcurrent + vxc*dt + 1/2*g*(sunx-xcurrent)*dt**2
+    #ynew = ycurrent + vyc*dt + 1/2*g*(suny-ycurrent)*dt**2
+    #znew = zcurrent + vzc*dt + 1/2*g*(sunz-zcurrent)*dt**2
+
+    object1[0,stepnumber+1] = xnew
+    object1[1,stepnumber+1] = ynew
+    object1[2,stepnumber+1] = znew
+
+    #print(xnew)
+
+    # how to push velocity?
+    object1[3,stepnumber+1] = (xnew-xold)/(2*dt)
+    object1[4,stepnumber+1] = (ynew-yold)/(2*dt)
+    object1[5,stepnumber+1] = (znew-zold)/(2*dt)
+    
+
+    xn = object1[0,stepnumber+1]
+    yn = object1[1,stepnumber+1]
+    zn = object1[2,stepnumber+1]
+    magrn = getDistance(object1,sunPos,stepnumber+1)
+
+    vxn = object1[3,stepnumber+1]
+    vyn = object1[4,stepnumber+1]
+    vzn = object1[5,stepnumber+1]
+    magvn = np.sqrt(vxn**2+vyn**2+vzn**2)
+
+    # calculate angle between radius/velocity vectors using inverted dot product defintion
+    theta = np.arccos(((xn-sunPos[0])*vxn + (yn-sunPos[1])*vyn + (zn-sunPos[2])*vzn) / (magrn*magvn))
+    Lmag = calcL(magrn, magvn, theta)
+
+    f_mu = potentialConstant(t)
+    # v is perpendicular to L by definition, and I think v x L is always radially outward?
+    amag = np.sqrt((magvn*Lmag - f_mu)**2)
+
+    Etot = (magvn**2)/2 - f_mu/magrn
+    """if Etot > 0:
+        print("Energy = ",Etot)
+        print("Radius = ",magrn)
+        print(stepnumber)"""
+
+    return object1, Lmag, amag, Etot, magrn
+
+
+# TESTING
+sunpos = np.array([0,0,0])
+xtrack = np.zeros(steps)
+ytrack = np.zeros(steps)
+Etrack = np.zeros(steps)
+rtrack = np.zeros(steps)
+
+for i in range(1,steps-1):
+    ptcl, L, a, E, r = step(ptcl, sunpos, i)
+    xtrack[i] = ptcl[0,i]
+    ytrack[i] = ptcl[1,i]
+    Etrack[i] = E
+    rtrack[i] = r
+    #print("Angular Momentum is ", L)
+    #print("Magnitude of eccentricity vector is ", a)
+    #print("Total energy is ", E)
+    """for j in range(1,100):
+        if abs(i-50*j)<.001:
+            print(getDistance(ptcl, sunpos, i))"""
+    
+xaxis = np.linspace(1,steps,num=steps)
+# first and last entries are zero because of the nature of the loop above
+xtrack[0] = ptcl[0,0]
+xtrack[-1] = xtrack[-2]
+ytrack[0] = ptcl[1,0]
+ytrack[-1] = ytrack[-2]
+Etrack[0] = Etrack[1]
+Etrack[-1] = Etrack[-2]
+rtrack[0] = rtrack[1]
+rtrack[-1] = rtrack[-2]
+#print(Etrack[1])
+#print(Etrack[-2])
+
+"""plt.plot(xtrack, ytrack)
+plt.plot(0,0,'ro')
+plt.text(0,0,'Sun Location')"""
+plt.plot(xaxis,Etrack)
+plt.show()
