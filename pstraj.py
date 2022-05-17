@@ -23,8 +23,6 @@ if mode==1:
     t = np.arange(0, ttotal, tstep)
 if mode==2:
     t = np.arange(6276000000, 0, -tstep)
-if mode==3:
-    t = np.arange(6276000000, 5000000000, -tstep)
 tscale = int(.7*ttotal/tstep)
 #tscale = 0
 
@@ -49,10 +47,11 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-vxstart = np.arange(-35000, -29000, 200)
-vystart = np.arange(-1100, -700, 20)
+vxstart = np.arange(-38000, -28000, 100)
+vystart = np.arange(-1300, -500, 10)
 vzstart = 0
-
+if mode==3:
+    t = np.arange(6276000000, 5000000000, -tstep)
 
 
 
@@ -268,11 +267,16 @@ if mode==1:
     print(vxavg, '||', vyavg, '||', tavg)
 
 if mode==3:
-    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=fart[:], marker='o', cmap='viridis')
+    f = plt.figure()
+    f.set_figwidth(9)
+    f.set_figheight(6)
+    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=fart[:], marker='o', cmap='plasma')
     cb = plt.colorbar()
     plt.xlabel("vx at 100 au in km/s")
     plt.ylabel("vy at 100 au in km/s")
     cb.set_label('Time at which orbit passes through 100 au (s)')
+    plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 6276000000 s')
+    plt.title('At target: vx range -37000 m/s to -29000 m/s, vy range -1100 m/s to -750 m/s')
     plt.show()
 
 """plt.scatter(storeyic[:]/au, storevxic[:]/1000, c=storet[:], marker='o', cmap='magma')
