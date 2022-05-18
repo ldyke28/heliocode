@@ -90,32 +90,32 @@ def dr_dt(x,t,rp):
 
 for i in range(yics.size):
     for j in range(zics.size):
-        init = [xic, yics[i-1], zics[j-1], vx0, vy0, vz0]
-        trajs[:,:,(i-1)*zics.size + (j-1)] = odeint(dr_dt, init, t, args=(radPressure,))
+        init = [xic, yics[i], zics[j], vx0, vy0, vz0]
+        trajs[:,:,(i)*zics.size + (j)] = odeint(dr_dt, init, t, args=(radPressure,))
 
 for i in range(yics.size):
     for j in range(zics.size):
         for k in range(t.size):
-            if np.sqrt((trajs[k,0,(i-1)*zics.size + (j-1)]-ibexpos[0])**2 + (trajs[k,1,(i-1)*zics.size + (j-1)]-ibexpos[1])**2
-            + (trajs[k,2,(i-1)*zics.size + (j-1)]-ibexpos[2])**2) < .01*au:
-                print(trajs[k,:,(i-1)*zics.size + (j-1)])
+            if np.sqrt((trajs[k,0,(i)*zics.size + (j)]-ibexpos[0])**2 + (trajs[k,1,(i)*zics.size + (j)]-ibexpos[1])**2
+            + (trajs[k,2,(i)*zics.size + (j)]-ibexpos[2])**2) < .01*au:
+                print(trajs[k,:,(i)*zics.size + (j)])
                 print(k)
-                print(yics[i-1])
-                print(zics[j-1])
+                print(yics[i])
+                print(zics[j])
                 print('------------------------')"""
 
 # 2D code
 """trajs = np.zeros((t.size,6,yics.size))
 for i in range(yics.size):
-    init = [xic, yics[i-1], 0, vx0, vy0, vz0]
-    trajs[:,:,i-1] = odeint(dr_dt, init, t, args=(radPressure,))
+    init = [xic, yics[i], 0, vx0, vy0, vz0]
+    trajs[:,:,i] = odeint(dr_dt, init, t, args=(radPressure,))
 
 for i in range(yics.size):
     for k in range(t.size):
-        if np.sqrt((trajs[k,0,i-1]-ibexpos[0])**2 + (trajs[k,1,i-1]-ibexpos[1])**2 + (trajs[k,2,i-1]-ibexpos[2])**2) < .001*au:
-            print(trajs[k,:,i-1])
+        if np.sqrt((trajs[k,0,i]-ibexpos[0])**2 + (trajs[k,1,i]-ibexpos[1])**2 + (trajs[k,2,i]-ibexpos[2])**2) < .001*au:
+            print(trajs[k,:,i])
             print(t[k])
-            print(yics[i-1])
+            print(yics[i])
             print('-------------------------')"""
 
 
@@ -131,27 +131,27 @@ if mode==1:
     for i in range(yics.size):
         for j in range(vxics.size):
             for q in range(vyics.size):
-                init = [xic, yics[i-1], 0, vxics[j-1], vyics[q-1], vz0]
-                trajs[:,:,(i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)] = odeint(dr_dt, init, t, args=(rp4,))
+                init = [xic, yics[i], 0, vxics[j], vyics[q], vz0]
+                trajs[:,:,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)] = odeint(dr_dt, init, t, args=(rp4,))
                 for k in range(t.size - tscale):
-                    rnew = np.sqrt((trajs[k+tscale,0,(i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]-ibexpos[0])**2 
-                    + (trajs[k+tscale,1,(i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]-ibexpos[1])**2 
-                    + (trajs[k+tscale,2,(i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]-ibexpos[2])**2)
-                    rold = np.sqrt((trajs[k+tscale-1,0,(i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]-ibexpos[0])**2 
-                    + (trajs[k+tscale-1,1,(i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]-ibexpos[1])**2 
-                    + (trajs[k+tscale-1,2,(i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]-ibexpos[2])**2)
+                    rnew = np.sqrt((trajs[k+tscale,0,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[0])**2 
+                    + (trajs[k+tscale,1,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[1])**2 
+                    + (trajs[k+tscale,2,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[2])**2)
+                    rold = np.sqrt((trajs[k+tscale-1,0,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[0])**2 
+                    + (trajs[k+tscale-1,1,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[1])**2 
+                    + (trajs[k+tscale-1,2,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[2])**2)
                     thresh = .01*au
                     if rnew >= thresh and rold < thresh:
-                        print(trajs[k+tscale-1,:,(i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)])
+                        print(trajs[k+tscale-1,:,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)])
                         print(t[k+tscale-1])
-                        print(yics[i-1])
-                        print(vxics[j-1])
-                        print(vyics[q-1])
-                        storeyic = np.append(storeyic, [yics[i-1]])
-                        storevxic = np.append(storevxic, [vxics[j-1]])
-                        storevyic = np.append(storevyic, [vyics[q-1]])
-                        storefinalvx = np.append(storefinalvx, [trajs[k+tscale-1, 3, (i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]])
-                        storefinalvy = np.append(storefinalvy, [trajs[k+tscale-1, 4, (i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]])
+                        print(yics[i])
+                        print(vxics[j])
+                        print(vyics[q])
+                        storeyic = np.append(storeyic, [yics[i]])
+                        storevxic = np.append(storevxic, [vxics[j]])
+                        storevyic = np.append(storevyic, [vyics[q]])
+                        storefinalvx = np.append(storefinalvx, [trajs[k+tscale-1, 3, (i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]])
+                        storefinalvy = np.append(storefinalvy, [trajs[k+tscale-1, 4, (i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]])
                         storet = np.append(storet, t[k+tscale-1])
                         print('-------------------------')
 
@@ -160,24 +160,24 @@ if mode==1:
     for j in range(vxics.size):
         for q in range(vyics.size):
             for k in range(t.size - tscale):
-                rnew = np.sqrt((trajs[k+tscale,0,(i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]-ibexpos[0])**2 
-                + (trajs[k+tscale,1,(i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]-ibexpos[1])**2 
-                + (trajs[k+tscale,2,(i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]-ibexpos[2])**2)
-                rold = np.sqrt((trajs[k+tscale-1,0,(i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]-ibexpos[0])**2 
-                + (trajs[k+tscale-1,1,(i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]-ibexpos[1])**2 
-                + (trajs[k+tscale-1,2,(i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]-ibexpos[2])**2)
+                rnew = np.sqrt((trajs[k+tscale,0,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[0])**2 
+                + (trajs[k+tscale,1,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[1])**2 
+                + (trajs[k+tscale,2,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[2])**2)
+                rold = np.sqrt((trajs[k+tscale-1,0,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[0])**2 
+                + (trajs[k+tscale-1,1,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[1])**2 
+                + (trajs[k+tscale-1,2,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[2])**2)
                 thresh = .01*au
                 if rnew >= thresh and rold < thresh:
-                    print(trajs[k+tscale-1,:,(i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)])
+                    print(trajs[k+tscale-1,:,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)])
                     print(t[k+tscale-1])
-                    print(yics[i-1])
-                    print(vxics[j-1])
-                    print(vyics[q-1])
-                    storeyic = np.append(storeyic, [yics[i-1]])
-                    storevxic = np.append(storevxic, [vxics[j-1]])
-                    storevyic = np.append(storevyic, [vyics[q-1]])
-                    storefinalvx = np.append(storefinalvx, [trajs[k+tscale-1, 3, (i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]])
-                    storefinalvy = np.append(storefinalvy, [trajs[k+tscale-1, 4, (i-1)*(vxics.size * vyics.size) + (j-1)*vyics.size + (q-1)]])
+                    print(yics[i])
+                    print(vxics[j])
+                    print(vyics[q])
+                    storeyic = np.append(storeyic, [yics[i]])
+                    storevxic = np.append(storevxic, [vxics[j]])
+                    storevyic = np.append(storevyic, [vyics[q]])
+                    storefinalvx = np.append(storefinalvx, [trajs[k+tscale-1, 3, (i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]])
+                    storefinalvy = np.append(storefinalvy, [trajs[k+tscale-1, 4, (i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]])
                     storet = np.append(storet, t[k+tscale-1])
                     print('-------------------------')"""
 
@@ -254,10 +254,10 @@ if mode==1:
     count = 0
     for i in range (storet.size):
         print(i, '|', attribs[0,i], '|', attribs[1,i], '|', attribs[2,i])
-        if storefinalvy[i-1]<0:
-            vxtot = vxtot + storefinalvx[i-1]
-            vytot = vytot + storefinalvy[i-1]
-            ttot = ttot + storet[i-1]
+        if storefinalvy[i]<0:
+            vxtot = vxtot + storefinalvx[i]
+            vytot = vytot + storefinalvy[i]
+            ttot = ttot + storet[i]
             count = count + 1
 
     vxavg = vxtot/count
