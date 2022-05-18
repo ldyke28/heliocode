@@ -47,11 +47,11 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-vxstart = np.arange(-49000, -39000, 100)
-vystart = np.arange(-2650, -1850, 10)
+vxstart = np.arange(-54000, -44000, 100)
+vystart = np.arange(-2900, -2100, 10)
 vzstart = 0
 if mode==3:
-    t = np.arange(6053000000, 4500000000, -tstep)
+    t = np.arange(5937190000, 4000000000, -tstep)
 
 
 
@@ -188,14 +188,14 @@ if mode==3:
     backtraj = np.zeros((t.size, 6, vxstart.size*vystart.size))
     for i in range(vxstart.size):
         for j in range(vystart.size):
-            init = [xstart, ystart, zstart, vxstart[i-1], vystart[j-1], vzstart]
-            backtraj[:,:,(i-1)*vystart.size + (j-1)] = odeint(dr_dt, init, t, args=(rp3,))
+            init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
+            backtraj[:,:,(i)*vystart.size + (j)] = odeint(dr_dt, init, t, args=(radPressure,))
             for k in range(t.size):
-                if backtraj[k,0,(i-1)*vystart.size + (j-1)] >= 100*au and backtraj[k-1,0,(i-1)*vystart.size + (j-1)] <= 100*au:
-                    print(backtraj[k-1,:,(i-1)*vystart.size + (j-1)])
+                if backtraj[k,0,(i)*vystart.size + (j)] >= 100*au and backtraj[k-1,0,(i)*vystart.size + (j)] <= 100*au:
+                    print(backtraj[k-1,:,(i)*vystart.size + (j)])
                     print(t[k-1])
-                    farvx = np.append(farvx, [backtraj[k-1,3,(i-1)*vystart.size + (j-1)]])
-                    farvy = np.append(farvy, [backtraj[k-1,4,(i-1)*vystart.size + (j-1)]])
+                    farvx = np.append(farvx, [backtraj[k-1,3,(i)*vystart.size + (j)]])
+                    farvy = np.append(farvy, [backtraj[k-1,4,(i)*vystart.size + (j)]])
                     fart = np.append(fart, [t[k-1]])
 
 
@@ -275,8 +275,8 @@ if mode==3:
     plt.xlabel("vx at 100 au in km/s")
     plt.ylabel("vy at 100 au in km/s")
     cb.set_label('Time at which orbit passes through 100 au (s)')
-    plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 6053000000 s')
-    plt.title('At target: vx range -49000 m/s to -39000 m/s, vy range -2650 m/s to -1850 m/s')
+    plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5937190000 s')
+    plt.title('At target: vx range -54000 m/s to -44000 m/s, vy range -2900 m/s to -2100 m/s')
     plt.show()
 
 """plt.scatter(storeyic[:]/au, storevxic[:]/1000, c=storet[:], marker='o', cmap='magma')
