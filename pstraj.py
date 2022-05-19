@@ -10,7 +10,7 @@ from mpl_toolkits import mplot3d
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram of phase space at distance x = 100 au
 mode = 3
-circle = True
+circle = False
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -52,11 +52,12 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-vxstart = np.arange(-34000, -24000, 100)
-vystart = np.arange(-600, 200, 10)
+vxstart = np.arange(-56500, -26500, 1000)
+vystart = np.arange(-16400, 13600, 1000)
 vzstart = 0
 if mode==3:
-    t = np.arange(5360140000, 4000000000, -tstep)
+    startt = 5598410000
+    t = np.arange(startt, 4000000000, -tstep)
     if circle: # if you want to initially use a circle in phase space
         vx1 = -51000
         vx2 = -41000
@@ -217,9 +218,15 @@ if mode==3:
                 if backtraj[k,0,(i)*vystart.size + (j)] >= 100*au and backtraj[k-1,0,(i)*vystart.size + (j)] <= 100*au:
                     print(backtraj[k-1,:,(i)*vystart.size + (j)])
                     print(t[k-1])
-                    farvx = np.append(farvx, [backtraj[k-1,3,(i)*vystart.size + (j)]])
-                    farvy = np.append(farvy, [backtraj[k-1,4,(i)*vystart.size + (j)]])
-                    fart = np.append(fart, [t[k-1]])
+                    # radius in paper given to be 14 km/s
+                    #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
+                    if np.sqrt((backtraj[k-1,3,(i)*vystart.size + (j)]-26000)**2 + (backtraj[k-1,4,(i)*vystart.size + (j)])**2) <= 14000:
+                        farvx = np.append(farvx, [backtraj[0,3,(i)*vystart.size + (j)]])
+                        farvy = np.append(farvy, [backtraj[0,4,(i)*vystart.size + (j)]])
+                        fart = np.append(fart, [startt - t[k-1]])
+                    #farvx = np.append(farvx, [backtraj[k-1,3,(i)*vystart.size + (j)]])
+                    #farvy = np.append(farvy, [backtraj[k-1,4,(i)*vystart.size + (j)]])
+                    #fart = np.append(fart, [t[k-1]])
 
 
 # code for plotting multiple trajectories with different radiation pressures
@@ -297,9 +304,12 @@ if mode==3:
     cb = plt.colorbar()
     plt.xlabel("vx at 100 au in km/s")
     plt.ylabel("vy at 100 au in km/s")
-    cb.set_label('Time at which orbit passes through 100 au (s)')
-    plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5360140000 s')
-    plt.title('At target: vx range -47000 m/s to -45000 m/s, vy range -3100 m/s to -1100 m/s')
+    #cb.set_label('Time at which orbit passes through 100 au (s)')
+    cb.set_label('Time of flight')
+    #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5598410000 s')
+    plt.suptitle('Phase space population at target drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    #plt.title('At target: vx range -47000 m/s to -45000 m/s, vy range -3100 m/s to -1100 m/s')
+    plt.title('Initial test distribution centered on vx = -41 km/s, vy = -1.4 km/s')
     plt.show()
 
 """plt.scatter(storeyic[:]/au, storevxic[:]/1000, c=storet[:], marker='o', cmap='magma')
