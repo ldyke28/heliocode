@@ -5,7 +5,12 @@ from scipy.integrate import odeint
 import scipy
 from mpl_toolkits import mplot3d
 
+# MODE LIST
+# 1 = generate a list of trajectories that come within proximity
+# 2 = plot an individual trajectory traced backward from point of interest
+# 3 = generate phase space diagram of phase space at distance x = 100 au
 mode = 3
+circle = True
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -47,11 +52,28 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-vxstart = np.arange(-54000, -44000, 100)
-vystart = np.arange(-2900, -2100, 10)
+vxstart = np.arange(-34000, -24000, 100)
+vystart = np.arange(-600, 200, 10)
 vzstart = 0
 if mode==3:
-    t = np.arange(5937190000, 4000000000, -tstep)
+    t = np.arange(5360140000, 4000000000, -tstep)
+    if circle: # if you want to initially use a circle in phase space
+        vx1 = -51000
+        vx2 = -41000
+        vy1 = -2500
+        vy2 = -1700
+        vxinit = np.arange(vx1, vx2, (vx2-vx1)/50)
+        vyinit = np.arange(vy1, vy2, (vy2-vy1)/50)
+        vxstart = np.array([])
+        vystart = np.array([])
+        for i in range(vxinit.size):
+            for j in range(vyinit.size):
+                #if np.sqrt((vxinit[i]-(vx1+vx2)/2)**2 + (vyinit[j]-(vy1+vy2)/2)**2) <= (vy2-vy1)/2:
+                #    vxstart = np.append(vxstart, [vxinit[i]])
+                #    vystart = np.append(vystart, [vyinit[j]])
+                if np.sqrt((i-(vxinit.size+1)/2)**2 + (j-(vyinit.size+1)/2)**2) <= vxinit.size/2:
+                    vxstart = np.append(vxstart, [vxinit[i]])
+                    vystart = np.append(vystart, [vyinit[j]])
 
 
 
@@ -132,7 +154,7 @@ if mode==1:
         for j in range(vxics.size):
             for q in range(vyics.size):
                 init = [xic, yics[i], 0, vxics[j], vyics[q], vz0]
-                trajs[:,:,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)] = odeint(dr_dt, init, t, args=(rp4,))
+                trajs[:,:,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)] = odeint(dr_dt, init, t, args=(rp3,))
                 for k in range(t.size - tscale):
                     rnew = np.sqrt((trajs[k+tscale,0,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[0])**2 
                     + (trajs[k+tscale,1,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[1])**2 
@@ -181,6 +203,7 @@ if mode==1:
                     storet = np.append(storet, t[k+tscale-1])
                     print('-------------------------')"""
 
+# code for tracking phase space at distance of x = 100 au away
 if mode==3:
     farvx = np.array([])
     farvy = np.array([])
@@ -189,7 +212,7 @@ if mode==3:
     for i in range(vxstart.size):
         for j in range(vystart.size):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
-            backtraj[:,:,(i)*vystart.size + (j)] = odeint(dr_dt, init, t, args=(radPressure,))
+            backtraj[:,:,(i)*vystart.size + (j)] = odeint(dr_dt, init, t, args=(rp3,))
             for k in range(t.size):
                 if backtraj[k,0,(i)*vystart.size + (j)] >= 100*au and backtraj[k-1,0,(i)*vystart.size + (j)] <= 100*au:
                     print(backtraj[k-1,:,(i)*vystart.size + (j)])
@@ -275,8 +298,8 @@ if mode==3:
     plt.xlabel("vx at 100 au in km/s")
     plt.ylabel("vy at 100 au in km/s")
     cb.set_label('Time at which orbit passes through 100 au (s)')
-    plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5937190000 s')
-    plt.title('At target: vx range -54000 m/s to -44000 m/s, vy range -2900 m/s to -2100 m/s')
+    plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5360140000 s')
+    plt.title('At target: vx range -47000 m/s to -45000 m/s, vy range -3100 m/s to -1100 m/s')
     plt.show()
 
 """plt.scatter(storeyic[:]/au, storevxic[:]/1000, c=storet[:], marker='o', cmap='magma')
