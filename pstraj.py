@@ -53,8 +53,8 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-vxstart = np.arange(-49500, -30500, 500)
-vystart = np.arange(-22000, 22000, 500)
+vxstart = np.arange(-51500, -30500, 1000)
+vystart = np.arange(-30000, 30000, 2000)
 vzstart = 0
 if mode==3:
     startt = 5598410000
@@ -223,15 +223,15 @@ if mode==3:
                     # radius in paper given to be 14 km/s
                     # only saving initial conditions corresponding to points that lie within this Maxwellian at x = 100 au
                     #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
-                    if np.sqrt((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + (backtraj[k-1,4,(i)*vystart.size + (j)])**2) <= 14000:
-                        farvx = np.append(farvx, [backtraj[0,3,(i)*vystart.size + (j)]])
-                        farvy = np.append(farvy, [backtraj[0,4,(i)*vystart.size + (j)]])
-                        fart = np.append(fart, [startt - t[k-1]])
-                        maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[0,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[0,4,(i)*vystart.size + (j)]**2)/(14000)**2)])
-                    #farvx = np.append(farvx, [backtraj[k-1,3,(i)*vystart.size + (j)]])
-                    #farvy = np.append(farvy, [backtraj[k-1,4,(i)*vystart.size + (j)]])
-                    #fart = np.append(fart, [t[k-1]])
-                    #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[0,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[0,4,(i)*vystart.size + (j)]**2)/(14000)**2)])
+                    #if np.sqrt((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + (backtraj[k-1,4,(i)*vystart.size + (j)])**2) <= 14000:
+                    #    farvx = np.append(farvx, [backtraj[0,3,(i)*vystart.size + (j)]])
+                    #    farvy = np.append(farvy, [backtraj[0,4,(i)*vystart.size + (j)]])
+                    #    fart = np.append(fart, [startt - t[k-1]])
+                    #    maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[k-1,4,(i)*vystart.size + (j)]**2)/(14000)**2)])
+                    farvx = np.append(farvx, [backtraj[k-1,3,(i)*vystart.size + (j)]])
+                    farvy = np.append(farvy, [backtraj[k-1,4,(i)*vystart.size + (j)]])
+                    fart = np.append(fart, [t[k-1]])
+                    maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[k-1,4,(i)*vystart.size + (j)]**2)/(14000)**2)])
 
 
 # code for plotting multiple trajectories with different radiation pressures
