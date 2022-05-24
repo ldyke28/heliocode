@@ -8,7 +8,7 @@ from mpl_toolkits import mplot3d
 # MODE LIST
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
-# 3 = generate phase space diagram of phase space at distance x = 100 au
+# 3 = generate phase space diagram
 mode = 3
 circle = False
 
@@ -18,6 +18,7 @@ msolar = 1.98847*10**30 # mass of the sun in kg
 G = 6.6743*10**(-11) # value for gravitational constant in SI units
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
+# Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
 ibexpos = np.array([.97*au, .2*au, 0])
 
@@ -52,12 +53,12 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-vxstart = np.arange(-56500, -26500, 1000)
-vystart = np.arange(-16400, 13600, 1000)
+vxstart = np.arange(-49500, -30500, 500)
+vystart = np.arange(-22000, 22000, 500)
 vzstart = 0
 if mode==3:
     startt = 5598410000
-    t = np.arange(startt, 4000000000, -tstep)
+    t = np.arange(startt, 3500000000, -tstep)
     if circle: # if you want to initially use a circle in phase space
         vx1 = -51000
         vx2 = -41000
@@ -209,6 +210,7 @@ if mode==3:
     farvx = np.array([])
     farvy = np.array([])
     fart = np.array([])
+    maxwcolor = np.array([])
     backtraj = np.zeros((t.size, 6, vxstart.size*vystart.size))
     for i in range(vxstart.size):
         for j in range(vystart.size):
@@ -219,14 +221,17 @@ if mode==3:
                     print(backtraj[k-1,:,(i)*vystart.size + (j)])
                     print(t[k-1])
                     # radius in paper given to be 14 km/s
+                    # only saving initial conditions corresponding to points that lie within this Maxwellian at x = 100 au
                     #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
-                    if np.sqrt((backtraj[k-1,3,(i)*vystart.size + (j)]-26000)**2 + (backtraj[k-1,4,(i)*vystart.size + (j)])**2) <= 14000:
+                    if np.sqrt((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + (backtraj[k-1,4,(i)*vystart.size + (j)])**2) <= 14000:
                         farvx = np.append(farvx, [backtraj[0,3,(i)*vystart.size + (j)]])
                         farvy = np.append(farvy, [backtraj[0,4,(i)*vystart.size + (j)]])
                         fart = np.append(fart, [startt - t[k-1]])
+                        maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[0,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[0,4,(i)*vystart.size + (j)]**2)/(14000)**2)])
                     #farvx = np.append(farvx, [backtraj[k-1,3,(i)*vystart.size + (j)]])
                     #farvy = np.append(farvy, [backtraj[k-1,4,(i)*vystart.size + (j)]])
                     #fart = np.append(fart, [t[k-1]])
+                    #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[0,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[0,4,(i)*vystart.size + (j)]**2)/(14000)**2)])
 
 
 # code for plotting multiple trajectories with different radiation pressures
@@ -300,16 +305,16 @@ if mode==3:
     f = plt.figure()
     f.set_figwidth(9)
     f.set_figheight(6)
-    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=fart[:], marker='o', cmap='plasma')
+    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='plasma')
     cb = plt.colorbar()
     plt.xlabel("vx at 100 au in km/s")
     plt.ylabel("vy at 100 au in km/s")
     #cb.set_label('Time at which orbit passes through 100 au (s)')
-    cb.set_label('Time of flight')
+    cb.set_label('f(r,v,t)')
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5598410000 s')
     plt.suptitle('Phase space population at target drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('At target: vx range -47000 m/s to -45000 m/s, vy range -3100 m/s to -1100 m/s')
-    plt.title('Initial test distribution centered on vx = -41 km/s, vy = -1.4 km/s')
+    plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
 
 """plt.scatter(storeyic[:]/au, storevxic[:]/1000, c=storet[:], marker='o', cmap='magma')
