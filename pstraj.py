@@ -20,7 +20,7 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-ibexpos = np.array([.97*au, .2*au, 0])
+ibexpos = np.array([-.97*au, .2*au, 0])
 
 # INITIAL CONDITIONS for both position and velocity (in SI units - m and m/s)
 ttotal = 7000000000
@@ -53,12 +53,15 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-vxstart = np.arange(-51500, -30500, 1000)
-vystart = np.arange(-30000, 30000, 2000)
+vxstart = np.arange(-50000, 0, 1500)
+vystart = np.arange(-50000, -20000, 1200)
+#vxstart = np.arange(-40000, -10000, 500)
+#vystart = np.arange(-2000, 2000, 200)
 vzstart = 0
 if mode==3:
-    startt = 5598410000
-    t = np.arange(startt, 3500000000, -tstep)
+    #startt = 5598410000
+    startt = 5700000000
+    t = np.arange(startt, 3000000000, -tstep)
     if circle: # if you want to initially use a circle in phase space
         vx1 = -51000
         vx2 = -41000
@@ -223,15 +226,18 @@ if mode==3:
                     # radius in paper given to be 14 km/s
                     # only saving initial conditions corresponding to points that lie within this Maxwellian at x = 100 au
                     #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
-                    #if np.sqrt((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + (backtraj[k-1,4,(i)*vystart.size + (j)])**2) <= 14000:
-                    #    farvx = np.append(farvx, [backtraj[0,3,(i)*vystart.size + (j)]])
-                    #    farvy = np.append(farvy, [backtraj[0,4,(i)*vystart.size + (j)]])
-                    #    fart = np.append(fart, [startt - t[k-1]])
-                    #    maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[k-1,4,(i)*vystart.size + (j)]**2)/(14000)**2)])
-                    farvx = np.append(farvx, [backtraj[k-1,3,(i)*vystart.size + (j)]])
-                    farvy = np.append(farvy, [backtraj[k-1,4,(i)*vystart.size + (j)]])
-                    fart = np.append(fart, [t[k-1]])
-                    maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[k-1,4,(i)*vystart.size + (j)]**2)/(14000)**2)])
+                    if np.sqrt((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + (backtraj[k-1,4,(i)*vystart.size + (j)])**2) <= 14000:
+                        farvx = np.append(farvx, [backtraj[0,3,(i)*vystart.size + (j)]])
+                        farvy = np.append(farvy, [backtraj[0,4,(i)*vystart.size + (j)]])
+                        fart = np.append(fart, [startt - t[k-1]])
+                        maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[k-1,4,(i)*vystart.size + (j)]**2)/(14000)**2)])
+                    #farvx = np.append(farvx, [backtraj[k-1,3,(i)*vystart.size + (j)]])
+                    #farvy = np.append(farvy, [backtraj[k-1,4,(i)*vystart.size + (j)]])
+                    #fart = np.append(fart, [startt - t[k-1]])
+                    #farvx = np.append(farvx, [backtraj[0,3,(i)*vystart.size + (j)]])
+                    #farvy = np.append(farvy, [backtraj[0,4,(i)*vystart.size + (j)]])
+                    #fart = np.append(fart, [startt - t[k-1]])
+                    #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[k-1,4,(i)*vystart.size + (j)]**2)/(14000)**2)])
 
 
 # code for plotting multiple trajectories with different radiation pressures
@@ -307,14 +313,16 @@ if mode==3:
     f.set_figheight(6)
     plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='plasma')
     cb = plt.colorbar()
-    plt.xlabel("vx at 100 au in km/s")
-    plt.ylabel("vy at 100 au in km/s")
+    plt.xlabel("vx at Target in km/s")
+    plt.ylabel("vy at Target in km/s")
     #cb.set_label('Time at which orbit passes through 100 au (s)')
+    #cb.set_label('Travel Time from 100 au to Point of Interest (s)')
     cb.set_label('f(r,v,t)')
-    #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5598410000 s')
-    plt.suptitle('Phase space population at target drawn from Maxwellian at 100 au centered on vx = -26 km/s')
-    #plt.title('At target: vx range -47000 m/s to -45000 m/s, vy range -3100 m/s to -1100 m/s')
-    plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
+    #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
+    plt.suptitle('Phase space population at target (t = 5.7e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
+    plt.title('Target at (-.97 au, .2 au)')
+    #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
 
 """plt.scatter(storeyic[:]/au, storevxic[:]/1000, c=storet[:], marker='o', cmap='magma')
