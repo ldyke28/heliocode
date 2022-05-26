@@ -1,3 +1,15 @@
+# List of files and descriptions
+
+UVFsolver - a solver written to employ universal variable formulation to solve for position/velocity information for an orbit at a given point in time
+
+arraytest - used to test manipulations of numpy arrays (not physics code)
+
+diffsolver - the original code written to solve the differential equation for the position/velocity of a particle in Cartesian coordinates given a radiation pressure function that is a function of time, which uses scipy's odeint function for an exact numerical solution
+
+pstraj/pstrajold - uses code from diffsolver to track one or a series of orbits and generate phase space information/trajectory information (see below)
+
+testparticlecode - old code that used second order central differencing to solve equations of motion for a particle orbit
+
 # Radiation pressure labels
 no rp - mu = 0
 
