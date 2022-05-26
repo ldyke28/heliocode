@@ -9,7 +9,7 @@ from mpl_toolkits import mplot3d
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 circle = False
 
 # Value for 1 au (astronomical unit) in meters
@@ -28,7 +28,7 @@ tstep = 10000
 if mode==1:
     t = np.arange(0, ttotal, tstep)
 if mode==2:
-    t = np.arange(6276000000, 0, -tstep)
+    t = np.arange(5780000000, 0, -tstep)
 tscale = int(.7*ttotal/tstep)
 #tscale = 0
 
@@ -184,12 +184,12 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], -32876.78, -978.381438, 0]
-    singletraj = odeint(dr_dt, init, t, args=(rp4,))
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], -23400, -11000, 0]
+    singletraj = odeint(dr_dt, init, t, args=(rp3,))
     for k in range(t.size):
             if singletraj[k,0] >= 100*au:
-                print(singletraj[k,:])
-                print(t[k])
+                print(singletraj[k-1,:])
+                print(t[k-1])
                 break
 
 
