@@ -112,6 +112,39 @@ def dr_dt(x,t,rp):
     dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-rp(t))
     return [dx0, dx1, dx2, dx3, dx4, dx5]
 
+# 3D code
+"""trajs = np.zeros((t.size,6,yics.size*zics.size))
+
+for i in range(yics.size):
+    for j in range(zics.size):
+        init = [xic, yics[i], zics[j], vx0, vy0, vz0]
+        trajs[:,:,(i)*zics.size + (j)] = odeint(dr_dt, init, t, args=(radPressure,))
+
+for i in range(yics.size):
+    for j in range(zics.size):
+        for k in range(t.size):
+            if np.sqrt((trajs[k,0,(i)*zics.size + (j)]-ibexpos[0])**2 + (trajs[k,1,(i)*zics.size + (j)]-ibexpos[1])**2
+            + (trajs[k,2,(i)*zics.size + (j)]-ibexpos[2])**2) < .01*au:
+                print(trajs[k,:,(i)*zics.size + (j)])
+                print(k)
+                print(yics[i])
+                print(zics[j])
+                print('------------------------')"""
+
+# 2D code
+"""trajs = np.zeros((t.size,6,yics.size))
+for i in range(yics.size):
+    init = [xic, yics[i], 0, vx0, vy0, vz0]
+    trajs[:,:,i] = odeint(dr_dt, init, t, args=(radPressure,))
+
+for i in range(yics.size):
+    for k in range(t.size):
+        if np.sqrt((trajs[k,0,i]-ibexpos[0])**2 + (trajs[k,1,i]-ibexpos[1])**2 + (trajs[k,2,i]-ibexpos[2])**2) < .001*au:
+            print(trajs[k,:,i])
+            print(t[k])
+            print(yics[i])
+            print('-------------------------')"""
+
 
 # velocity scanning code
 if mode==1:
@@ -149,6 +182,31 @@ if mode==1:
                         storet = np.append(storet, t[k+tscale-1])
                         print('-------------------------')
 
+# code to check for proximity after calculating orbit
+"""for i in range(yics.size):
+    for j in range(vxics.size):
+        for q in range(vyics.size):
+            for k in range(t.size - tscale):
+                rnew = np.sqrt((trajs[k+tscale,0,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[0])**2 
+                + (trajs[k+tscale,1,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[1])**2 
+                + (trajs[k+tscale,2,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[2])**2)
+                rold = np.sqrt((trajs[k+tscale-1,0,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[0])**2 
+                + (trajs[k+tscale-1,1,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[1])**2 
+                + (trajs[k+tscale-1,2,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[2])**2)
+                thresh = .01*au
+                if rnew >= thresh and rold < thresh:
+                    print(trajs[k+tscale-1,:,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)])
+                    print(t[k+tscale-1])
+                    print(yics[i])
+                    print(vxics[j])
+                    print(vyics[q])
+                    storeyic = np.append(storeyic, [yics[i]])
+                    storevxic = np.append(storevxic, [vxics[j]])
+                    storevyic = np.append(storevyic, [vyics[q]])
+                    storefinalvx = np.append(storefinalvx, [trajs[k+tscale-1, 3, (i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]])
+                    storefinalvy = np.append(storefinalvy, [trajs[k+tscale-1, 4, (i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]])
+                    storet = np.append(storet, t[k+tscale-1])
+                    print('-------------------------')"""
 
 # code for tracking phase space at distance of x = 100 au away
 if mode==3:
@@ -180,6 +238,21 @@ if mode==3:
                     #farvy = np.append(farvy, [backtraj[0,4,(i)*vystart.size + (j)]])
                     #fart = np.append(fart, [startt - t[k-1]])
                     #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[k-1,4,(i)*vystart.size + (j)]**2)/(14000)**2)])
+
+
+# code for plotting multiple trajectories with different radiation pressures
+"""init = np.zeros((6,4))
+init[0,:] = xic
+init[1,:] = yics[:]
+init[2,:] = 0
+init[3,:] = vx0
+init[4,:] = vy0
+init[5,:] = vz0
+trajs = np.zeros((t.size,6,yics.size))
+trajs[:,:,0] = odeint(dr_dt, init[:,0], t, args=(radPressure,))
+trajs[:,:,1] = odeint(dr_dt, init[:,1], t, args=(rp2,))
+trajs[:,:,2] = odeint(dr_dt, init[:,2], t, args=(rp3,))
+trajs[:,:,3] = odeint(dr_dt, init[:,3], t, args=(rp4,))"""
 
 
 # single trajectory plotting code
@@ -251,3 +324,25 @@ if mode==3:
     plt.title('Target at (-.97 au, .2 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
+
+"""plt.scatter(storeyic[:]/au, storevxic[:]/1000, c=storet[:], marker='o', cmap='magma')
+cb = plt.colorbar()
+plt.xlabel("Initial condition for y in au")
+plt.ylabel("Initial condition for vx in km/s")
+cb.set_label('Time of passing (s)')
+plt.show()
+
+plt.scatter(storefinalvx[:], storefinalvy[:], c=storet[:], marker='o', cmap='magma')
+cb = plt.colorbar()
+plt.xlabel("vx while passing the target point (m/s)")
+plt.ylabel("vy while passing the target point (m/s)")
+cb.set_label('Time of passing (s)')
+plt.show()"""
+
+"""fig3d = plt.figure()
+ax3d = plt.axes(projection='3d')
+ax3d.scatter3D(storevxic[:]/1000, storevyic[:]/1000, storeyic[:]/au, c='darkcyan')
+ax3d.set_xlabel("Initial condition for vx in km/s")
+ax3d.set_ylabel("Initial condition for vy in km/s")
+ax3d.set_zlabel("Initial condition for y in au")
+plt.show()"""
