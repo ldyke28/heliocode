@@ -27,7 +27,7 @@ Once we know what average velocities are occurring corresponding to given orbits
 
 Here, we see these orbits are passing the point of interest at around t=5.53575e9 seconds. We can use v_x ~= -34.5 km/s and v_y ~= -1.1 km/s as the center of our velocity components and generate initial conditions within an equal range around both of these points to trace back. These orbits are traced backward until it is certain they have passed through the plane defined by x = 100 au, and the components of velocity are recorded when they pass through this plane.
 
-When we want to examine the transformation of the Maxwellian at the point of interest, we can trace the orbits back, select a region that defines the Maxwellian out of the velocity components in the x=100 au plane, and record the velocity conditions at the point of interest that correspond to velocities that are within the Maxwellian at x=100 au, as well as the time of travel for these points.
+When we want to examine the transformation of the Maxwellian at the point of interest, we can trace the orbits back, select a region that defines the Maxwellian out of the velocity components in the x=100 au plane, and record the velocity conditions at the point of interest that correspond to velocities that are within the Maxwellian at x=100 au, as well as the time of travel for these points and the corresponding value of the distribution function.
 
 # Working with the code
 
