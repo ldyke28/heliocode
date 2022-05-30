@@ -11,6 +11,7 @@ from mpl_toolkits import mplot3d
 # 3 = generate phase space diagram
 mode = 3
 circle = False
+contourplot = True # determines whether scatter (False) or contour (True) plot
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -53,15 +54,15 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-vxstart = np.arange(-41000, 100, 2000)
-vystart = np.arange(-15000, 45000, 2000)
+vxstart = np.arange(-41000, -15000, 1500)
+vystart = np.arange(-15000, 28000, 1500)
 #vxstart = np.arange(-40000, -10000, 500)
 #vystart = np.arange(-2000, 2000, 200)
 vzstart = 0
 if mode==3:
     #startt = 5598410000
-    startt = 5780000000
-    t = np.arange(startt, 1000000000, -tstep)
+    startt = 6125000000
+    t = np.arange(startt, 3000000000, -tstep)
     if circle: # if you want to initially use a circle in phase space
         vx1 = -51000
         vx2 = -41000
@@ -238,15 +239,22 @@ if mode==3:
     f = plt.figure()
     f.set_figwidth(9)
     f.set_figheight(6)
-    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='plasma')
-    cb = plt.colorbar()
+    if contourplot == True:
+        # tricontourf for filled contour plot
+        plt.tricontour(farvx[:]/1000, farvy[:]/1000, maxwcolor[:])
+        cb = plt.colorbar()
+        cb.set_label('f(r,v,t)')
+    else:
+        plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='plasma')
+        cb = plt.colorbar()
+        #cb.set_label('Time at which orbit passes through 100 au (s)')
+        #cb.set_label('Travel Time from 100 au to Point of Interest (s)')
+        cb.set_label('f(r,v,t)')
+
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
-    #cb.set_label('Time at which orbit passes through 100 au (s)')
-    #cb.set_label('Travel Time from 100 au to Point of Interest (s)')
-    cb.set_label('f(r,v,t)')
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 5.78e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.125e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
     plt.title('Target at (-.2 au, .97 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
