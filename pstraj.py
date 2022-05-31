@@ -241,7 +241,8 @@ if mode==3:
     f.set_figheight(6)
     if contourplot == True:
         # tricontourf for filled contour plot
-        plt.tricontour(farvx[:]/1000, farvy[:]/1000, maxwcolor[:])
+        levels = [.1, .2, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, .98, .99, 1.0]
+        plt.tricontour(farvx[:]/1000, farvy[:]/1000, maxwcolor[:], levels)
         cb = plt.colorbar()
         cb.set_label('f(r,v,t)')
     else:
