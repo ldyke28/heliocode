@@ -21,7 +21,7 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-ibexpos = np.array([-.2*au, .97*au, 0])
+ibexpos = np.array([-.97*au, .2*au, 0])
 
 # INITIAL CONDITIONS for both position and velocity (in SI units - m and m/s)
 ttotal = 7000000000
@@ -54,8 +54,8 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-vxstart = np.arange(-41000, -15000, 1500)
-vystart = np.arange(-15000, 28000, 1500)
+vxstart = np.arange(-40000, -25000, 500)
+vystart = np.arange(-10000, 5000, 500)
 #vxstart = np.arange(-40000, -10000, 500)
 #vystart = np.arange(-2000, 2000, 200)
 vzstart = 0
@@ -257,6 +257,6 @@ if mode==3:
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
     plt.suptitle('Phase space population at target (t = 6.125e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (-.2 au, .97 au)')
+    plt.title('Target at (-.97 au, .2 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
