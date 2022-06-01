@@ -10,7 +10,6 @@ from mpl_toolkits import mplot3d
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
 mode = 3
-circle = False
 contourplot = True # determines whether scatter (False) or contour (True) plot
 
 # Value for 1 au (astronomical unit) in meters
@@ -54,32 +53,15 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-vxstart = np.arange(-40000, -25000, 500)
-vystart = np.arange(-10000, 5000, 500)
+vxstart = np.arange(-50000, -10000, 1200)
+vystart = np.arange(-35000, -8000, 1000)
 #vxstart = np.arange(-40000, -10000, 500)
 #vystart = np.arange(-2000, 2000, 200)
 vzstart = 0
 if mode==3:
     #startt = 5598410000
-    startt = 6125000000
+    startt = 6000000000
     t = np.arange(startt, 3000000000, -tstep)
-    if circle: # if you want to initially use a circle in phase space
-        vx1 = -51000
-        vx2 = -41000
-        vy1 = -2500
-        vy2 = -1700
-        vxinit = np.arange(vx1, vx2, (vx2-vx1)/50)
-        vyinit = np.arange(vy1, vy2, (vy2-vy1)/50)
-        vxstart = np.array([])
-        vystart = np.array([])
-        for i in range(vxinit.size):
-            for j in range(vyinit.size):
-                #if np.sqrt((vxinit[i]-(vx1+vx2)/2)**2 + (vyinit[j]-(vy1+vy2)/2)**2) <= (vy2-vy1)/2:
-                #    vxstart = np.append(vxstart, [vxinit[i]])
-                #    vystart = np.append(vystart, [vyinit[j]])
-                if np.sqrt((i-(vxinit.size+1)/2)**2 + (j-(vyinit.size+1)/2)**2) <= vxinit.size/2:
-                    vxstart = np.append(vxstart, [vxinit[i]])
-                    vystart = np.append(vystart, [vyinit[j]])
 
 
 
@@ -161,7 +143,7 @@ if mode==3:
     for i in range(vxstart.size):
         for j in range(vystart.size):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
-            backtraj[:,:,(i)*vystart.size + (j)] = odeint(dr_dt, init, t, args=(rp4,))
+            backtraj[:,:,(i)*vystart.size + (j)] = odeint(dr_dt, init, t, args=(rp2,))
             for k in range(t.size):
                 if backtraj[k,0,(i)*vystart.size + (j)] >= 100*au and backtraj[k-1,0,(i)*vystart.size + (j)] <= 100*au:
                     print(backtraj[k-1,:,(i)*vystart.size + (j)])
@@ -173,7 +155,7 @@ if mode==3:
                         farvx = np.append(farvx, [backtraj[0,3,(i)*vystart.size + (j)]])
                         farvy = np.append(farvy, [backtraj[0,4,(i)*vystart.size + (j)]])
                         fart = np.append(fart, [startt - t[k-1]])
-                        maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[k-1,4,(i)*vystart.size + (j)]**2)/(14000)**2)])
+                        maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[k-1,4,(i)*vystart.size + (j)]**2)/(5327)**2)])
                     #farvx = np.append(farvx, [backtraj[k-1,3,(i)*vystart.size + (j)]])
                     #farvy = np.append(farvy, [backtraj[k-1,4,(i)*vystart.size + (j)]])
                     #fart = np.append(fart, [startt - t[k-1]])
@@ -241,7 +223,7 @@ if mode==3:
     f.set_figheight(6)
     if contourplot == True:
         # tricontourf for filled contour plot
-        levels = [.1, .2, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, .98, .99, 1.0]
+        levels = [.01, .1, .2, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, .98, .99, 1.0]
         plt.tricontour(farvx[:]/1000, farvy[:]/1000, maxwcolor[:], levels)
         cb = plt.colorbar()
         cb.set_label('f(r,v,t)')
@@ -255,7 +237,7 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.125e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
     plt.title('Target at (-.97 au, .2 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
