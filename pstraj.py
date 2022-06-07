@@ -20,7 +20,7 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-ibexpos = np.array([-.97*au, .2*au, 0])
+ibexpos = np.array([-.707*au, .707*au, 0])
 
 # INITIAL CONDITIONS for both position and velocity (in SI units - m and m/s)
 ttotal = 7000000000
@@ -53,14 +53,16 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-vxstart = np.arange(-50000, -10000, 1200)
-vystart = np.arange(-35000, -8000, 1000)
-#vxstart = np.arange(-40000, -10000, 500)
-#vystart = np.arange(-2000, 2000, 200)
+vxstart = np.arange(-45000, 5000, 2000)
+vystart = np.arange(-25000, 5000, 2000)
+#vxstart = np.arange(-20000, 15000, 1500)
+#vystart = np.arange(-5000, 40000, 1500)
+#vxstart = np.arange(-50000, 20000, 5000)
+#vystart = np.arange(-50000, 50000, 5000)
 vzstart = 0
 if mode==3:
     #startt = 5598410000
-    startt = 6000000000
+    startt = 6054000000
     t = np.arange(startt, 3000000000, -tstep)
 
 
@@ -143,7 +145,7 @@ if mode==3:
     for i in range(vxstart.size):
         for j in range(vystart.size):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
-            backtraj[:,:,(i)*vystart.size + (j)] = odeint(dr_dt, init, t, args=(rp2,))
+            backtraj[:,:,(i)*vystart.size + (j)] = odeint(dr_dt, init, t, args=(rp4,))
             for k in range(t.size):
                 if backtraj[k,0,(i)*vystart.size + (j)] >= 100*au and backtraj[k-1,0,(i)*vystart.size + (j)] <= 100*au:
                     print(backtraj[k-1,:,(i)*vystart.size + (j)])
@@ -218,12 +220,19 @@ if mode==1:
     print(vxavg, '||', vyavg, '||', tavg)
 
 if mode==3:
+    # writing data to a file
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/test.txt", 'w')
+    for i in range(farvx.size):
+        file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
+    file.close()
+
     f = plt.figure()
     f.set_figwidth(9)
     f.set_figheight(6)
-    if contourplot == True:
+    """if contourplot == True:
         # tricontourf for filled contour plot
-        levels = [.01, .1, .2, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, .98, .99, 1.0]
+        #levels = [.01, .1, .2, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, .98, .99, 1.0]
+        levels = [.001, .01, .1, .2, .3, .4, .5, .6, .7, .8, .9, .95, .98, 1.0]
         plt.tricontour(farvx[:]/1000, farvy[:]/1000, maxwcolor[:], levels)
         cb = plt.colorbar()
         cb.set_label('f(r,v,t)')
@@ -232,13 +241,35 @@ if mode==3:
         cb = plt.colorbar()
         #cb.set_label('Time at which orbit passes through 100 au (s)')
         #cb.set_label('Travel Time from 100 au to Point of Interest (s)')
-        cb.set_label('f(r,v,t)')
+        cb.set_label('f(r,v,t)')"""
 
+    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='plasma')
+    cb = plt.colorbar()
+    #cb.set_label('Time at which orbit passes through 100 au (s)')
+    #cb.set_label('Travel Time from 100 au to Point of Interest (s)')
+    cb.set_label('f(r,v,t)')
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.054e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (-.97 au, .2 au)')
+    plt.title('Target at (-.707 au, .707 au)')
+    #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
+    plt.show()
+    
+
+    f = plt.figure()
+    f.set_figwidth(9)
+    f.set_figheight(6)
+    levels = [.001, .01, .1, .2, .3, .4, .5, .6, .7, .8, .9, .95, .98, 1.0]
+    plt.tricontour(farvx[:]/1000, farvy[:]/1000, maxwcolor[:], levels)
+    cb = plt.colorbar()
+    cb.set_label('f(r,v,t)')
+    plt.xlabel("vx at Target in km/s")
+    plt.ylabel("vy at Target in km/s")
+    #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
+    plt.suptitle('Phase space population at target (t = 6.054e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
+    plt.title('Target at (-.707 au, .707 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
