@@ -9,7 +9,7 @@ from mpl_toolkits import mplot3d
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 #contourplot = True # determines whether scatter (False) or contour (True) plot
 
 # Value for 1 au (astronomical unit) in meters
@@ -28,7 +28,7 @@ tstep = 10000
 if mode==1:
     t = np.arange(0, ttotal, tstep)
 if mode==2:
-    t = np.arange(5780000000, 0, -tstep)
+    t = np.arange(6246000000, 0, -tstep)
 tscale = int(.7*ttotal/tstep)
 #tscale = 0
 
@@ -53,16 +53,16 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-#vxstart = np.arange(-45000, 10000, 2000)
-#vystart = np.arange(-30000, 0000, 1000)
-vxstart = np.arange(-30000, 15000, 1200)
-vystart = np.arange(-5000, 40000, 1200)
+#vxstart = np.arange(-50000, 10000, 1200)
+#vystart = np.arange(-35000, 0000, 1000)
+vxstart = np.arange(-25000, 25000, 1000)
+vystart = np.arange(-5000, 45000, 1200)
 #vxstart = np.arange(-50000, 20000, 3000)
 #vystart = np.arange(-50000, 50000, 3000)
 vzstart = 0
 if mode==3:
     #startt = 5598410000
-    startt = 6054000000
+    startt = 6246000000
     t = np.arange(startt, 4000000000, -tstep)
 
 
@@ -145,6 +145,7 @@ if mode==3:
     for i in range(vxstart.size):
         for j in range(vystart.size):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
+            # calculating trajectories for each initial condition in phase space given
             backtraj[:,:,(i)*vystart.size + (j)] = odeint(dr_dt, init, t, args=(rp4,))
             for k in range(t.size):
                 if backtraj[k,0,(i)*vystart.size + (j)] >= 100*au and backtraj[k-1,0,(i)*vystart.size + (j)] <= 100*au:
@@ -157,45 +158,39 @@ if mode==3:
                         farvx = np.append(farvx, [backtraj[0,3,(i)*vystart.size + (j)]])
                         farvy = np.append(farvy, [backtraj[0,4,(i)*vystart.size + (j)]])
                         fart = np.append(fart, [startt - t[k-1]])
+                        # calculating value of phase space density based on the value at the crossing of x = 100 au
                         maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[k-1,4,(i)*vystart.size + (j)]**2)/(5327)**2)])
-                    #farvx = np.append(farvx, [backtraj[k-1,3,(i)*vystart.size + (j)]])
-                    #farvy = np.append(farvy, [backtraj[k-1,4,(i)*vystart.size + (j)]])
-                    #fart = np.append(fart, [startt - t[k-1]])
-                    #farvx = np.append(farvx, [backtraj[0,3,(i)*vystart.size + (j)]])
-                    #farvy = np.append(farvy, [backtraj[0,4,(i)*vystart.size + (j)]])
-                    #fart = np.append(fart, [startt - t[k-1]])
-                    #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[k-1,4,(i)*vystart.size + (j)]**2)/(14000)**2)])
+
 
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], -23400, -11000, 0]
-    singletraj = odeint(dr_dt, init, t, args=(rp3,))
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], -12000, 000, 0]
+    singletraj = odeint(dr_dt, init, t, args=(rp4,))
     for k in range(t.size):
             if singletraj[k,0] >= 100*au:
                 print(singletraj[k-1,:])
                 print(t[k-1])
                 break
 
-
-#new = odeint(dr_dt, [1000*au, 5*au, 5*au, vx0, vy0, vz0], t)
-
 print('Finished')
-#print(new[-1,:])
 
 if mode==2:
     zer = [0]
     fig3d = plt.figure()
     ax3d = plt.axes(projection='3d')
-    ax3d.plot3D(singletraj[:,0], singletraj[:,1], singletraj[:,2], 'darkmagenta')
+    ax3d.plot3D(singletraj[:,0]/au, singletraj[:,1]/au, singletraj[:,2]/au, 'darkmagenta')
     #ax3d.plot3D(trajs[:,0,1], trajs[:,1,1], trajs[:,2,1], 'gold', linestyle='--')
     #ax3d.plot3D(trajs[:,0,2], trajs[:,1,2], trajs[:,2,2], 'forestgreen', linestyle=':')
     #ax3d.plot3D(trajs[:,0,3], trajs[:,1,3], trajs[:,2,3], 'firebrick', linestyle='-.')
     ax3d.scatter3D(zer,zer,zer,c='red')
-    ax3d.scatter3D([.97*au],[.2*au],[0], c='springgreen')
-    ax3d.set_xlim3d(left = -1*au, right = 100*au)
-    ax3d.set_ylim3d(bottom = -5*au, top = 5*au)
-    ax3d.set_zlim3d(bottom = -1*au, top = 1*au)
+    ax3d.scatter3D([ibexpos[0]/au],[ibexpos[1]/au],[ibexpos[2]/au], c='springgreen')
+    ax3d.set_xlabel("x")
+    ax3d.set_ylabel("y")
+    ax3d.set_zlabel("z")
+    ax3d.set_xlim3d(left = -1, right = 10)
+    ax3d.set_ylim3d(bottom = -1, top = 1)
+    ax3d.set_zlim3d(bottom = -1, top = 1)
     plt.show()
 if mode==1:
     attribs = np.vstack((storefinalvx, storefinalvy, storet))
@@ -220,17 +215,17 @@ if mode==1:
     print(vxavg, '||', vyavg, '||', tavg)
 
 if mode==3:
-    # writing data to a file
-    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2_meddownwind_sta_flipped_dir_t4.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2_5pi6_sta_ind_t5.txt", "w")
+    # writing data to a file - need to change each time or it will overwrite previous file
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2_meddownwind_attractive_ind.txt", 'w')
+    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2_5pi6_sta_ind_t5.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
 
+    # plotting a scatterplot of vx and vy at the target point, colored by the phase space density
     f = plt.figure()
     f.set_figwidth(9)
     f.set_figheight(6)
-
     plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='plasma')
     cb = plt.colorbar()
     #cb.set_label('Time at which orbit passes through 100 au (s)')
@@ -239,13 +234,14 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.054e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
     plt.title('Target at (-.866 au, .5 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     
 
+    # plotting a contour whose levels are values of the phase space density
     f = plt.figure()
     f.set_figwidth(9)
     f.set_figheight(6)
@@ -256,7 +252,7 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.054e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
     plt.title('Target at (-.866 au, .5 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
