@@ -9,7 +9,7 @@ from mpl_toolkits import mplot3d
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 2
+mode = 3
 #contourplot = True # determines whether scatter (False) or contour (True) plot
 
 # Value for 1 au (astronomical unit) in meters
@@ -55,15 +55,15 @@ ystart = ibexpos[1]
 zstart = ibexpos[2]
 #vxstart = np.arange(-50000, 10000, 1200)
 #vystart = np.arange(-35000, 0000, 1000)
-vxstart = np.arange(-25000, 25000, 1000)
-vystart = np.arange(-5000, 45000, 1200)
+vxstart = np.arange(-15000, 10000, 600)
+vystart = np.arange(-10000, 12000, 500)
 #vxstart = np.arange(-50000, 20000, 3000)
 #vystart = np.arange(-50000, 50000, 3000)
 vzstart = 0
 if mode==3:
     #startt = 5598410000
     startt = 6246000000
-    t = np.arange(startt, 4000000000, -tstep)
+    t = np.arange(startt, 4500000000, -tstep)
 
 
 
@@ -216,8 +216,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2_meddownwind_attractive_ind.txt", 'w')
-    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2_5pi6_sta_ind_t5.txt", "w")
+    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2_meddownwind_attractive_ind.txt", 'w')
+    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2_5pi6_attractive_ring_highres.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
