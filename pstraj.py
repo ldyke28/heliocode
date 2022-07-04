@@ -20,7 +20,7 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-ibexpos = np.array([-.866*au, .5*au, 0])
+ibexpos = np.array([-.707*au, .707*au, 0])
 
 # INITIAL CONDITIONS for both position and velocity (in SI units - m and m/s)
 ttotal = 7000000000
@@ -55,14 +55,14 @@ ystart = ibexpos[1]
 zstart = ibexpos[2]
 #vxstart = np.arange(-50000, 10000, 1200)
 #vystart = np.arange(-35000, 0000, 1000)
-vxstart = np.arange(-15000, 10000, 600)
-vystart = np.arange(-10000, 12000, 500)
-#vxstart = np.arange(-50000, 20000, 3000)
-#vystart = np.arange(-50000, 50000, 3000)
+vxstart = np.arange(-25000, 20000, 700)
+vystart = np.arange(-20000, 25000, 700)
+#vxstart = np.arange(-50000, 20000, 1500)
+#vystart = np.arange(-50000, 50000, 1500)
 vzstart = 0
 if mode==3:
     #startt = 5598410000
-    startt = 6246000000
+    startt = 6275000000
     t = np.arange(startt, 4500000000, -tstep)
 
 
@@ -216,8 +216,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2_meddownwind_attractive_ind.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2_5pi6_attractive_ring_highres.txt", "w")
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2_meddownwind_sin2=p25_str_center.txt", 'w')
+    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2_5pi6_attractive_ring_highres.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
@@ -234,9 +234,9 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.275e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (-.866 au, .5 au)')
+    plt.title('Target at (-.707 au, .707 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     
@@ -252,8 +252,8 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.275e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (-.866 au, .5 au)')
+    plt.title('Target at (-.707 au, .707 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
