@@ -55,8 +55,8 @@ ystart = ibexpos[1]
 zstart = ibexpos[2]
 #vxstart = np.arange(-50000, 10000, 1200)
 #vystart = np.arange(-35000, 0000, 1000)
-vxstart = np.arange(-25000, 20000, 1000)
-vystart = np.arange(-20000, 25000, 1000)
+vxstart = np.arange(-30000, 25000, 900)
+vystart = np.arange(-25000, 25000, 900)
 #vxstart = np.arange(-50000, 20000, 1500)
 #vystart = np.arange(-50000, 50000, 1500)
 vzstart = 0
@@ -216,8 +216,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2_meddownwind_sin2=p25_str_center.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2_5pi6_sin2=p25_str_center.txt", "w")
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2_5pi6_sin2=p25_str_center.txt", 'w')
+    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2_5pi6_sin2=p25_str_center.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
