@@ -9,7 +9,7 @@ from mpl_toolkits import mplot3d
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 2
+mode = 3
 #contourplot = True # determines whether scatter (False) or contour (True) plot
 
 # Value for 1 au (astronomical unit) in meters
