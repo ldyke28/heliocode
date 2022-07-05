@@ -10,6 +10,8 @@ pstraj/pstrajold - uses code from diffsolver to track one or a series of orbits 
 
 testparticlecode - old code that used second order central differencing to solve equations of motion for a particle orbit
 
+plotfromdata - allows for plotting of graphs from generated data files
+
 # Radiation pressure labels and related info
 no rp - mu = 0
 
