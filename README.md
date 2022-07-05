@@ -10,7 +10,7 @@ pstraj/pstrajold - uses code from diffsolver to track one or a series of orbits 
 
 testparticlecode - old code that used second order central differencing to solve equations of motion for a particle orbit
 
-# Radiation pressure labels
+# Radiation pressure labels and related info
 no rp - mu = 0
 
 p7 rp - mu = .7
@@ -18,6 +18,25 @@ p7 rp - mu = .7
 s2 rp - mu = sin^2(2pi/11yrs * t)
 
 p5s2 rp - mu = .5 + sin^2(2pi/11yrs * t)
+
+To calculate the radiation pressure at a specific point in time, using time in seconds:
+
+s2 rp: mu = sin^2(2*pi*t/(3.47e8))
+
+p5s2 rp: mu = .5 + sin^2(2*pi*t/(3.47e8))
+
+Some important times for testing and their implications:
+
+5.8e9 s - sine squared term ~= 1
+
+6.125e9 s - sine squared term increasing past .5 (for the p5s2 radiation pressure, this indicates a switch to a repulsive force)
+
+6.029e9 s - sine squared term decreasing below .5 (for the p5s2 radiation pressure, this indicates a switch to an attractive force)
+
+6.246e9 s - sine squared term is 0 (the time dependent forces will be as attractive as possible)
+
+I chose to work with times around 6e9 seconds because that was the characteristic time scale for orbits to reach the area of interest around the sun when starting at t = 0 at the plane x = 1000 au. Since the sine term oscillates regularly and there isn’t any damping included in the model yet, any other time would work just as well - the choice of times around this regime was arbitrary.
+
 
 
 # Tracking process
@@ -43,4 +62,4 @@ When we want to examine the transformation of the Maxwellian at the point of int
 
 # Working with the code
 
-I have the code set up to run in three modes: 1 allows you to generate the list using forward tracing, 2 maps an individual orbit and graphs it, and 3 performs the backtracing and plotting of the Maxwellian. You still need to provide initial conditions yourself and designate which radiation pressure you want to use (I’ve written functions for mu = 0, .7, sin^2(2pi/11yrs * t), and .5 + sin^2(2pi/11yrs * t) so far), but the code does the rest for you. Mode is designated through the variable “mode” at the top and only takes 1, 2, and 3 (it will accept other things, but they won’t actually do anything).
+I have the code set up to run in three modes: 1 allows you to generate the list using forward tracing, 2 maps an individual orbit and graphs it, and 3 performs the backtracing and plotting of the Maxwellian. You still need to provide initial conditions yourself and designate which radiation pressure you want to use (I’ve written functions for mu = 0, .7, sin^2(2pi/11yrs * t), and .5 + sin^2(2pi/11yrs * t) so far), but the code does the rest for you. Mode is designated through the variable “mode” at the top and only takes 1, 2, and 3 (it will accept other things, but they won’t actually do anything). Be sure, if you are on mode 3, to write the path correctly if you want to save to a file, or else it will throw an error.
