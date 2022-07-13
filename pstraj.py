@@ -57,8 +57,8 @@ zstart = ibexpos[2]
 #vystart = np.arange(-30000, 2000, 700)
 #vxstart = np.arange(-40000, 0000, 600)
 #vystart = np.arange(24000, 40000, 400)
-vxstart = np.arange(-25000, 25000, 800)
-vystart = np.arange(-25000, 25000, 800)
+vxstart = np.arange(-25000, 25000, 1100)
+vystart = np.arange(-25000, 25000, 1300)
 #vxstart = np.arange(-50000, 20000, 2000)
 #vystart = np.arange(-50000, 50000, 2000)
 vzstart = 0
@@ -221,21 +221,21 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_5pi6_sin2_p5_str_center.txt", 'w')
-    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_meddownwind_sin2_p375_str_center.txt", "w")
+    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_5pi6_sin2_p5_str_center.txt", 'w')
+    """file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_5pi6_sin2_p5_str_center.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
-    file.close()
+    file.close()"""
 
     # plotting a scatterplot of vx and vy at the target point, colored by the phase space density
     f = plt.figure()
     f.set_figwidth(9)
     f.set_figheight(6)
-    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='plasma')
+    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=fart[:], marker='o', cmap='plasma')
     cb = plt.colorbar()
     #cb.set_label('Time at which orbit passes through 100 au (s)')
-    #cb.set_label('Travel Time from 100 au to Point of Interest (s)')
-    cb.set_label('f(r,v,t)')
+    cb.set_label('Travel Time from 100 au to Point of Interest (s)')
+    #cb.set_label('f(r,v,t)')
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
