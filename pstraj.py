@@ -20,7 +20,7 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-ibexpos = np.array([-.866*au, .5*au, 0])
+ibexpos = np.array([-.707*au, .707*au, 0])
 
 # INITIAL CONDITIONS for both position and velocity (in SI units - m and m/s)
 ttotal = 7000000000
@@ -57,14 +57,14 @@ zstart = ibexpos[2]
 #vystart = np.arange(-30000, 2000, 700)
 #vxstart = np.arange(-40000, 0000, 600)
 #vystart = np.arange(24000, 40000, 400)
-vxstart = np.arange(-25000, 25000, 800)
+vxstart = np.arange(-25000, 20000, 700)
 vystart = np.arange(-25000, 25000, 800)
 #vxstart = np.arange(-50000, 20000, 2000)
 #vystart = np.arange(-50000, 50000, 2000)
 vzstart = 0
 if mode==3:
     #startt = 5598410000
-    startt = 6332750000
+    startt = 6246000000
     t = np.arange(startt, 4500000000, -tstep)
 
 
@@ -221,7 +221,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_5pi6_sin2_p5_str_center.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_meddownwind_attractive_str_center_dfcolor.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_meddownwind_sin2_p375_str_center.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
@@ -234,14 +234,14 @@ if mode==3:
     plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='plasma')
     cb = plt.colorbar()
     #cb.set_label('Time at which orbit passes through 100 au (s)')
-    #cb.set_label('Travel Time from 100 au to Point of Interest (s)')
-    cb.set_label('f(r,v,t)')
+    cb.set_label('Travel Time from 100 au to Point of Interest (s)')
+    #cb.set_label('f(r,v,t)')
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.33275e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (-.866 au, .5 au)')
+    plt.title('Target at (-.707 au, .707 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     
@@ -257,8 +257,8 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.33275e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (-.866 au, .5 au)')
+    plt.title('Target at (-.707 au, .707 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
