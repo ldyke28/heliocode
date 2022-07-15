@@ -6,17 +6,17 @@ vx = np.array([])
 vy = np.array([])
 f = np.array([])
 
-filenum = 3
+filenum = 1
 
 #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2_meddownwind_sta_flipped.txt", "r")
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_meddownwind_attractive_direct.txt", delimiter=',')
-#file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2_5pi6_sta_t3.txt", delimiter=',')
+#file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_meddownwind_attractive_direct.txt", delimiter=',')
+file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_meddownwind_attractive_str_center_dfcolor.txt", delimiter=',')
 
 
-file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_meddownwind_attractive_indirect.txt", delimiter=',')
+#file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_meddownwind_attractive_indirect.txt", delimiter=',')
 #file2 = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2_5pi6_sta_ind_t3.txt", delimiter=',')
 
-file3 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_meddownwind_attractive_test3.txt", delimiter=',')
+#file3 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_meddownwind_attractive_test3.txt", delimiter=',')
 
 
 for i in range(np.shape(file)[0]):
@@ -44,7 +44,7 @@ fig = plt.figure()
 fig.set_figwidth(9)
 fig.set_figheight(6)
 
-plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma')
+plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma', norm=matplotlib.colors.LogNorm())
 cb = plt.colorbar()
 cb.set_label('f(r,v,t)')
 plt.xlabel("vx at Target in km/s")

@@ -9,7 +9,7 @@ from mpl_toolkits import mplot3d
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 #contourplot = True # determines whether scatter (False) or contour (True) plot
 
 # Value for 1 au (astronomical unit) in meters
@@ -28,7 +28,7 @@ tstep = 10000
 if mode==1:
     t = np.arange(0, ttotal, tstep)
 if mode==2:
-    t = np.arange(6185000000, 0, -tstep)
+    t = np.arange(6246000000, 4500000000, -tstep)
 tscale = int(.7*ttotal/tstep)
 #tscale = 0
 
@@ -170,32 +170,42 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], 6000, 000, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], 19800, -13000, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp5,))
+    trackrp = np.zeros(t.size)
     for k in range(t.size):
-            if singletraj[k,0] >= 100*au:
-                print(singletraj[k-1,:])
-                print(t[k-1])
-                break
+        trackrp[k] = rp5(t[k])
+        if np.sqrt((singletraj[k,0]-sunpos[0])**2 + (singletraj[k,1]-sunpos[1])**2 + (singletraj[k,2]-sunpos[2])**2) <= .00465*au:
+            print("Orbit too close to sun")
+        if singletraj[k,0] >= 100*au:
+            print(singletraj[k-1,:])
+            print(t[k-1])
+            break
 
 print('Finished')
 
 if mode==2:
     zer = [0]
     fig3d = plt.figure()
+    fig3d.set_figwidth(6)
+    fig3d.set_figheight(6)
     ax3d = plt.axes(projection='3d')
-    ax3d.plot3D(singletraj[:,0]/au, singletraj[:,1]/au, singletraj[:,2]/au, 'darkmagenta')
+    scatterplot = ax3d.scatter3D(singletraj[:,0]/au, singletraj[:,1]/au, singletraj[:,2]/au, c=trackrp[:], cmap='coolwarm', s=2, vmin=.5, vmax=1.5)
+    cb = fig3d.colorbar(scatterplot)
+    cb.set_label('Value of mu')
     #ax3d.plot3D(trajs[:,0,1], trajs[:,1,1], trajs[:,2,1], 'gold', linestyle='--')
     #ax3d.plot3D(trajs[:,0,2], trajs[:,1,2], trajs[:,2,2], 'forestgreen', linestyle=':')
     #ax3d.plot3D(trajs[:,0,3], trajs[:,1,3], trajs[:,2,3], 'firebrick', linestyle='-.')
-    ax3d.scatter3D(zer,zer,zer,c='red')
+    ax3d.scatter3D(zer,zer,zer,c='orange')
     ax3d.scatter3D([ibexpos[0]/au],[ibexpos[1]/au],[ibexpos[2]/au], c='springgreen')
-    ax3d.set_xlabel("x")
-    ax3d.set_ylabel("y")
-    ax3d.set_zlabel("z")
-    ax3d.set_xlim3d(left = -1, right = 10)
-    ax3d.set_ylim3d(bottom = -1, top = 1)
+    ax3d.set_xlabel("x (au)")
+    ax3d.set_ylabel("y (au)")
+    ax3d.set_zlabel("z (au)")
+    ax3d.set_xlim3d(left = -2, right = 10)
+    ax3d.set_ylim3d(bottom = -2, top = 2)
     ax3d.set_zlim3d(bottom = -1, top = 1)
+    ax3d.view_init(90,270)
+    ax3d.set_title("Individual Orbit at time t=6.246e9 s \n Target at (-.707 au, .707 au) \n Initial condition v = (-11.7 km/s, 19.0 km/s)",fontsize=12)
     plt.show()
 if mode==1:
     attribs = np.vstack((storefinalvx, storefinalvy, storet))
