@@ -28,7 +28,7 @@ tstep = 10000
 if mode==1:
     t = np.arange(0, ttotal, tstep)
 if mode==2:
-    t = np.arange(6246000000, 4500000000, -tstep)
+    t = np.arange(6290000000, 4500000000, -tstep)
 tscale = int(.7*ttotal/tstep)
 #tscale = 0
 
@@ -57,10 +57,10 @@ zstart = ibexpos[2]
 #vystart = np.arange(-30000, 2000, 700)
 #vxstart = np.arange(-40000, 0000, 600)
 #vystart = np.arange(24000, 40000, 400)
-vxstart = np.arange(-25000, 25000, 800)
-vystart = np.arange(-25000, 25000, 800)
-#vxstart = np.arange(-50000, 20000, 2000)
-#vystart = np.arange(-50000, 50000, 2000)
+#vxstart = np.arange(-25000, 25000, 800)
+#vystart = np.arange(-25000, 25000, 800)
+vxstart = np.arange(-50000, 20000, 2000)
+vystart = np.arange(-50000, 50000, 2000)
 vzstart = 0
 if mode==3:
     #startt = 5598410000
@@ -146,31 +146,30 @@ if mode==3:
     farvy = np.array([])
     fart = np.array([])
     maxwcolor = np.array([])
-    backtraj = np.zeros((t.size, 6, vxstart.size*vystart.size))
+    backtraj = np.zeros((t.size, 6))
     for i in range(vxstart.size):
         for j in range(vystart.size):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
-            backtraj[:,:,(i)*vystart.size + (j)] = odeint(dr_dt, init, t, args=(rp5,))
+            backtraj[:,:] = odeint(dr_dt, init, t, args=(rp5,))
             for k in range(t.size):
-                if backtraj[k,0,(i)*vystart.size + (j)] >= 100*au and backtraj[k-1,0,(i)*vystart.size + (j)] <= 100*au:
-                    print(backtraj[k-1,:,(i)*vystart.size + (j)])
+                if backtraj[k,0] >= 100*au and backtraj[k-1,0] <= 100*au:
+                    print(backtraj[k-1,:])
                     print(t[k-1])
                     # radius in paper given to be 14 km/s
                     # only saving initial conditions corresponding to points that lie within this Maxwellian at x = 100 au
                     #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
-                    if np.sqrt((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + (backtraj[k-1,4,(i)*vystart.size + (j)])**2) <= 14000:
-                        farvx = np.append(farvx, [backtraj[0,3,(i)*vystart.size + (j)]])
-                        farvy = np.append(farvy, [backtraj[0,4,(i)*vystart.size + (j)]])
+                    if np.sqrt((backtraj[k-1,3]+26000)**2 + (backtraj[k-1,4])**2) <= 14000:
+                        farvx = np.append(farvx, [backtraj[0,3]])
+                        farvy = np.append(farvy, [backtraj[0,4]])
                         fart = np.append(fart, [startt - t[k-1]])
                         # calculating value of phase space density based on the value at the crossing of x = 100 au
-                        maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[k-1,3,(i)*vystart.size + (j)]+26000)**2 + backtraj[k-1,4,(i)*vystart.size + (j)]**2)/(5327)**2)])
-
+                        maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[k-1,3]+26000)**2 + backtraj[k-1,4]**2)/(5327)**2)])
 
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], 1600, -9000, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], 7800, -17800, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp5,))
     trackrp = np.zeros(t.size)
     for k in range(t.size):
@@ -201,12 +200,12 @@ if mode==2:
     ax3d.set_xlabel("x (au)")
     ax3d.set_ylabel("y (au)")
     ax3d.set_zlabel("z (au)")
-    ax3d.set_xlim3d(left = -1.5, right = 1)
-    ax3d.set_ylim3d(bottom = -0.5, top = 1.5)
+    ax3d.set_xlim3d(left = -2.5, right = 1)
+    ax3d.set_ylim3d(bottom = -0.5, top = 2.5)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
-    ax3d.set_title("Individual Orbit at time t=6.246e9 s \n Target at (-.707 au, .707 au) \
-        \n Initial condition v = (1.6 km/s, -9.0 km/s) \n Value of distribution function = 0.5246658668007628",fontsize=12)
+    ax3d.set_title("Individual Orbit at time t=6.29e9 s \n Target at (-.707 au, .707 au) \
+        \n At target point v = (7.8 km/s, -17.8 km/s) \n Value of distribution function = 0.7745911962336968",fontsize=12)
     plt.show()
 if mode==1:
     attribs = np.vstack((storefinalvx, storefinalvy, storet))
