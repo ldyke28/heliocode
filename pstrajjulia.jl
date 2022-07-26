@@ -22,12 +22,15 @@ ibexpos = [.707*au .707*au 0]
 ttotal = 7000000000
 tstep = 10000
 if mode==1
-    t = range(0, ttotal, step=tstep)
+    #t = range(0, ttotal, step=tstep)
+    t = (0, ttotal)
 end
 if mode==2
-    t = range(6290000000, 4500000000, step=-tstep)
-tscale = Int32(.7*ttotal/tstep)
+    #t = range(6290000000, 4500000000, step=-tstep)
+    t = (6246000000, 6300000000)
 end
+tscale = Int32(.7*ttotal/tstep)
+
 #tscale = 0
 
 
@@ -63,7 +66,8 @@ vzstart = 0
 if mode==3
     #startt = 5598410000
     startt = 6350000000
-    t = range(startt, 4500000000, step=-tstep)
+    #t = range(startt, 4500000000, step=-tstep)
+    t = (startt, 4500000000)
 end
 
 
@@ -94,17 +98,17 @@ function rp5(t)
     return .5 + (sin(pi*(t/347000000)))^2
 end
 
-function dr_dt(x,t,)
+function dr_dt(ddx,dx,x,p,t)
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
     # dx0-2 = vx, vy, and vz, dx3-5 = ax, ay, and az
+    #(1-rp5(t))
     r = sqrt((sunpos[1]-x[1])^2 + (sunpos[2]-x[2])^2 + (sunpos[3]-x[3])^2)
-    dx0 = x[4]
-    dx1 = x[5]
-    dx2 = x[6]
-    dx3 = (msolar*G/(r^3))*(sunpos[1]-x[1])*(1-rp5(t))
-    dx4 = (msolar*G/(r^3))*(sunpos[2]-x[2])*(1-rp5(t))
-    dx5 = (msolar*G/(r^3))*(sunpos[3]-x[3])*(1-rp5(t))
-    return [dx0 dx1 dx2 dx3 dx4 dx5]
+    vx = dx[1]
+    vy = dx[2]
+    vz = dx[3]
+    ddx[1] = (msolar*G/(r^3))*(sunpos[1]-x[1])
+    ddx[2] = (msolar*G/(r^3))*(sunpos[2]-x[2])
+    ddx[3] = (msolar*G/(r^3))*(sunpos[3]-x[3])
 end
 
 
@@ -120,10 +124,10 @@ if mode==1
     for i=1:(yics.size)
         for j=1:(vxics.size)
             for q=1:(vyics.size)
-                init = [xic yics[i] 0 vxics[j] vyics[q] vz0]
-                prob = ODEProblem(dr_dt, init, t)
-                trajs[:,:,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)] = solve(prob)
-                #trajs[:,:,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)] = odeint(dr_dt, init, t, args=(rp3,))
+                initc = [xic yics[i] 0 vxics[j] vyics[q] vz0]
+                probl = ODEProblem(dr_dt, initc, t)
+                trajs[:,:,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)] = solve(probl)
+                #trajs[:,:,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)] = odeint(dr_dt, initc, t, args=(rp3,))
                 for k in range(t.size - tscale)
                     rnew = sqrt((trajs[k+tscale,1,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[1])^2 
                     + (trajs[k+tscale+1,2,(i)*(vxics.size * vyics.size) + (j)*vyics.size + (q)]-ibexpos[2])^2 
@@ -162,11 +166,11 @@ if mode==3
     backtraj = zeros(t.size, 6)
     for i=1:(vxstart.size)
         for j=1:(vystart.size)
-            init = [xstart ystart zstart vxstart[i] vystart[j] vzstart]
+            initcs = [xstart ystart zstart vxstart[i] vystart[j] vzstart]
             # calculating trajectories for each initial condition in phase space given
-            prob = ODEProblem(dr_dt, init, t)
-            backtraj[:,:] = solve(prob)
-            #backtraj[:,:] = odeint(dr_dt, init, t, args=(rp5,))
+            proble = ODEProblem(dr_dt, initcs, t)
+            backtraj[:,:] = solve(proble)
+            #backtraj[:,:] = odeint(dr_dt, initc, t, args=(rp5,))
             for k=1:(t.size)
                 if backtraj[k+1,1] >= 100*au && backtraj[k,0] <= 100*au
                     println(backtraj[k,:])
@@ -190,13 +194,15 @@ end
 
 # single trajectory plotting code
 if mode==2
-    init = [ibexpos[0] ibexpos[1] ibexpos[2] 7800 -17800 0]
-    prob = ODEProblem(dr_dt, init, t)
-    singletraj = solve(prob)
-    #singletraj = odeint(dr_dt, init, t, args=(rp5,))
-    trackrp = zeros(t.size)
-    for k=1:(t.size)
-        trackrp[k] = rp5(t[k])
+    initcons = [ibexpos[1] ibexpos[2] ibexpos[3]]
+    dinitcons = [-37000. -6000. 0.]
+    pro = SecondOrderODEProblem(dr_dt, dinitcons, initcons, t)
+    singletraj = solve(pro)
+    display(plot(singletraj, vars=(4,5)))
+    #singletraj = odeint(dr_dt, initc, t, args=(rp5,))
+    #trackrp = zeros(singletraj.t.size)
+    #=for k=1:(singletraj.t.size)
+        trackrp[k] = rp5(singletraj.t[k])
         if sqrt((singletraj[k+1,1]-sunpos[1])^2 + (singletraj[k+1,2]-sunpos[2])^2 + (singletraj[k+1,3]-sunpos[3])^2) <= .00465*au
             println("Orbit too close to sun")
         end
@@ -205,15 +211,15 @@ if mode==2
             println(t[k])
             break
         end
-    end
+    end=#
 end
 
 println("Finished")
 
-using PyPlot
-if mode==2
+
+#=if mode==2
     zer = [0]
-    """fig3d = plt.figure()
+    fig3d = plt.figure()
     fig3d.set_figwidth(7)
     fig3d.set_figheight(6)
     ax3d = plt.axes(projection='3d')
@@ -234,8 +240,8 @@ if mode==2
     ax3d.view_init(90,270)
     ax3d.set_title("Individual Orbit at time t=6.29e9 s \n Target at (-.707 au, .707 au) \
         \n At target point v = (7.8 km/s, -17.8 km/s) \n Value of distribution function = 0.7745911962336968",fontsize=12)
-    plt.show()"""
-    scatter3d(singletraj[:,1], singletraj[:,2], singletraj[:,3], c=trackrp[:])
+    plt.show()
+    #scatter3d(singletraj[:,1], singletraj[:,2], singletraj[:,3], c=trackrp[:])
 end
 if mode==1
     attribs = np.vstack((storefinalvx, storefinalvy, storet))
@@ -245,7 +251,7 @@ if mode==1
     vytot = 0
     ttot = 0
     count = 0
-    for i in range (storet.size):
+    for i=1:(storet.size):
         println(i, '|', attribs[0,i], '|', attribs[1,i], '|', attribs[2,i])
         if storefinalvy[i]<0:
             vxtot = vxtot + storefinalvx[i]
@@ -305,4 +311,4 @@ if mode==3:
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
     plt.title('Target at (.707 au, .707 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
-    plt.show()
+    plt.show()=#
