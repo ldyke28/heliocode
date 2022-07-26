@@ -12,9 +12,6 @@ mode = 2
 au = 1.496*10^11
 msolar = 1.98847e30 # mass of the sun in kg
 G = 6.6743*10^(-11) # value for gravitational constant in SI units
-println(typeof(msolar))
-println(msolar)
-println(G)
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
