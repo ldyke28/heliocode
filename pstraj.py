@@ -9,7 +9,7 @@ from mpl_toolkits import mplot3d
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 #contourplot = True # determines whether scatter (False) or contour (True) plot
 
 # Value for 1 au (astronomical unit) in meters
@@ -94,6 +94,7 @@ def dr_dt(x,t,rp):
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
     # dx0-2 = vx, vy, and vz, dx3-5 = ax, ay, and az
     r = np.sqrt((sunpos[0]-x[0])**2 + (sunpos[1]-x[1])**2 + (sunpos[2]-x[2])**2)
+    print((msolar*G))
     dx0 = x[3]
     dx1 = x[4]
     dx2 = x[5]

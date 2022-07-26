@@ -10,8 +10,11 @@ mode = 2
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10^11
-msolar = 1.98847*10^30 # mass of the sun in kg
+msolar = 1.98847e30 # mass of the sun in kg
 G = 6.6743*10^(-11) # value for gravitational constant in SI units
+println(typeof(msolar))
+println(msolar)
+println(G)
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
@@ -27,7 +30,7 @@ if mode==1
 end
 if mode==2
     #t = range(6290000000, 4500000000, step=-tstep)
-    t = (6246000000, 6300000000)
+    t = (6246000000, 6200000000)
 end
 tscale = Int32(.7*ttotal/tstep)
 
@@ -106,9 +109,17 @@ function dr_dt(ddx,dx,x,p,t)
     vx = dx[1]
     vy = dx[2]
     vz = dx[3]
-    ddx[1] = (msolar*G/(r^3))*(sunpos[1]-x[1])
-    ddx[2] = (msolar*G/(r^3))*(sunpos[2]-x[2])
-    ddx[3] = (msolar*G/(r^3))*(sunpos[3]-x[3])
+    #ddx[1] = (msolar*G/(r^3))*(sunpos[1]-x[1])
+    #ddx[2] = (msolar*G/(r^3))*(sunpos[2]-x[2])
+    #ddx[3] = (msolar*G/(r^3))*(sunpos[3]-x[3])
+    ddx .= -(msolar*G)/r^3 * (sunpos-x)*(.5 + (sin(pi*(t/347000000)))^2)
+end
+
+function dr_dtnew(u, p, t)
+    r = sqrt((sunpos[1]-u[1])^2 + (sunpos[2]-u[2])^2 + (sunpos[3]-u[3])^2)
+    rp = .5 + (sin(pi*(t/347000000)))^2
+    #println(p)
+    return [u[4], u[5], u[6], rp*(p/(r^3))*(sunpos[1]-u[1]), rp*(p/(r^3))*(sunpos[2]-u[2]), rp*(p/(r^3))*(sunpos[3]-u[3])]
 end
 
 
@@ -194,11 +205,15 @@ end
 
 # single trajectory plotting code
 if mode==2
-    initcons = [ibexpos[1] ibexpos[2] ibexpos[3]]
-    dinitcons = [-37000. -6000. 0.]
+    #=initcons = [ibexpos[1] ibexpos[2] ibexpos[3]]
+    dinitcons = [-20000. 20000. 0.]
     pro = SecondOrderODEProblem(dr_dt, dinitcons, initcons, t)
-    singletraj = solve(pro)
-    display(plot(singletraj, vars=(4,5)))
+    singletraj = solve(pro, dt=-tstep)
+    display(plot(singletraj, vars=(4,5)))=#
+    icnew = [ibexpos[1], ibexpos[2], ibexpos[3], -20000., 20000., 0.]
+    prob = ODEProblem(dr_dtnew, icnew, t, msolar*G)
+    soln = solve(prob)
+    display(plot(soln, vars=(1,2)))
     #singletraj = odeint(dr_dt, initc, t, args=(rp5,))
     #trackrp = zeros(singletraj.t.size)
     #=for k=1:(singletraj.t.size)

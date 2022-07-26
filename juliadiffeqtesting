@@ -1,0 +1,17 @@
+using DifferentialEquations
+using Plots
+
+omega = 1
+
+x0 = [0.0]
+dx0 = [pi/2]
+tspan = (0.0, 2*pi)
+
+function ho(ddu, du, u, omega, t)
+    ddu .= -omega^2*u
+end
+
+prob = SecondOrderODEProblem(ho, dx0, x0, tspan, omega)
+sol = solve(prob, DPRKN6())
+
+plot(sol, vars=[2,1])
