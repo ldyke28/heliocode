@@ -28,7 +28,7 @@ tstep = 10000
 if mode==1:
     t = np.arange(0, ttotal, tstep)
 if mode==2:
-    t = np.arange(6290000000, 4500000000, -tstep)
+    t = np.arange(6246000000, 6200000000, -tstep)
 tscale = int(.7*ttotal/tstep)
 #tscale = 0
 
@@ -94,7 +94,6 @@ def dr_dt(x,t,rp):
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
     # dx0-2 = vx, vy, and vz, dx3-5 = ax, ay, and az
     r = np.sqrt((sunpos[0]-x[0])**2 + (sunpos[1]-x[1])**2 + (sunpos[2]-x[2])**2)
-    print((msolar*G))
     dx0 = x[3]
     dx1 = x[4]
     dx2 = x[5]
@@ -170,7 +169,7 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], 7800, -17800, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], -20000, 20000, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp5,))
     trackrp = np.zeros(t.size)
     for k in range(t.size):
