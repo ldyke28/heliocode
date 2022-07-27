@@ -28,7 +28,7 @@ tstep = 10000
 if mode==1:
     t = np.arange(0, ttotal, tstep)
 if mode==2:
-    t = np.arange(6246000000, 6200000000, -tstep)
+    t = np.arange(6300000000, 4500000000, -tstep)
 tscale = int(.7*ttotal/tstep)
 #tscale = 0
 
@@ -169,7 +169,7 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], -20000, 20000, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], 20600, 16600, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp5,))
     trackrp = np.zeros(t.size)
     for k in range(t.size):
@@ -200,12 +200,12 @@ if mode==2:
     ax3d.set_xlabel("x (au)")
     ax3d.set_ylabel("y (au)")
     ax3d.set_zlabel("z (au)")
-    ax3d.set_xlim3d(left = -2.5, right = 1)
-    ax3d.set_ylim3d(bottom = -0.5, top = 2.5)
+    ax3d.set_xlim3d(left = -1, right = 3)
+    ax3d.set_ylim3d(bottom = -.5, top = 1.5)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
-    ax3d.set_title("Individual Orbit at time t=6.29e9 s \n Target at (-.707 au, .707 au) \
-        \n At target point v = (7.8 km/s, -17.8 km/s) \n Value of distribution function = 0.7745911962336968",fontsize=12)
+    ax3d.set_title("Individual Orbit at time t=6.3e9 s \n Target at (.707 au, .707 au) \
+        \n At target point v = (20.6 km/s, 16.6 km/s) \n Value of distribution function = 0.9436428285452941",fontsize=12)
     plt.show()
 if mode==1:
     attribs = np.vstack((storefinalvx, storefinalvy, storet))

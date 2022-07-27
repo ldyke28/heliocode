@@ -20,16 +20,16 @@ ibexpos = [.707*au .707*au 0]
 
 # INITIAL CONDITIONS for both position and velocity (in SI units - m and m/s)
 ttotal = 7000000000
-tstep = 10000
+tstep = 1000
 if mode==1
     #t = range(0, ttotal, step=tstep)
     t = (0, ttotal)
 end
 if mode==2
     #t = range(6290000000, 4500000000, step=-tstep)
-    t = (6246000000, 6200000000)
+    t = (6300000000, 6000000000)
 end
-tscale = Int32(.7*ttotal/tstep)
+#tscale = Int32(.7*ttotal/tstep)
 
 #tscale = 0
 
@@ -174,12 +174,12 @@ if mode==3
     backtraj = zeros(t.size, 6)
     for i=1:(vxstart.size)
         for j=1:(vystart.size)
-            initcs = [xstart ystart zstart vxstart[i] vystart[j] vzstart]
+            initcs = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
-            proble = ODEProblem(dr_dt, initcs, t)
-            backtraj[:,:] = solve(proble)
+            proble = ODEProblem(dr_dtnew, initcs, t, msolar*G)
+            backtraj = solve(proble)
             #backtraj[:,:] = odeint(dr_dt, initc, t, args=(rp5,))
-            for k=1:(t.size)
+            for k=1:(backtraj.t.size())
                 if backtraj[k+1,1] >= 100*au && backtraj[k,0] <= 100*au
                     println(backtraj[k,:])
                     println(t[k])
@@ -207,11 +207,11 @@ if mode==2
     pro = SecondOrderODEProblem(dr_dt, dinitcons, initcons, t)
     singletraj = solve(pro, dt=-tstep)
     display(plot(singletraj, vars=(4,5)))=#
-    icnew = [ibexpos[1], ibexpos[2], ibexpos[3], -20000., 20000., 0.]
+    icnew = [ibexpos[1], ibexpos[2], ibexpos[3], 20600., 16600., 0.]
     prob = ODEProblem(dr_dtnew, icnew, t, msolar*G)
     soln = solve(prob)
-    display(plot(soln, vars=(1,2)))
-    #singletraj = odeint(dr_dt, initc, t, args=(rp5,))
+    display(plot(soln, vars=(1,2), xlims=(-1*au, 3*au), ylims=(-.5*au, 1.5*au)))
+    
     #trackrp = zeros(singletraj.t.size)
     #=for k=1:(singletraj.t.size)
         trackrp[k] = rp5(singletraj.t[k])
@@ -229,59 +229,7 @@ end
 println("Finished")
 
 
-#=if mode==2
-    zer = [0]
-    fig3d = plt.figure()
-    fig3d.set_figwidth(7)
-    fig3d.set_figheight(6)
-    ax3d = plt.axes(projection='3d')
-    scatterplot = ax3d.scatter3D(singletraj[:,0]/au, singletraj[:,1]/au, singletraj[:,2]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=.5, vmax=1.5)
-    cb = fig3d.colorbar(scatterplot)
-    cb.set_label('Value of mu')
-    #ax3d.plot3D(trajs[:,0,1], trajs[:,1,1], trajs[:,2,1], 'gold', linestyle='--')
-    #ax3d.plot3D(trajs[:,0,2], trajs[:,1,2], trajs[:,2,2], 'forestgreen', linestyle=':')
-    #ax3d.plot3D(trajs[:,0,3], trajs[:,1,3], trajs[:,2,3], 'firebrick', linestyle='-.')
-    ax3d.scatter3D(zer,zer,zer,c='orange')
-    ax3d.scatter3D([ibexpos[0]/au],[ibexpos[1]/au],[ibexpos[2]/au], c='springgreen')
-    ax3d.set_xlabel("x (au)")
-    ax3d.set_ylabel("y (au)")
-    ax3d.set_zlabel("z (au)")
-    ax3d.set_xlim3d(left = -2.5, right = 1)
-    ax3d.set_ylim3d(bottom = -0.5, top = 2.5)
-    ax3d.set_zlim3d(bottom = -1, top = 1)
-    ax3d.view_init(90,270)
-    ax3d.set_title("Individual Orbit at time t=6.29e9 s \n Target at (-.707 au, .707 au) \
-        \n At target point v = (7.8 km/s, -17.8 km/s) \n Value of distribution function = 0.7745911962336968",fontsize=12)
-    plt.show()
-    #scatter3d(singletraj[:,1], singletraj[:,2], singletraj[:,3], c=trackrp[:])
-end
-if mode==1
-    attribs = np.vstack((storefinalvx, storefinalvy, storet))
-    println(attribs.size)
-    attribs = attribs[:, attribs[2,:].argsort()]
-    vxtot = 0
-    vytot = 0
-    ttot = 0
-    count = 0
-    for i=1:(storet.size):
-        println(i, '|', attribs[0,i], '|', attribs[1,i], '|', attribs[2,i])
-        if storefinalvy[i]<0:
-            vxtot = vxtot + storefinalvx[i]
-            vytot = vytot + storefinalvy[i]
-            ttot = ttot + storet[i]
-            count = count + 1
-        end
-    end
-
-    vxavg = vxtot/count
-    vyavg = vytot/count
-    tavg = ttot/count
-    println('~~~~~~~~~~~~~~~~~~~~~')
-    println(vxavg, '||', vyavg, '||', tavg)
-end
-        
-
-if mode==3:
+#=if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
     file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p35e9_str_center.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_meddownwind_sin2_p375_str_center.txt", "w")
