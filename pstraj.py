@@ -9,17 +9,23 @@ from mpl_toolkits import mplot3d
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 2
+mode = 3
 #contourplot = True # determines whether scatter (False) or contour (True) plot
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
 msolar = 1.98847*10**30 # mass of the sun in kg
 G = 6.6743*10**(-11) # value for gravitational constant in SI units
+# one year in s = 3.156e7 s
+# Note to self: solar maximum in April 2014
+oneyear = 3.156*10**7
+finalt = 6246000000
+phase = 0
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
+#ibexpos = np.array([np.cos(np.pi*finalt/oneyear + phase)*au, np.sin(np.pi*finalt/oneyear + phase)*au, 0])
 ibexpos = np.array([.707*au, .707*au, 0])
 
 # INITIAL CONDITIONS for both position and velocity (in SI units - m and m/s)
@@ -28,7 +34,7 @@ tstep = 10000
 if mode==1:
     t = np.arange(0, ttotal, tstep)
 if mode==2:
-    t = np.arange(6300000000, 4500000000, -tstep)
+    t = np.arange(finalt, 4500000000, -tstep)
 tscale = int(.7*ttotal/tstep)
 #tscale = 0
 
@@ -64,8 +70,10 @@ vystart = np.arange(-25000, 25000, 500)
 vzstart = 0
 if mode==3:
     #startt = 5598410000
-    startt = 6350000000
-    t = np.arange(startt, 4500000000, -tstep)
+    startt = finalt
+    lastt = 4500000000
+    t = np.arange(startt, lastt, -tstep)
+    mode3dt = startt-lastt
 
 
 
@@ -154,6 +162,9 @@ if mode==3:
             backtraj[:,:] = odeint(dr_dt, init, t, args=(rp5,))
             for k in range(t.size):
                 if backtraj[k,0] >= 100*au and backtraj[k-1,0] <= 100*au:
+                    btintegrand = 1/(startt-t[k+1])*np.exp(-.001*np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + \
+                        (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)/(100*au))
+                    attfact = scipy.integrate.simps(btintegrand, t[0:k+1])
                     print(backtraj[k-1,:])
                     print(t[k-1])
                     # radius in paper given to be 14 km/s
@@ -164,7 +175,7 @@ if mode==3:
                         farvy = np.append(farvy, [backtraj[0,4]])
                         fart = np.append(fart, [startt - t[k-1]])
                         # calculating value of phase space density based on the value at the crossing of x = 100 au
-                        maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[k-1,3]+26000)**2 + backtraj[k-1,4]**2)/(5327)**2)])
+                        maxwcolor = np.append(maxwcolor, [-attfact*np.exp(-((backtraj[k-1,3]+26000)**2 + backtraj[k-1,4]**2)/(5327)**2)])
 
 
 # single trajectory plotting code
@@ -231,7 +242,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p35e9_str_center.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p246e9_ff_attenuation_v2.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_meddownwind_sin2_p375_str_center.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
@@ -249,7 +260,7 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.35e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
     plt.title('Target at (.707 au, .707 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
@@ -267,7 +278,7 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.35e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
     plt.title('Target at (.707 au, .707 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
