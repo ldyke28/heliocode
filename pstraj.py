@@ -162,8 +162,8 @@ if mode==3:
             backtraj[:,:] = odeint(dr_dt, init, t, args=(rp5,))
             for k in range(t.size):
                 if backtraj[k,0] >= 100*au and backtraj[k-1,0] <= 100*au:
-                    btintegrand = 1/(startt-t[k+1])*np.exp(-.001*np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + \
-                        (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)/(100*au))
+                    btintegrand = 1/(startt-t[k+1])*np.exp(np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + \
+                        (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)/(100*au)-1)
                     attfact = scipy.integrate.simps(btintegrand, t[0:k+1])
                     print(backtraj[k-1,:])
                     print(t[k-1])
