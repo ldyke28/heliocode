@@ -59,10 +59,10 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-vxstart = np.arange(-55000, -25000, 300)
-vystart = np.arange(-25000, 15000, 500)
-#vxstart = np.arange(25000, 45000, 400)
-#vystart = np.arange(0000, 30000, 500)
+#vxstart = np.arange(-55000, -25000, 300)
+#vystart = np.arange(-25000, 15000, 500)
+vxstart = np.arange(22500, 40000, 200)
+vystart = np.arange(5000, 35000, 300)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(-50000, 50000, 2000)
@@ -242,7 +242,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p246e9_attractive_direct_baseattenuation.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p246e9_attractive_indirect_baseattenuation.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_meddownwind_sin2_p375_str_center.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
