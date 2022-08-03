@@ -19,7 +19,7 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 # one year in s = 3.156e7 s
 # Note to self: solar maximum in April 2014
 oneyear = 3.156*10**7
-finalt = 6246000000
+finalt = 6332750000
 phase = 0
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
@@ -59,12 +59,12 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-#vxstart = np.arange(-55000, -25000, 300)
-#vystart = np.arange(-25000, 15000, 500)
-vxstart = np.arange(22500, 40000, 200)
-vystart = np.arange(5000, 35000, 300)
-#vxstart = np.arange(-25000, 25000, 500)
-#vystart = np.arange(-25000, 25000, 500)
+#vxstart = np.arange(-55000, -25000, 600)
+#vystart = np.arange(-25000, 15000, 1000)
+#vxstart = np.arange(22500, 40000, 600)
+#vystart = np.arange(5000, 35000, 900)
+vxstart = np.arange(-25000, 25000, 500)
+vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(-50000, 50000, 2000)
 #vystart = np.arange(-50000, 50000, 2000)
 vzstart = 0
@@ -162,20 +162,21 @@ if mode==3:
             backtraj[:,:] = odeint(dr_dt, init, t, args=(rp5,))
             for k in range(t.size):
                 if backtraj[k,0] >= 100*au and backtraj[k-1,0] <= 100*au:
-                    #btintegrand = 1/(startt-t[k+1])*np.exp((np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + \
-                    #    (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)/(100*au)-1))
-                    PIrate = 10**(-7)
-                    r1 = 1*au
-                    currentrad = np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)
-                    currentv = np.sqrt(backtraj[0:k+1,3]**2 + backtraj[0:k+1,4]**2 + backtraj[0:k+1,5]**2)
-                    btintegrand2 = PIrate/currentv*(r1/currentrad)**2
-                    attfact = scipy.integrate.simps(btintegrand2, currentrad)
                     print(backtraj[k-1,:])
                     print(t[k-1])
                     # radius in paper given to be 14 km/s
                     # only saving initial conditions corresponding to points that lie within this Maxwellian at x = 100 au
                     #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
                     if np.sqrt((backtraj[k-1,3]+26000)**2 + (backtraj[k-1,4])**2) <= 14000:
+                        #btintegrand = 1/(startt-t[k+1])*np.exp((np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + \
+                        #    (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)/(100*au)-1))
+                        PIrate = 10**(-7)
+                        r1 = 1*au
+                        currentrad = np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)
+                        currentv = np.sqrt(backtraj[0:k+1,3]**2 + backtraj[0:k+1,4]**2 + backtraj[0:k+1,5]**2)
+                        btintegrand2 = PIrate/currentv*(r1/currentrad)**2
+                        #btintegrand3 = PIrate*(r1/currentrad)**2
+                        attfact = scipy.integrate.simps(btintegrand2, currentrad)
                         farvx = np.append(farvx, [backtraj[0,3]])
                         farvy = np.append(farvy, [backtraj[0,4]])
                         fart = np.append(fart, [startt - t[k-1]])
@@ -185,7 +186,7 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], 20600, 16600, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], 10000, 8000, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp5,))
     trackrp = np.zeros(t.size)
     for k in range(t.size):
@@ -220,8 +221,8 @@ if mode==2:
     ax3d.set_ylim3d(bottom = -.5, top = 1.5)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
-    ax3d.set_title("Individual Orbit at time t=6.3e9 s \n Target at (.707 au, .707 au) \
-        \n At target point v = (20.6 km/s, 16.6 km/s) \n Value of distribution function = 0.9436428285452941",fontsize=12)
+    ax3d.set_title("Individual Orbit at time t=6.246e9 s \n Target at (.707 au, .707 au) \
+        \n At target point v = (10.0 km/s, 8.0 km/s) \n Value of distribution function = 5.208890638727108",fontsize=12)
     plt.show()
 if mode==1:
     attribs = np.vstack((storefinalvx, storefinalvy, storet))
@@ -248,12 +249,10 @@ if mode==1:
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
     #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p246e9_attractive_indirect_baseattenuation.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_pi4_6p246e9_attractive_indirect_newattenuation.txt", "w")
+    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_pi4_6p33275e9_center_realattenuation.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
-
-    print(maxwcolor)
 
     # plotting a scatterplot of vx and vy at the target point, colored by the phase space density
     f = plt.figure()
@@ -267,7 +266,7 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.33275e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
     plt.title('Target at (.707 au, .707 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
@@ -285,7 +284,7 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.33275e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
     plt.title('Target at (.707 au, .707 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
