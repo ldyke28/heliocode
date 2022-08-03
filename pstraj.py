@@ -164,11 +164,11 @@ if mode==3:
                 if backtraj[k,0] >= 100*au and backtraj[k-1,0] <= 100*au:
                     #btintegrand = 1/(startt-t[k+1])*np.exp((np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + \
                     #    (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)/(100*au)-1))
-                    PIrate = 1
+                    PIrate = 10**(-7)
                     r1 = 1*au
                     currentrad = np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)
                     currentv = np.sqrt(backtraj[0:k+1,3]**2 + backtraj[0:k+1,4]**2 + backtraj[0:k+1,5]**2)
-                    btintegrand2 = PIrate*(r1/currentrad)**2/currentv
+                    btintegrand2 = PIrate/currentv*(r1/currentrad)**2
                     attfact = scipy.integrate.simps(btintegrand2, currentrad)
                     print(backtraj[k-1,:])
                     print(t[k-1])
@@ -180,7 +180,7 @@ if mode==3:
                         farvy = np.append(farvy, [backtraj[0,4]])
                         fart = np.append(fart, [startt - t[k-1]])
                         # calculating value of phase space density based on the value at the crossing of x = 100 au
-                        maxwcolor = np.append(maxwcolor, [np.exp(attfact)*np.exp(-((backtraj[k-1,3]+26000)**2 + backtraj[k-1,4]**2)/(5327)**2)])
+                        maxwcolor = np.append(maxwcolor, [np.exp(-attfact)*np.exp(-((backtraj[k-1,3]+26000)**2 + backtraj[k-1,4]**2)/(5327)**2)])
 
 
 # single trajectory plotting code
@@ -252,6 +252,8 @@ if mode==3:
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
+
+    print(maxwcolor)
 
     # plotting a scatterplot of vx and vy at the target point, colored by the phase space density
     f = plt.figure()
