@@ -9,7 +9,7 @@ from mpl_toolkits import mplot3d
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 #contourplot = True # determines whether scatter (False) or contour (True) plot
 
 # Value for 1 au (astronomical unit) in meters
@@ -186,7 +186,7 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], 10000, 8000, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], 24500, 24500, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp5,))
     trackrp = np.zeros(t.size)
     for k in range(t.size):
