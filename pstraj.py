@@ -178,10 +178,10 @@ if mode==3:
                         r1 = 1*au
                         oldrad = np.sqrt((sunpos[0]-backtraj[1:k+2,0])**2 + (sunpos[1]-backtraj[1:k+2,1])**2 + (sunpos[2]-backtraj[1:k+2,2])**2)
                         currentrad = np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)
-                        rvecx = (-sunpos[0]+backtraj[0:k+1,0])/currentrad
-                        rvecy= (-sunpos[1]+backtraj[0:k+1,1])/currentrad
-                        rvecz = (-sunpos[2]+backtraj[0:k+1,2])/currentrad
-                        currentvr = backtraj[0:k+1,3]*rvecx[0:k+1] + backtraj[0:k+1,4]*rvecy[0:k+1] + backtraj[0:k+1,5]*rvecz[0:k+1]
+                        rvecx = (-sunpos[0]+backtraj[1:k+2,0])/oldrad
+                        rvecy= (-sunpos[1]+backtraj[1:k+2,1])/oldrad
+                        rvecz = (-sunpos[2]+backtraj[1:k+2,2])/oldrad
+                        currentvr = backtraj[1:k+2,3]*rvecx[0:k+1] + backtraj[1:k+2,4]*rvecy[0:k+1] + backtraj[1:k+2,5]*rvecz[0:k+1]
                         #currentv = np.sqrt(backtraj[0:k+1,3]**2 + backtraj[0:k+1,4]**2 + backtraj[0:k+1,5]**2)
                         #btintegrand2 = (1/(currentrad-oldrad))*PIrate/currentvr*(r1/currentrad)**2
                         btintegrand2 = PIrate/currentvr*(r1/currentrad)**2
@@ -258,8 +258,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p23e9_center_realatten_breaktest.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_pi4_6p23e9_center_pleasework3.txt", "w")
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p23e9_center_pleasework5.txt", 'w')
+    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_pi4_6p23e9_center_pleasework3.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
