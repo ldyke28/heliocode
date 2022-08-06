@@ -181,16 +181,21 @@ if mode==3:
                         rvecx = (-sunpos[0]+backtraj[1:k+2,0])/oldrad
                         rvecy= (-sunpos[1]+backtraj[1:k+2,1])/oldrad
                         rvecz = (-sunpos[2]+backtraj[1:k+2,2])/oldrad
+                        nrvecx = (-sunpos[0]+backtraj[0:k+1,0])/currentrad
+                        nrvecy= (-sunpos[1]+backtraj[0:k+1,1])/currentrad
+                        nrvecz = (-sunpos[2]+backtraj[0:k+1,2])/currentrad
                         currentvr = backtraj[1:k+2,3]*rvecx[0:k+1] + backtraj[1:k+2,4]*rvecy[0:k+1] + backtraj[1:k+2,5]*rvecz[0:k+1]
+                        currentvr1 = backtraj[0:k+1,3]*nrvecx[0:k+1] + backtraj[0:k+1,4]*nrvecy[0:k+1] + backtraj[0:k+1,5]*nrvecz[0:k+1]
                         #currentv = np.sqrt(backtraj[0:k+1,3]**2 + backtraj[0:k+1,4]**2 + backtraj[0:k+1,5]**2)
                         #btintegrand2 = (1/(currentrad-oldrad))*PIrate/currentvr*(r1/currentrad)**2
                         btintegrand2 = PIrate/currentvr*(r1/currentrad)**2
+                        #btintegrand2 = PIrate/((currentvr + currentvr1)/2)*(r1/currentrad)**2
                         attfact = scipy.integrate.simps(btintegrand2, currentrad)
                         farvx = np.append(farvx, [backtraj[0,3]])
                         farvy = np.append(farvy, [backtraj[0,4]])
                         fart = np.append(fart, [startt - t[k-1]])
                         # calculating value of phase space density based on the value at the crossing of x = 100 au
-                        maxwcolor = np.append(maxwcolor, [np.exp(attfact)*np.exp(-((backtraj[k-1,3]+26000)**2 + backtraj[k-1,4]**2)/(5327)**2)])
+                        maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[k-1,3]+26000)**2 + backtraj[k-1,4]**2)/(5327)**2)])
                         break
 
 
@@ -258,7 +263,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p23e9_center_pleasework5.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p23e9_center_pleasework16.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_pi4_6p23e9_center_pleasework3.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')

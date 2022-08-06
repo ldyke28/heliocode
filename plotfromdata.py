@@ -9,8 +9,8 @@ f = np.array([])
 filenum = 1
 
 #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p3e9_center_noatttest.txt", "r")
-#file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p3e9_center_noatttest.txt", delimiter=',')
-file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_pi4_6p23e9_center_pleasework.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p23e9_center_pleasework15.txt", delimiter=',')
+#file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_pi4_6p23e9_center_pleasework.txt", delimiter=',')
 
 
 #file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_meddownwind_attractive_indirect.txt", delimiter=',')
@@ -45,7 +45,7 @@ fig.set_figwidth(9)
 fig.set_figheight(6)
 
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma')
-plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma', norm=matplotlib.colors.LogNorm(vmin=.001))
+plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma', norm=matplotlib.colors.LogNorm(vmin=10**(-10)))
 cb = plt.colorbar()
 cb.set_label('f(r,v,t)')
 plt.xlabel("vx at Target in km/s")
@@ -55,7 +55,7 @@ plt.title('Target at (.707 au, .707 au)')
 plt.show()
 
 
-fig = plt.figure()
+"""fig = plt.figure()
 fig.set_figwidth(9)
 fig.set_figheight(6)
 levels = [.001, .01, .1, .2, .3, .4, .5, .6, .7, .8, .9, .95, .98, 1.0]
@@ -66,4 +66,4 @@ plt.xlabel("vx at Target in km/s")
 plt.ylabel("vy at Target in km/s")
 plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
 plt.title('Target at (-.707 au, .707 au)')
-plt.show()
+plt.show()"""
