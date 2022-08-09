@@ -19,7 +19,7 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 # one year in s = 3.156e7 s
 # Note to self: solar maximum in April 2014
 oneyear = 3.156*10**7
-finalt = 6270000000
+finalt = 6332750000
 phase = 0
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
@@ -63,10 +63,10 @@ zstart = ibexpos[2]
 #vystart = np.arange(-25000, 15000, 800)
 #vxstart = np.arange(22500, 40000, 600)
 #vystart = np.arange(5000, 35000, 900)
-vxstart = np.arange(-25000, 25000, 500)
-vystart = np.arange(-25000, 25000, 500)
-#vxstart = np.arange(-50000, 50000, 2000)
-#vystart = np.arange(-50000, 50000, 2000)
+#vxstart = np.arange(-25000, 25000, 500)
+#vystart = np.arange(-25000, 25000, 500)
+vxstart = np.arange(0000, 10000, 50)
+vystart = np.arange(-15000, -5000, 50)
 vzstart = 0
 if mode==3:
     #startt = 5598410000
@@ -263,8 +263,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p23e9_center_pleasework16.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_pi4_6p27e9_center_absatten.txt.txt", "w")
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p33275e9_focus_absatten.txt", 'w')
+    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_pi4_6p27e9_center_absatten.txt.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
@@ -281,7 +281,7 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.27e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.33275e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
     plt.title('Target at (.707 au, .707 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
