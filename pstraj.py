@@ -277,7 +277,7 @@ if mode==3:
     cb = plt.colorbar()
     #cb.set_label('Time at which orbit passes through 100 au (s)')
     #cb.set_label('Travel Time from 100 au to Point of Interest (s)')
-    cb.set_label('f(r,v,t)')
+    cb.set_label('PDF(r,v,t)')
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
