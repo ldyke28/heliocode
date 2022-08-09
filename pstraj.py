@@ -9,7 +9,7 @@ from mpl_toolkits import mplot3d
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 #contourplot = True # determines whether scatter (False) or contour (True) plot
 
 # Value for 1 au (astronomical unit) in meters
@@ -19,7 +19,7 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 # one year in s = 3.156e7 s
 # Note to self: solar maximum in April 2014
 oneyear = 3.156*10**7
-finalt = 6332750000
+finalt = 6255000000
 phase = 0
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
@@ -63,10 +63,10 @@ zstart = ibexpos[2]
 #vystart = np.arange(-25000, 15000, 800)
 #vxstart = np.arange(22500, 40000, 600)
 #vystart = np.arange(5000, 35000, 900)
-#vxstart = np.arange(-25000, 25000, 500)
-#vystart = np.arange(-25000, 25000, 500)
-vxstart = np.arange(0000, 10000, 50)
-vystart = np.arange(-15000, -5000, 50)
+vxstart = np.arange(-25000, 25000, 500)
+vystart = np.arange(-25000, 25000, 500)
+#vxstart = np.arange(0000, 10000, 50)
+#vystart = np.arange(-15000, -5000, 50)
 vzstart = 0
 if mode==3:
     #startt = 5598410000
@@ -201,7 +201,7 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], 13000, 12500, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], 5000, 500, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp5,))
     trackrp = np.zeros(t.size)
     for k in range(t.size):
@@ -236,8 +236,8 @@ if mode==2:
     ax3d.set_ylim3d(bottom = -.5, top = 1.5)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
-    ax3d.set_title("Individual Orbit at time t=6.33275e9 s \n Target at (.707 au, .707 au) \
-        \n At target point v = (13.0 km/s, 12.5 km/s) \n Value of distribution function = 2.859240084055678",fontsize=12)
+    ax3d.set_title("Individual Orbit at time t=6.255e9 s \n Target at (.707 au, .707 au) \
+        \n At target point v = (5.0 km/s, 0.5 km/s) \n Value of distribution function = 0.5372143222524527",fontsize=12)
     plt.show()
 if mode==1:
     attribs = np.vstack((storefinalvx, storefinalvy, storet))
@@ -263,8 +263,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p33275e9_focus_absatten.txt", 'w')
-    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_pi4_6p27e9_center_absatten.txt.txt", "w")
+    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p22e9_center_absatten.txt", 'w')
+    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_pi4_6p28e9_center_absatten.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
@@ -281,7 +281,7 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.33275e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.28e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
     plt.title('Target at (.707 au, .707 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
