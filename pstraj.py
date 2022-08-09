@@ -188,8 +188,8 @@ if mode==3:
                         currentvr1 = backtraj[0:k+1,3]*nrvecx[0:k+1] + backtraj[0:k+1,4]*nrvecy[0:k+1] + backtraj[0:k+1,5]*nrvecz[0:k+1]
                         #currentv = np.sqrt(backtraj[0:k+1,3]**2 + backtraj[0:k+1,4]**2 + backtraj[0:k+1,5]**2)
                         #btintegrand2 = (1/(currentrad-oldrad))*PIrate/currentvr*(r1/currentrad)**2
-                        #btintegrand2 = PIrate/currentvr*(r1/currentrad)**2
-                        btintegrand2 = PIrate/((currentvr + currentvr1)/2)*(r1/currentrad)**2
+                        btintegrand2 = PIrate/currentvr1*(r1/currentrad)**2
+                        #btintegrand2 = PIrate/((currentvr + currentvr1)/2)*(r1/currentrad)**2
                         attfact = scipy.integrate.simps(btintegrand2, currentrad)
                         farvx = np.append(farvx, [backtraj[0,3]])
                         farvy = np.append(farvy, [backtraj[0,4]])
