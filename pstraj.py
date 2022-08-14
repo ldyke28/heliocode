@@ -20,17 +20,17 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 # Note to self: solar maximum in April 2014
 oneyear = 3.156*10**7
 finalt = 6255000000
+tstep = 2000
 phase = 0
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
 #ibexpos = np.array([np.cos(np.pi*finalt/oneyear + phase)*au, np.sin(np.pi*finalt/oneyear + phase)*au, 0])
-ibexpos = np.array([.707*au, .707*au, 0])
+ibexpos = np.array([-.866*au, .5*au, 0])
 
 # INITIAL CONDITIONS for both position and velocity (in SI units - m and m/s)
 ttotal = 7000000000
-tstep = 2500
 if mode==1:
     t = np.arange(0, ttotal, tstep)
 if mode==2:
@@ -59,12 +59,12 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-#vxstart = np.arange(-55000, -25000, 500)
-#vystart = np.arange(-25000, 15000, 800)
-#vxstart = np.arange(22500, 40000, 600)
-#vystart = np.arange(5000, 35000, 900)
-vxstart = np.arange(-25000, 25000, 500)
-vystart = np.arange(-25000, 25000, 500)
+#vxstart = np.arange(-50000, -000, 500)
+#vystart = np.arange(-40000, -10000, 300)
+vxstart = np.arange(-35000, 10000, 300)
+vystart = np.arange(25000, 50000, 200)
+#vxstart = np.arange(-25000, 25000, 500)
+#vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(0000, 10000, 50)
 #vystart = np.arange(-15000, -5000, 50)
 vzstart = 0
@@ -174,7 +174,7 @@ if mode==3:
                     if np.sqrt((backtraj[k-1,3]+26000)**2 + (backtraj[k-1,4])**2 + (backtraj[k-1,5])**2) <= 14000:
                         #btintegrand = 1/(startt-t[k+1])*np.exp((np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + \
                         #    (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)/(100*au)-1))
-                        PIrate = 10**(-7)
+                        PIrate = 10**(-7) *(1 + (np.sin(np.pi*(t[0:k+1]/347000000)))**2)
                         r1 = 1*au
                         #oldrad = np.sqrt((sunpos[0]-backtraj[1:k+2,0])**2 + (sunpos[1]-backtraj[1:k+2,1])**2 + (sunpos[2]-backtraj[1:k+2,2])**2)
                         currentrad = np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)
@@ -263,7 +263,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p255e9_center_absattenb_hr_shortert.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_5pi6_6p255e9_indirect_attentdpi.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_pi4_6p255e9_center_absattenb_hr.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
@@ -283,7 +283,7 @@ if mode==3:
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
     plt.suptitle('Phase space population at target (t = 6.255e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (.707 au, .707 au)')
+    plt.title('Target at (-.866 au, .5 au), Time Resolution = 2000 s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     
