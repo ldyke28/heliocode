@@ -59,10 +59,10 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-vxstart = np.arange(-50000, -15000, 500)
-vystart = np.arange(-20000, 10000, 500)
-#vxstart = np.arange(-40000, 0000, 400)
-#vystart = np.arange(25000, 40000, 160)
+#vxstart = np.arange(-50000, -15000, 500)
+#vystart = np.arange(-20000, 10000, 500)
+vxstart = np.arange(-40000, 0000, 1500)
+vystart = np.arange(25000, 40000, 1000)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(0000, 10000, 50)
@@ -263,8 +263,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_5pi6_6p33275e9_indirect_p7pi.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_5pi6_6p33275e9_direct_p7pi.txt", "w")
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_5pi6_6p33275e9_indirect_p7pi.txt", 'w')
+    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_5pi6_6p33275e9_direct_p7pi.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
