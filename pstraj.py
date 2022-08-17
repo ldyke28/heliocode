@@ -20,7 +20,7 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 # Note to self: solar maximum in April 2014
 oneyear = 3.156*10**7
 finalt = 6332750000
-tstep = 2500
+tstep = 1000
 phase = 0
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
@@ -61,8 +61,8 @@ ystart = ibexpos[1]
 zstart = ibexpos[2]
 #vxstart = np.arange(-50000, -15000, 500)
 #vystart = np.arange(-20000, 10000, 500)
-vxstart = np.arange(-40000, 0000, 1500)
-vystart = np.arange(25000, 40000, 1000)
+vxstart = np.arange(-40000, -15000, 200)
+vystart = np.arange(15000, 30000, 140)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(0000, 10000, 50)
@@ -283,7 +283,7 @@ if mode==3:
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
     plt.suptitle('Phase space population at target (t = 6.33275e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (-.866 au, .5 au), Time Resolution = 2500 s')
+    plt.title('Target at (-.866 au, .5 au), Time Resolution = 1000 s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     

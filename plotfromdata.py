@@ -9,8 +9,8 @@ f = np.array([])
 filenum = 1
 
 #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p3e9_center_noatttest.txt", "r")
-#file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_5pi6_6p255e9_direct_attentdpi.txt", delimiter=',')
-file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_5pi6_6p28e9_indirect_attentdpi.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_5pi6_6p33275e9_indirect_p7pi.txt", delimiter=',')
+#file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_5pi6_6p28e9_indirect_attentdpi.txt", delimiter=',')
 
 
 #file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_meddownwind_attractive_indirect.txt", delimiter=',')
@@ -45,7 +45,7 @@ fig.set_figwidth(9)
 fig.set_figheight(6)
 
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma')
-plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma', norm=matplotlib.colors.LogNorm(vmin=10**(-4), vmax=1))
+plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma', norm=matplotlib.colors.LogNorm(vmin=10**(-10), vmax=1))
 cb = plt.colorbar()
 cb.set_label('PDF(r,v,t)')
 plt.xlabel("vx at Target in km/s")
