@@ -19,7 +19,7 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 # one year in s = 3.156e7 s
 # Note to self: solar maximum in April 2014
 oneyear = 3.156*10**7
-finalt = 6332750000
+finalt = 6246000000
 tstep = 2000
 phase = 0
 
@@ -27,7 +27,7 @@ phase = 0
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
 #ibexpos = np.array([np.cos(np.pi*finalt/oneyear + phase)*au, np.sin(np.pi*finalt/oneyear + phase)*au, 0])
-ibexpos = np.array([-.707*au, .707*au, 0])
+ibexpos = np.array([-0*au, 1*au, 0])
 
 # INITIAL CONDITIONS for both position and velocity (in SI units - m and m/s)
 ttotal = 7000000000
@@ -59,10 +59,10 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-#vxstart = np.arange(-50000, -15000, 400)
-#vystart = np.arange(-20000, 15000, 400)
-vxstart = np.arange(-35000, -10000, 200)
-vystart = np.arange(20000, 35000, 140)
+#vxstart = np.arange(-55000, -20000, 400)
+#vystart = np.arange(-30000, 5000, 400)
+vxstart = np.arange(5000, 25000, 200)
+vystart = np.arange(15000, 55000, 400)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(0000, 10000, 50)
@@ -263,8 +263,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_5pi6_6p33275e9_indirect_p7pi.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_3pi4_6p33275e9_indirect_p7pi.txt", "w")
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi2_6p246e9_indirect_p7pi.txt", 'w')
+    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_3pi4_6p33275e9_indirect_p7pi.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
@@ -281,9 +281,9 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.33275e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (-.707 au, .707 au), Time Resolution = 2000 s')
+    plt.title('Target at (0 au, 1 au), Time Resolution = 2000 s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     

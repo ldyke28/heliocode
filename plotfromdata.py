@@ -9,7 +9,7 @@ f = np.array([])
 filenum = 1
 
 #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p3e9_center_noatttest.txt", "r")
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_5pi6_6p33275e9_indirect_p7pi.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi2_6p246e9_indirect_p7pi.txt", delimiter=',')
 #file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_5pi6_6p28e9_indirect_attentdpi.txt", delimiter=',')
 
 
@@ -50,8 +50,8 @@ cb = plt.colorbar()
 cb.set_label('PDF(r,v,t)')
 plt.xlabel("vx at Target in km/s")
 plt.ylabel("vy at Target in km/s")
-plt.suptitle('Phase space population at target (t = 6.28e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
-plt.title('Target at (-.866 au, .5 au)')
+plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+plt.title('Target at (0 au, 1 au)')
 plt.show()
 
 
