@@ -19,7 +19,7 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 # one year in s = 3.156e7 s
 # Note to self: solar maximum in April 2014
 oneyear = 3.156*10**7
-finalt = 6246000000
+finalt = 6332750000
 tstep = 2000
 phase = 0
 
@@ -59,10 +59,10 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-#vxstart = np.arange(-55000, -20000, 400)
-#vystart = np.arange(-30000, 5000, 400)
-vxstart = np.arange(5000, 25000, 200)
-vystart = np.arange(15000, 55000, 400)
+#vxstart = np.arange(-50000, -15000, 400)
+#vystart = np.arange(-20000, 15000, 400)
+vxstart = np.arange(-2000, 3000, 10)
+vystart = np.arange(28000, 50000, 400)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(0000, 10000, 50)
@@ -97,6 +97,11 @@ def rp4(t):
 
 def rp5(t):
     return .5 + (np.sin(np.pi*(t/347000000)))**2
+
+def rp6(t):
+    # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
 
 def dr_dt(x,t,rp):
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
@@ -175,6 +180,8 @@ if mode==3:
                         #btintegrand = 1/(startt-t[k+1])*np.exp((np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + \
                         #    (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)/(100*au)-1))
                         PIrate = 10**(-7) *(1 + .7*(np.sin(np.pi*(t[0:k+1]/347000000)))**2)
+                        #omegat = 2*np.pi/(3.47*10**(8))*t
+                        #PIrate2 = 10**(-7)*(1 + 10**(-7)/(np.e + 1/np.e)*(np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + 1/np.e))
                         r1 = 1*au
                         #oldrad = np.sqrt((sunpos[0]-backtraj[1:k+2,0])**2 + (sunpos[1]-backtraj[1:k+2,1])**2 + (sunpos[2]-backtraj[1:k+2,2])**2)
                         currentrad = np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)
@@ -197,6 +204,7 @@ if mode==3:
                         # calculating value of phase space density based on the value at the crossing of x = 100 au
                         maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[k-1,3]+26000)**2 + backtraj[k-1,4]**2)/(5327)**2)])
                         break
+                    break
 
 
 # single trajectory plotting code
@@ -263,7 +271,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi2_6p246e9_indirect_p7pi.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi2_6p33275e9_indirect_p7pi.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_3pi4_6p33275e9_indirect_p7pi.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
@@ -281,7 +289,7 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.33275e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
     plt.title('Target at (0 au, 1 au), Time Resolution = 2000 s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
