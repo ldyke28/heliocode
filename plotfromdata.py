@@ -6,15 +6,15 @@ vx = np.array([])
 vy = np.array([])
 f = np.array([])
 
-filenum = 1
+filenum = 2
 
 #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p3e9_center_noatttest.txt", "r")
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi2_6p33275e9_indirect_p7pi.txt", delimiter=',')
-#file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_5pi6_6p28e9_indirect_attentdpi.txt", delimiter=',')
+#file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi2_6p33275e9_indirect_p7pi.txt", delimiter=',')
+file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi2_6p246e9_indirect_cosexppi.txt", delimiter=',')
 
 
 #file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_meddownwind_attractive_indirect.txt", delimiter=',')
-#file2 = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2_5pi6_sta_ind_t3.txt", delimiter=',')
+file2 = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi2_6p246e9_indirect_cosexppi_v2.txt", delimiter=',')
 
 #file3 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_meddownwind_attractive_test3.txt", delimiter=',')
 
@@ -50,7 +50,7 @@ cb = plt.colorbar()
 cb.set_label('PDF(r,v,t)')
 plt.xlabel("vx at Target in km/s")
 plt.ylabel("vy at Target in km/s")
-plt.suptitle('Phase space population at target (t = 6.33275e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
 plt.title('Target at (0 au, 1 au)')
 plt.show()
 

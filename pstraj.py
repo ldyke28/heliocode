@@ -27,7 +27,7 @@ phase = 0
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
 #ibexpos = np.array([np.cos(np.pi*finalt/oneyear + phase)*au, np.sin(np.pi*finalt/oneyear + phase)*au, 0])
-ibexpos = np.array([-0*au, 1*au, 0])
+ibexpos = np.array([-.866*au, .5*au, 0])
 
 # INITIAL CONDITIONS for both position and velocity (in SI units - m and m/s)
 ttotal = 7000000000
@@ -59,10 +59,10 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-#vxstart = np.arange(-50000, -15000, 400)
-#vystart = np.arange(-20000, 15000, 400)
-vxstart = np.arange(-2000, 3000, 10)
-vystart = np.arange(28000, 50000, 400)
+#vxstart = np.arange(-55000, -15000, 400)
+#vystart = np.arange(-30000, 10000, 400)
+vxstart = np.arange(-35000, 0000, 450)
+vystart = np.arange(20000, 40000, 250)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(0000, 10000, 50)
@@ -164,7 +164,7 @@ if mode==3:
         for j in range(vystart.size):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
-            backtraj[:,:] = odeint(dr_dt, init, t, args=(rp5,))
+            backtraj[:,:] = odeint(dr_dt, init, t, args=(rp6,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 continue
             for k in range(t.size):
@@ -179,9 +179,9 @@ if mode==3:
                     if np.sqrt((backtraj[k-1,3]+26000)**2 + (backtraj[k-1,4])**2 + (backtraj[k-1,5])**2) <= 14000:
                         #btintegrand = 1/(startt-t[k+1])*np.exp((np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + \
                         #    (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)/(100*au)-1))
-                        PIrate = 10**(-7) *(1 + .7*(np.sin(np.pi*(t[0:k+1]/347000000)))**2)
-                        #omegat = 2*np.pi/(3.47*10**(8))*t
-                        #PIrate2 = 10**(-7)*(1 + 10**(-7)/(np.e + 1/np.e)*(np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + 1/np.e))
+                        #PIrate = 10**(-7) *(1 + .7*(np.sin(np.pi*(t[0:k+1]/347000000)))**2)
+                        omt = 2*np.pi/(3.47*10**(8))*t[0:k+1]
+                        PIrate2 = 10**(-7)*(1 + 10**(-7)/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
                         r1 = 1*au
                         #oldrad = np.sqrt((sunpos[0]-backtraj[1:k+2,0])**2 + (sunpos[1]-backtraj[1:k+2,1])**2 + (sunpos[2]-backtraj[1:k+2,2])**2)
                         currentrad = np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)
@@ -195,7 +195,7 @@ if mode==3:
                         currentvr1 = backtraj[0:k+1,3]*nrvecx[0:k+1] + backtraj[0:k+1,4]*nrvecy[0:k+1] + backtraj[0:k+1,5]*nrvecz[0:k+1]
                         #currentv = np.sqrt(backtraj[0:k+1,3]**2 + backtraj[0:k+1,4]**2 + backtraj[0:k+1,5]**2)
                         #btintegrand2 = (1/(currentrad-oldrad))*PIrate/currentvr*(r1/currentrad)**2
-                        btintegrand2 = PIrate/currentvr1*(r1/currentrad)**2
+                        btintegrand2 = PIrate2/currentvr1*(r1/currentrad)**2
                         #btintegrand2 = PIrate/((currentvr + currentvr1)/2)*(r1/currentrad)**2
                         attfact = scipy.integrate.simps(btintegrand2, currentrad)
                         farvx = np.append(farvx, [backtraj[0,3]])
@@ -271,8 +271,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi2_6p33275e9_indirect_p7pi.txt", 'w')
-    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p5s2adj_3pi4_6p33275e9_indirect_p7pi.txt", "w")
+    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi2_6p33275e9_indirect_p7pi.txt", 'w')
+    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_5pi6_6p33275e9_indirect_cosexppi.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
@@ -291,7 +291,7 @@ if mode==3:
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
     plt.suptitle('Phase space population at target (t = 6.33275e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (0 au, 1 au), Time Resolution = 2000 s')
+    plt.title('Target at (-.866 au, .5 au), Time Resolution = 2000 s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     
