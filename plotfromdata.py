@@ -6,17 +6,17 @@ vx = np.array([])
 vy = np.array([])
 f = np.array([])
 
-filenum = 3
+filenum = 1
 
 #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p3e9_center_noatttest.txt", "r")
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_6p36675e9_center_cosexppi.txt", delimiter=',')
-#file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_5pi6_6p36675e9_center_cosexppi.txt", delimiter=',')
+#file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_6p36675e9_center_cosexppi.txt", delimiter=',')
+file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_5pi6_6p26e9_center_cosexppi.txt", delimiter=',')
 
 
-file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_6p36675e9_indirect_cosexppi.txt", delimiter=',')
+#file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_6p36675e9_indirect_cosexppi.txt", delimiter=',')
 #file2 = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_5pi6_6p36675e9_indirect_cosexppi.txt", delimiter=',')
 
-file3 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_6p36675e9_direct_cosexppi.txt", delimiter=',')
+#file3 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_6p36675e9_direct_cosexppi.txt", delimiter=',')
 
 
 for i in range(np.shape(file)[0]):
@@ -50,8 +50,8 @@ cb = plt.colorbar()
 cb.set_label('PDF(r,v,t)')
 plt.xlabel("vx at Target in km/s")
 plt.ylabel("vy at Target in km/s")
-plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
-plt.title('Target at (0 au, 1 au)')
+plt.suptitle('Phase space population at target (t = 6.26e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+plt.title('Target at (-.866 au, .5 au)')
 plt.show()
 
 
