@@ -19,16 +19,18 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 # one year in s = 3.156e7 s
 # Note to self: solar maximum in April 2014
 oneyear = 3.156*10**7
-finalt = 6260000000
+finalt = 6246000000
 #6.36674976e9 force free for cosexprp
-tstep = 2000
+tstep = 10000
+tstepclose = 400
+tstepfar = 50000
 phase = 0
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
 #ibexpos = np.array([np.cos(np.pi*finalt/oneyear + phase)*au, np.sin(np.pi*finalt/oneyear + phase)*au, 0])
-ibexpos = np.array([-.866*au, .5*au, 0])
+ibexpos = np.array([-0*au, 1*au, 0])
 
 # INITIAL CONDITIONS for both position and velocity (in SI units - m and m/s)
 ttotal = 7000000000
@@ -60,12 +62,12 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-#vxstart = np.arange(-50000, -15000, 350)
-#vystart = np.arange(-20000, 10000, 350)
+vxstart = np.arange(-50000, -15000, 350)
+vystart = np.arange(-25000, 10000, 350)
 #vxstart = np.arange(-45000, -10000, 300)
 #vystart = np.arange(15000, 30000, 150)
-vxstart = np.arange(-25000, 25000, 500)
-vystart = np.arange(-25000, 25000, 500)
+#vxstart = np.arange(-25000, 25000, 500)
+#vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(0000, 10000, 50)
 #vystart = np.arange(-15000, -5000, 50)
 vzstart = 0
@@ -73,7 +75,10 @@ if mode==3:
     #startt = 5598410000
     startt = finalt
     lastt = 4500000000
-    t = np.arange(startt, lastt, -tstep)
+    tmid = startt - 400000000
+    tclose = np.arange(startt, tmid, -tstepclose)
+    tfar = np.arange(tmid, lastt, -tstepfar)
+    t = np.concatenate((tclose, tfar))
     mode3dt = startt-lastt
 
 
@@ -272,8 +277,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_6p36675e9_direct_cosexppi.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_5pi6_6p26e9_center_cosexppi.txt", "w")
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_6p246e9_direct_cosexppi_test.txt", 'w')
+    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_5pi6_6p26e9_center_cosexppi.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
@@ -290,9 +295,9 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.26e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (-.866 au, .5 au), Time Resolution = 2000 s')
+    plt.title('Target at (0 au, 1 au), Time Resolution Close to Target = 400 s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     
