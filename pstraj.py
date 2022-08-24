@@ -62,12 +62,12 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-vxstart = np.arange(-50000, -15000, 350)
-vystart = np.arange(-25000, 10000, 350)
+#vxstart = np.arange(-50000, -15000, 350)
+#vystart = np.arange(-25000, 10000, 350)
 #vxstart = np.arange(-45000, -10000, 300)
 #vystart = np.arange(15000, 30000, 150)
-#vxstart = np.arange(-25000, 25000, 500)
-#vystart = np.arange(-25000, 25000, 500)
+vxstart = np.arange(-25000, 25000, 500)
+vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(0000, 10000, 50)
 #vystart = np.arange(-15000, -5000, 50)
 vzstart = 0
@@ -277,7 +277,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_6p246e9_direct_cosexppi_test.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_6p246e9_center_cosexppi_test.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_5pi6_6p26e9_center_cosexppi.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
