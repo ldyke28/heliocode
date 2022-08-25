@@ -173,8 +173,8 @@ if mode==3:
             backtraj[:,:] = odeint(dr_dt, init, t, args=(rp6,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 continue
-            for k in range(t.size):
-                if backtraj[k,0] >= 100*au and backtraj[k-1,0] <= 100*au:
+            for k in range(t.size - tclose.size):
+                if backtraj[k+tclose.size,0] >= 100*au and backtraj[k-1+tclose.size,0] <= 100*au:
                     #if np.sqrt((backtraj[0:k+1,0]-sunpos[0])**2 + (backtraj[0:k+1,1]-sunpos[1])**2 + (backtraj[0:k+1,2]-sunpos[2])**2).any() <= .00465*au:
                     #    break
                     print(backtraj[k-1,:])
