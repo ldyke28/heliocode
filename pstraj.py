@@ -22,7 +22,7 @@ oneyear = 3.156*10**7
 finalt = 6366750000
 #6.36674976e9 force free for cosexprp
 tstep = 10000
-tstepclose = 100
+tstepclose = 200
 tstepfar = 200000
 phase = 0
 
@@ -62,10 +62,10 @@ vz0 = 0
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-#vxstart = np.arange(-50000, -17000, 350)
-#vystart = np.arange(-20000, 10000, 350)
-vxstart = np.arange(-45000, -15000, 300)
-vystart = np.arange(16500, 30000, 150)
+vxstart = np.arange(-50000, -17000, 350)
+vystart = np.arange(-20000, 10000, 350)
+#vxstart = np.arange(-45000, -15000, 300)
+#vystart = np.arange(16500, 30000, 150)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(0000, 10000, 50)
@@ -177,28 +177,29 @@ if mode==3:
                 if backtraj[k+tclose.size,0] >= 100*au and backtraj[k-1+tclose.size,0] <= 100*au:
                     #if np.sqrt((backtraj[0:k+1,0]-sunpos[0])**2 + (backtraj[0:k+1,1]-sunpos[1])**2 + (backtraj[0:k+1,2]-sunpos[2])**2).any() <= .00465*au:
                     #    break
-                    print(backtraj[k-1,:])
-                    print(t[k-1])
+                    kn = k+tclose.size
+                    print(backtraj[kn-1,:])
+                    print(t[kn-1])
                     # radius in paper given to be 14 km/s
                     # only saving initial conditions corresponding to points that lie within this Maxwellian at x = 100 au
                     #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
-                    if np.sqrt((backtraj[k-1,3]+26000)**2 + (backtraj[k-1,4])**2 + (backtraj[k-1,5])**2) <= 14000:
+                    if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 14000:
                         #btintegrand = 1/(startt-t[k+1])*np.exp((np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + \
                         #    (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)/(100*au)-1))
                         #PIrate = 10**(-7) *(1 + .7*(np.sin(np.pi*(t[0:k+1]/347000000)))**2)
-                        omt = 2*np.pi/(3.47*10**(8))*t[0:k+1]
-                        PIrate2 = 10**(-7)*(1 + 10**(-7)/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
+                        omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
+                        PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
                         r1 = 1*au
                         #oldrad = np.sqrt((sunpos[0]-backtraj[1:k+2,0])**2 + (sunpos[1]-backtraj[1:k+2,1])**2 + (sunpos[2]-backtraj[1:k+2,2])**2)
-                        currentrad = np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)
+                        currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
                         #rvecx = (-sunpos[0]+backtraj[1:k+2,0])/oldrad
                         #rvecy= (-sunpos[1]+backtraj[1:k+2,1])/oldrad
                         #rvecz = (-sunpos[2]+backtraj[1:k+2,2])/oldrad
-                        nrvecx = (-sunpos[0]+backtraj[0:k+1,0])/currentrad
-                        nrvecy= (-sunpos[1]+backtraj[0:k+1,1])/currentrad
-                        nrvecz = (-sunpos[2]+backtraj[0:k+1,2])/currentrad
+                        nrvecx = (-sunpos[0]+backtraj[0:kn+1,0])/currentrad
+                        nrvecy= (-sunpos[1]+backtraj[0:kn+1,1])/currentrad
+                        nrvecz = (-sunpos[2]+backtraj[0:kn+1,2])/currentrad
                         #currentvr = backtraj[1:k+2,3]*rvecx[0:k+1] + backtraj[1:k+2,4]*rvecy[0:k+1] + backtraj[1:k+2,5]*rvecz[0:k+1]
-                        currentvr1 = backtraj[0:k+1,3]*nrvecx[0:k+1] + backtraj[0:k+1,4]*nrvecy[0:k+1] + backtraj[0:k+1,5]*nrvecz[0:k+1]
+                        currentvr1 = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
                         #currentv = np.sqrt(backtraj[0:k+1,3]**2 + backtraj[0:k+1,4]**2 + backtraj[0:k+1,5]**2)
                         #btintegrand2 = (1/(currentrad-oldrad))*PIrate/currentvr*(r1/currentrad)**2
                         btintegrand2 = PIrate2/currentvr1*(r1/currentrad)**2
@@ -206,9 +207,9 @@ if mode==3:
                         attfact = scipy.integrate.simps(btintegrand2, currentrad)
                         farvx = np.append(farvx, [backtraj[0,3]])
                         farvy = np.append(farvy, [backtraj[0,4]])
-                        fart = np.append(fart, [startt - t[k-1]])
+                        fart = np.append(fart, [startt - t[kn-1]])
                         # calculating value of phase space density based on the value at the crossing of x = 100 au
-                        maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[k-1,3]+26000)**2 + backtraj[k-1,4]**2)/(5327)**2)])
+                        maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2)/(5327)**2)])
                         break
                     break
 
@@ -278,7 +279,7 @@ if mode==1:
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
     #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_6p36675e9_direct_cosexppi_test.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_5pi6_6p236675e9_indirect_cosexppi_test2.txt", "w")
+    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_5pi6_6p36675e9_direct_cosexppi_fix.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
@@ -297,7 +298,7 @@ if mode==3:
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
     plt.suptitle('Phase space population at target (t = 6.36675e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (-.866 au, .5 au), Time Resolution Close to Target = 100 s')
+    plt.title('Target at (-.866 au, .5 au), Time Resolution Close to Target = 200 s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     
