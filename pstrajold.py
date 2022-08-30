@@ -346,3 +346,58 @@ ax3d.set_xlabel("Initial condition for vx in km/s")
 ax3d.set_ylabel("Initial condition for vy in km/s")
 ax3d.set_zlabel("Initial condition for y in au")
 plt.show()"""
+
+
+#old block of backtracing code
+if mode==3:
+    farvx = np.array([])
+    farvy = np.array([])
+    fart = np.array([])
+    maxwcolor = np.array([])
+    backtraj = np.zeros((t.size, 6))
+    for i in range(vxstart.size):
+        for j in range(vystart.size):
+            init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
+            # calculating trajectories for each initial condition in phase space given
+            backtraj[:,:] = odeint(dr_dt, init, t, args=(rp6,))
+            if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
+                continue
+            for k in range(t.size - tclose.size):
+                if backtraj[k+tclose.size,0] >= 100*au and backtraj[k-1+tclose.size,0] <= 100*au:
+                    #if np.sqrt((backtraj[0:k+1,0]-sunpos[0])**2 + (backtraj[0:k+1,1]-sunpos[1])**2 + (backtraj[0:k+1,2]-sunpos[2])**2).any() <= .00465*au:
+                    #    break
+                    kn = k+tclose.size
+                    print(backtraj[kn-1,:])
+                    print(t[kn-1])
+                    # radius in paper given to be 14 km/s
+                    # only saving initial conditions corresponding to points that lie within this Maxwellian at x = 100 au
+                    #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
+                    if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 14000:
+                        #btintegrand = 1/(startt-t[k+1])*np.exp((np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + \
+                        #    (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)/(100*au)-1))
+                        #PIrate = 10**(-7) *(1 + .7*(np.sin(np.pi*(t[0:k+1]/347000000)))**2)
+                        omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
+                        PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
+                        r1 = 1*au
+                        #oldrad = np.sqrt((sunpos[0]-backtraj[1:k+2,0])**2 + (sunpos[1]-backtraj[1:k+2,1])**2 + (sunpos[2]-backtraj[1:k+2,2])**2)
+                        currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
+                        #rvecx = (-sunpos[0]+backtraj[1:k+2,0])/oldrad
+                        #rvecy= (-sunpos[1]+backtraj[1:k+2,1])/oldrad
+                        #rvecz = (-sunpos[2]+backtraj[1:k+2,2])/oldrad
+                        nrvecx = (-sunpos[0]+backtraj[0:kn+1,0])/currentrad
+                        nrvecy= (-sunpos[1]+backtraj[0:kn+1,1])/currentrad
+                        nrvecz = (-sunpos[2]+backtraj[0:kn+1,2])/currentrad
+                        #currentvr = backtraj[1:k+2,3]*rvecx[0:k+1] + backtraj[1:k+2,4]*rvecy[0:k+1] + backtraj[1:k+2,5]*rvecz[0:k+1]
+                        currentvr1 = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
+                        #currentv = np.sqrt(backtraj[0:k+1,3]**2 + backtraj[0:k+1,4]**2 + backtraj[0:k+1,5]**2)
+                        #btintegrand2 = (1/(currentrad-oldrad))*PIrate/currentvr*(r1/currentrad)**2
+                        btintegrand2 = PIrate2/currentvr1*(r1/currentrad)**2
+                        #btintegrand2 = PIrate/((currentvr + currentvr1)/2)*(r1/currentrad)**2
+                        attfact = scipy.integrate.simps(btintegrand2, currentrad)
+                        farvx = np.append(farvx, [backtraj[0,3]])
+                        farvy = np.append(farvy, [backtraj[0,4]])
+                        fart = np.append(fart, [startt - t[kn-1]])
+                        # calculating value of phase space density based on the value at the crossing of x = 100 au
+                        maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2)/(5327)**2)])
+                        break
+                    break
