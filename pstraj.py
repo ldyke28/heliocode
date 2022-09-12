@@ -20,10 +20,10 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 oneyear = 3.156*10**7
 
 
-finalt = 6250000000 # time to start backtracing
+finalt = 6280000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 tstep = 10000 # general time resolution
-tstepclose = 200 # time resolution for close regime
+tstepclose = 1000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 
@@ -70,10 +70,10 @@ zstart = ibexpos[2]
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
 #vxstart = np.arange(-55000, -10000, 400)
 #vystart = np.arange(-45000, -20000, 200)
-vxstart = np.arange(-30000, 10000, 200)
-vystart = np.arange(40000, 55000, 80)
-#vxstart = np.arange(-25000, 25000, 500)
-#vystart = np.arange(-25000, 25000, 500)
+#vxstart = np.arange(-30000, 10000, 200)
+#vystart = np.arange(40000, 55000, 80)
+vxstart = np.arange(-25000, 25000, 500)
+vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(-50000, 0000, 2500)
 #vystart = np.arange(-50000, 50000, 5000)
 vzstart = 0
@@ -175,7 +175,7 @@ if mode==3:
         for j in range(vystart.size):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
-            backtraj[:,:] = odeint(dr_dt, init, t, args=(radPressure,))
+            backtraj[:,:] = odeint(dr_dt, init, t, args=(rp6,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
@@ -253,7 +253,7 @@ if mode==2:
     ax3d.set_ylim3d(bottom = -.5, top = 1.5)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
-    ax3d.set_title("Individual Orbit at time t=6.33275e9 s \n Target at (.707 au, .707 au) \
+    ax3d.set_title("Individual Orbit at time t=6.25e9 s \n Target at (-.866 au, .5 au) \
         \n At target point v = (3.0 km/s, -13.0 km/s) \n Value of distribution function = 0.7421392933966723",fontsize=12)
     plt.show()
 if mode==1:
@@ -281,7 +281,7 @@ if mode==1:
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
     #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_6p36675e9_direct_cosexppi_test.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/norp_5pi6_6p25e9_indirect_cosexppi.txt", "w")
+    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_5pi6_6p28e9_center_cosexppi.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
@@ -298,9 +298,9 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.25e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.28e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (-.866 au, .5 au), Time Resolution Close to Target = 200 s')
+    plt.title('Target at (-.866 au, .5 au), Time Resolution Close to Target = 1000 s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     
