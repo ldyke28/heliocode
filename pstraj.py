@@ -20,17 +20,17 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 oneyear = 3.156*10**7
 
 
-finalt = 6280000000 # time to start backtracing
+finalt = 6250000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 tstep = 10000 # general time resolution
-tstepclose = 1000 # time resolution for close regime
+tstepclose = 200 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-ibexpos = np.array([-.866*au, .5*au, 0])
+ibexpos = np.array([.707*au, .707*au, 0])
 # implementation of target point that orbits around the sun
 #ibexpos = np.array([np.cos(np.pi*finalt/oneyear + phase)*au, np.sin(np.pi*finalt/oneyear + phase)*au, 0])
 
@@ -68,14 +68,14 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-#vxstart = np.arange(-55000, -10000, 400)
-#vystart = np.arange(-45000, -20000, 200)
-#vxstart = np.arange(-30000, 10000, 200)
-#vystart = np.arange(40000, 55000, 80)
-vxstart = np.arange(-25000, 25000, 500)
-vystart = np.arange(-25000, 25000, 500)
-#vxstart = np.arange(-50000, 0000, 2500)
-#vystart = np.arange(-50000, 50000, 5000)
+#vxstart = np.arange(-55000, -20000, 200)
+#vystart = np.arange(-20000, 15000, 200)
+vxstart = np.arange(20000, 36000, 150)
+vystart = np.arange(10000, 35000, 300)
+#vxstart = np.arange(-25000, 25000, 500)
+#vystart = np.arange(-25000, 25000, 500)
+#vxstart = np.arange(-18000, -9000, 50)
+#vystart = np.arange(-17000, -8000, 50)
 vzstart = 0
 if mode==3:
     startt = finalt
@@ -216,8 +216,8 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], 3000, -13000, 0]
-    singletraj = odeint(dr_dt, init, t, args=(rp5,))
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], 9000, 6000, 0]
+    singletraj = odeint(dr_dt, init, t, args=(rp6,))
     trackrp = np.zeros(t.size)
     for k in range(t.size):
         trackrp[k] = rp6(t[k]) # calculating the value of the radiation pressure at each time point
@@ -235,10 +235,10 @@ if mode==2:
     zer = [0]
     fig3d = plt.figure()
     fig3d.set_figwidth(7)
-    fig3d.set_figheight(6)
+    fig3d.set_figheight(7)
     ax3d = plt.axes(projection='3d')
     # plotting the trajectory as a series of scatter plot points colored by radiation pressure
-    scatterplot = ax3d.scatter3D(singletraj[:,0]/au, singletraj[:,1]/au, singletraj[:,2]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=rp6(0), vmax=rp6(np.pi))
+    scatterplot = ax3d.scatter3D(singletraj[:,0]/au, singletraj[:,1]/au, singletraj[:,2]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=(.75-.243/np.e), vmax=(.75+.243*np.e))
     cb = fig3d.colorbar(scatterplot)
     cb.set_label('Value of mu')
     #ax3d.plot3D(trajs[:,0,1], trajs[:,1,1], trajs[:,2,1], 'gold', linestyle='--')
@@ -249,12 +249,12 @@ if mode==2:
     ax3d.set_xlabel("x (au)")
     ax3d.set_ylabel("y (au)")
     ax3d.set_zlabel("z (au)")
-    ax3d.set_xlim3d(left = -1, right = 3)
-    ax3d.set_ylim3d(bottom = -.5, top = 1.5)
+    ax3d.set_xlim3d(left = -1.5, right = 1)
+    ax3d.set_ylim3d(bottom = -1, top = 1)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
     ax3d.set_title("Individual Orbit at time t=6.25e9 s \n Target at (-.866 au, .5 au) \
-        \n At target point v = (3.0 km/s, -13.0 km/s) \n Value of distribution function = 0.7421392933966723",fontsize=12)
+        \n At target point v = (9.0 km/s, 6.0 km/s) \n Value of distribution function = 6.195576975435612e-17",fontsize=12)
     plt.show()
 if mode==1:
     attribs = np.vstack((storefinalvx, storefinalvy, storet))
@@ -281,7 +281,7 @@ if mode==1:
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
     #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_6p36675e9_direct_cosexppi_test.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_5pi6_6p28e9_center_cosexppi.txt", "w")
+    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi4_6p25e9_indirect_cosexppi.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
@@ -298,9 +298,9 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.28e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.25e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (-.866 au, .5 au), Time Resolution Close to Target = 1000 s')
+    plt.title('Target at (.707 au, .707 au), Time Resolution Close to Target = 200 s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     
