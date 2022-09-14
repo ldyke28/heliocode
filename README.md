@@ -12,6 +12,12 @@ testparticlecode - old code that used second order central differencing to solve
 
 plotfromdata - allows for plotting of graphs from generated data files
 
+extraplotting - written to plot mu and beta
+
+juliadiffeqtesting - used to familiarize myself with solving differential equations in Julia
+
+pstrajjulia - an attempt to see if Julia could handle the trajectory solving process from pstraj
+
 # Radiation pressure labels and related info
 no rp - mu = 0
 
@@ -21,23 +27,21 @@ s2 rp - mu = sin^2(2pi/11yrs * t)
 
 p5s2 rp - mu = .5 + sin^2(2pi/11yrs * t)
 
+p5s2adj rp - mu = .5 + sin^2(pi/11yrs * t)
+
+cosexp rp - mu = .75 + .243 * cos(2pi/11yrs * t - pi) * e^(cos(2pi/11yrs * t - pi))
+
 To calculate the radiation pressure at a specific point in time, using time in seconds:
 
 s2 rp: mu = sin^2(2*pi*t/(3.47e8))
 
 p5s2 rp: mu = .5 + sin^2(2*pi*t/(3.47e8))
 
-Some important times for testing and their implications:
+p5s2adj rp: mu = .5 + sin^2(pi*t/(3.47e8))
 
-5.8e9 s - sine squared term ~= 1
+cosexp rp: mu = .75 + .243 * cos(2*pi/(3.47e8) * t - pi) * e^(cos(2*pi/(3.47e8) * t - pi))
 
-6.125e9 s - sine squared term increasing past .5 (for the p5s2 radiation pressure, this indicates a switch to a repulsive force)
-
-6.029e9 s - sine squared term decreasing below .5 (for the p5s2 radiation pressure, this indicates a switch to an attractive force)
-
-6.246e9 s - sine squared term is 0 (the time dependent forces will be as attractive as possible)
-
-I chose to work with times around 6e9 seconds because that was the characteristic time scale for orbits to reach the area of interest around the sun when starting at t = 0 at the plane x = 1000 au. Since the sine term oscillates regularly and there isn’t any damping included in the model yet, any other time would work just as well - the choice of times around this regime was arbitrary.
+I chose to work with times around 6e9 seconds because that was the characteristic time scale for orbits to reach the area of interest around the sun when starting at t = 0 at the plane x = 1000 au. Since the sine term oscillates regularly and there isn’t any damping included in the model yet, any other time would work just as well - the choice of times around this regime was arbitrary. I plan to shift this time to be closer to t=0 (specifically with a minimum of mu at t=0) at some point.
 
 
 
@@ -53,15 +57,17 @@ Once these points in the orbits are identified, the phase space coordinates (pos
 
 # Backtracing
 
-Once we know what average velocities are occurring corresponding to given orbits passing at certain points in time, we can set the starting time to be one of the times within the list and center the initial conditions for the velocity components around the average for each component of the velocity from that point in time. For example: 
+At the point of me updating this, this is the most relevant capability of the code.
 
-![alt text](https://github.com/ldyke28/heliocode/blob/d0d1aca802099abc3c1eb7b318f2655d79a67b65/extra/examplelist.png)
-(taken from p5s2 rp list)
-
-Here, we see these orbits are passing the point of interest at around t=5.53575e9 seconds. We can use v_x ~= -34.5 km/s and v_y ~= -1.1 km/s as the center of our velocity components and generate initial conditions within an equal range around both of these points to trace back. These orbits are traced backward until it is certain they have passed through the plane defined by x = 100 au, and the components of velocity are recorded when they pass through this plane.
+A series of initial conditions are given for the velocity components, as well as a time array that starts at the time at which the trajectories reach the target point and goes backward in time through a sufficient period to capture all relevant trajectories. The trajectories are all inputted into the odeint function to solve for the trajectory data.
 
 When we want to examine the transformation of the Maxwellian at the point of interest, we can trace the orbits back, select a region that defines the Maxwellian out of the velocity components in the x=100 au plane, and record the velocity conditions at the point of interest that correspond to velocities that are within the Maxwellian at x=100 au, as well as the time of travel for these points and the corresponding value of the distribution function.
 
+For these trajectories, we also factor in losses that correspond to the photoionization of the particles, with a photoionization rate defined within the code.
+
 # Working with the code
 
-I have the code set up to run in three modes: 1 allows you to generate the list using forward tracing, 2 maps an individual orbit and graphs it, and 3 performs the backtracing and plotting of the Maxwellian. You still need to provide initial conditions yourself and designate which radiation pressure you want to use (I’ve written functions for mu = 0, .7, sin^2(2pi/11yrs * t), and .5 + sin^2(2pi/11yrs * t) so far), but the code does the rest for you. Mode is designated through the variable “mode” at the top and only takes 1, 2, and 3 (it will accept other things, but they won’t actually do anything). Be sure, if you are on mode 3, to write the path correctly if you want to save to a file, or else it will throw an error.
+I have the code set up to run in three modes: 1 allows you to generate the list using forward tracing, 2 maps an individual orbit and graphs it, and 3 performs the backtracing and plotting of the Maxwellian. You still need to provide initial conditions yourself and designate which radiation pressure you want to use (I’ve written functions for all of the radiation pressures above), but the code does the rest for you. Mode is designated through the variable “mode” at the top and only takes 1, 2, and 3 (it will accept other things, but they won’t actually do anything). Be sure, if you are on mode 3, to write the path correctly if you want to save to a file, or else it will throw an error.
+
+
+If you're reading this and aren't sure what's going on at some point in the code, feel free to email me at lucas.r.dyke.gr@dartmouth.edu with questions.
