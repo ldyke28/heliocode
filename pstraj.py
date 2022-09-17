@@ -4,6 +4,7 @@ import matplotlib
 from scipy.integrate import odeint
 import scipy
 from mpl_toolkits import mplot3d
+from tqdm import tqdm
 
 # MODE LIST
 # 1 = generate a list of trajectories that come within proximity
@@ -19,11 +20,11 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 # Note to self: solar maximum in April 2014
 oneyear = 3.156*10**7
 
-
-finalt = 0000000000 # time to start backtracing
+# 120749800 for first force free
+finalt = 120749800 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 tstep = 10000 # general time resolution
-tstepclose = 200 # time resolution for close regime
+tstepclose = 2000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 
@@ -68,12 +69,10 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-#vxstart = np.arange(-50000, -15000, 300)
-#vystart = np.arange(-25000, 10000, 300)
-vxstart = np.arange(2000, 18000, 50)
-vystart = np.arange(19000, 47000, 120)
-#vxstart = np.arange(20000, 36000, 150)
-#vystart = np.arange(10000, 35000, 300)
+vxstart = np.arange(-50000, -15000, 300)
+vystart = np.arange(-25000, 10000, 300)
+#vxstart = np.arange(2000, 18000, 50)
+#vystart = np.arange(19000, 47000, 120)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(-18000, -9000, 50)
@@ -173,8 +172,8 @@ if mode==3:
     fart = np.array([])
     maxwcolor = np.array([])
     backtraj = np.zeros((t.size, 6))
-    for i in range(vxstart.size):
-        for j in range(vystart.size):
+    for i in tqdm(range(vxstart.size)):
+        for j in tqdm(range(vystart.size)):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
             backtraj[:,:] = odeint(dr_dt, init, t, args=(rp6,))
@@ -186,13 +185,13 @@ if mode==3:
                     # adjusting the indexing to avoid checking in the close regime
                     kn = k+tclose.size
                     # printing phase space information as the trajectory passes through x = 100 au
-                    print(backtraj[kn-1,:])
-                    print(t[kn-1])
+                    #print(backtraj[kn-1,:])
+                    #print(t[kn-1])
                     # radius in paper given to be 14 km/s
                     # only saving initial conditions corresponding to points that lie within this Maxwellian at x = 100 au
                     #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
                     if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 14000:
-                        omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
+                        """omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
                         # function for the photoionization rate at each point in time
                         PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
                         r1 = 1*au # reference radius
@@ -206,12 +205,13 @@ if mode==3:
                         # integrand for the photoionization losses
                         btintegrand = PIrate2/currentvr*(r1/currentrad)**2
                         # calculation of attenuation factor
-                        attfact = scipy.integrate.simps(btintegrand, currentrad)
+                        attfact = scipy.integrate.simps(btintegrand, currentrad)"""
                         farvx = np.append(farvx, [backtraj[0,3]])
                         farvy = np.append(farvy, [backtraj[0,4]])
                         fart = np.append(fart, [startt - t[kn-1]])
                         # calculating value of phase space density based on the value at the crossing of x = 100 au
-                        maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2)/(5327)**2)])
+                        #maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2)/(5327)**2)])
+                        maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2)/(5327)**2)])
                         break
                     break
 
@@ -282,7 +282,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_0e9_direct_cosexppi.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_6p25e9_center_nopi_ex.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi4_6p25e9_indirect_cosexppi.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
@@ -300,9 +300,9 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 0 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 6.25e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (0 au, 1 au), Time Resolution Close to Target = 200 s')
+    plt.title('Target at (0 au, 1 au), Time Resolution Close to Target = 2000 s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     
