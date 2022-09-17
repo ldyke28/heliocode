@@ -21,6 +21,7 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 oneyear = 3.156*10**7
 
 # 120749800 for first force free
+# 226250200 for second force free
 finalt = 120749800 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 tstep = 10000 # general time resolution
