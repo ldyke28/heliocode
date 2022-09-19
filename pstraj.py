@@ -22,7 +22,7 @@ oneyear = 3.156*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 173500000 # time to start backtracing
+finalt = 226250200 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 tstep = 10000 # general time resolution
 tstepclose = 400 # time resolution for close regime
@@ -70,10 +70,10 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-vxstart = np.arange(-40000, 5000, 325)
-vystart = np.arange(-15000, 30000, 325)
-#vxstart = np.arange(000, 2500, 25)
-#vystart = np.arange(28500, 50000, 300)
+vxstart = np.arange(-40000, 5000, 425)
+vystart = np.arange(-15000, 30000, 425)
+#vxstart = np.arange(000, 2500, 20)
+#vystart = np.arange(28500, 50000, 250)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(-18000, -9000, 50)
@@ -282,8 +282,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_6p25e9_indirect_cosexppi.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi2_2p262502e8_direct_cosexppi.txt", "w")
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_2p262502e8_direct_cosexppi_new.txt", 'w')
+    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi2_2p262502e8_direct_cosexppi.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
