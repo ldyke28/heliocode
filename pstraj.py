@@ -22,7 +22,7 @@ oneyear = 3.156*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 226250200 # time to start backtracing
+finalt = 173500000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 tstep = 10000 # general time resolution
 tstepclose = 400 # time resolution for close regime
@@ -42,7 +42,7 @@ ttotal = 7000000000
 if mode==1:
     t = np.arange(0, ttotal, tstep)
 if mode==2:
-    t = np.arange(finalt, 4500000000, -tstep)
+    t = np.arange(finalt, -2000000000, -tstep)
 tscale = int(.7*ttotal/tstep)
 #tscale = 0
 
@@ -218,7 +218,7 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], 9000, 6000, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], -25000, -5000, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp6,))
     trackrp = np.zeros(t.size)
     for k in range(t.size):
@@ -251,8 +251,8 @@ if mode==2:
     ax3d.set_xlabel("x (au)")
     ax3d.set_ylabel("y (au)")
     ax3d.set_zlabel("z (au)")
-    ax3d.set_xlim3d(left = -1.5, right = 1)
-    ax3d.set_ylim3d(bottom = -1, top = 1)
+    ax3d.set_xlim3d(left = -1.5, right = 4)
+    ax3d.set_ylim3d(bottom = -1, top = 2)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
     ax3d.set_title("Individual Orbit at time t=6.25e9 s \n Target at (-.866 au, .5 au) \
