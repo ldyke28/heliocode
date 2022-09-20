@@ -70,10 +70,10 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-vxstart = np.arange(-40000, 5000, 425)
-vystart = np.arange(-15000, 30000, 425)
-#vxstart = np.arange(000, 2500, 20)
-#vystart = np.arange(28500, 50000, 250)
+#vxstart = np.arange(-40000, 5000, 425)
+#vystart = np.arange(-15000, 30000, 425)
+vxstart = np.arange(-30000, 30000, 800)
+vystart = np.arange(30000, 60000, 800)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(-18000, -9000, 50)
@@ -282,7 +282,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_2p262502e8_direct_cosexppi_new.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_2p262502e8_direct_cosexppi_ex.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi2_2p262502e8_direct_cosexppi.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
