@@ -9,7 +9,7 @@ f = np.array([])
 filenum = 1
 
 #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p3e9_center_noatttest.txt", "r")
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_2p262502e8_direct_cosexppi.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper Data/cosexprp_5pi6_6p2e9_center_cosexppi.txt", delimiter=',')
 #file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi4_6p25e9_center_cosexppi.txt", delimiter=',')
 
 
@@ -50,9 +50,17 @@ cb = plt.colorbar()
 cb.set_label('PDF(r,v,t)')
 plt.xlabel("vx at Target in km/s")
 plt.ylabel("vy at Target in km/s")
-plt.suptitle('Phase space population at target (t = 2.262502e8 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
-plt.title('Target at (0 au, 1 au), Time Resolution Close to Target = 300 s')
+plt.suptitle('Phase space population at target (t = 6.2e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+plt.title('Target at (-.866 au, .5 au), Time Resolution Close to Target = 1000 s')
 plt.show()
+
+"""cb.set_label('PDF(r,v,t)', fontsize=12)
+plt.xlabel("vx at Target in km/s", fontsize=14)
+plt.ylabel("vy at Target in km/s", fontsize=14)
+plt.suptitle('Phase space population at target (t = 6.2e9 s) \n Drawn from Maxwellian at 100 au centered on vx = -26 km/s', fontsize=14)
+plt.title('Target at (-.866 au, .5 au), Time Resolution Close to Target = 1000 s', fontsize=14)
+plt.show()"""
+
 
 
 """fig = plt.figure()
