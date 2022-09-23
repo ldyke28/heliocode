@@ -22,7 +22,7 @@ oneyear = 3.156*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 000000000 # time to start backtracing
+finalt = 120749800 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 tstep = 10000 # general time resolution
 tstepclose = 100 # time resolution for close regime
@@ -72,8 +72,8 @@ zstart = ibexpos[2]
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
 #vxstart = np.arange(-50000, -15000, 300)
 #vystart = np.arange(-25000, 10000, 300)
-vxstart = np.arange(300, 2500, 20)
-vystart = np.arange(29000, 48000, 180)
+vxstart = np.arange(400, 2500, 20)
+vystart = np.arange(29500, 48000, 180)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(-18000, -9000, 50)
