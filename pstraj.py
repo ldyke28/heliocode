@@ -32,7 +32,7 @@ phase = 0 # phase for implementing rotation of target point around sun
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-ibexpos = np.array([-.1423*au, .9898*au, 0])
+ibexpos = np.array([.3827*au, .9239*au, 0])
 # implementation of target point that orbits around the sun
 #ibexpos = np.array([np.cos(np.pi*finalt/oneyear + phase)*au, np.sin(np.pi*finalt/oneyear + phase)*au, 0])
 
@@ -76,8 +76,8 @@ zstart = ibexpos[2]
 #vystart = np.arange(29500, 48000, 180)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
-vxstart = np.arange(-10000, 10000, 250)
-vystart = np.arange(30000, 80000, 1000)
+vxstart = np.arange(-40000, 40000, 1200)
+vystart = np.arange(10000, 90000, 1200)
 vzstart = 0
 if mode==3:
     startt = finalt
@@ -218,7 +218,7 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], -25000, -5000, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], 2000, 20000, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp6,))
     trackrp = np.zeros(t.size)
     for k in range(t.size):
@@ -283,7 +283,7 @@ if mode==1:
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
     #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_1p735e8_indirect_cosexppi_loctest.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_6pi11_1p735e8_indirect_cosexppi_loctest.txt", "w")
+    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_3pi8_1p735e8_indirect_cosexppi_loctest.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
@@ -302,7 +302,7 @@ if mode==3:
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
     plt.suptitle('Phase space population at target (t $\\approx$ 5.5 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (-.1423 au, .9898 au), Time Resolution Close to Target = 5000 s')
+    plt.title('Target at (.3827 au, .9239 au), Time Resolution Close to Target = 5000 s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     
