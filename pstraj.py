@@ -22,7 +22,7 @@ oneyear = 3.156*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 173500000 # time to start backtracing
+finalt = 4000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 tstep = 10000 # general time resolution
 tstepclose = 5000 # time resolution for close regime
@@ -32,7 +32,7 @@ phase = 0 # phase for implementing rotation of target point around sun
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-ibexpos = np.array([.3827*au, .9239*au, 0])
+ibexpos = np.array([-.866*au, .5*au, 0])
 # implementation of target point that orbits around the sun
 #ibexpos = np.array([np.cos(np.pi*finalt/oneyear + phase)*au, np.sin(np.pi*finalt/oneyear + phase)*au, 0])
 
@@ -218,7 +218,7 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], 2000, 20000, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], 9000, 6000, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp6,))
     trackrp = np.zeros(t.size)
     for k in range(t.size):
@@ -251,11 +251,11 @@ if mode==2:
     ax3d.set_xlabel("x (au)")
     ax3d.set_ylabel("y (au)")
     ax3d.set_zlabel("z (au)")
-    ax3d.set_xlim3d(left = -1.5, right = 4)
-    ax3d.set_ylim3d(bottom = -1, top = 2)
+    ax3d.set_xlim3d(left = -1.5, right = 1)
+    ax3d.set_ylim3d(bottom = -1, top = 1)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
-    ax3d.set_title("Individual Orbit at time t=6.25e9 s \n Target at (-.866 au, .5 au) \
+    ax3d.set_title("Individual Orbit at time t$\\approx$.1268 years \n Target at (-.866 au, .5 au) \
         \n At target point v = (9.0 km/s, 6.0 km/s) \n Value of distribution function = 6.195576975435612e-17",fontsize=12)
     plt.show()
 if mode==1:
