@@ -10,7 +10,7 @@ from tqdm import tqdm
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -218,23 +218,42 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], 9000, 6000, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], -10000, -16500, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp6,))
     trackrp = np.zeros(t.size)
-    for k in range(t.size):
+    Ltrack = np.zeros(t.size)
+    Evartrack = np.zeros(t.size)
+    Etrack = np.zeros(t.size)
+    rtrack = np.zeros(t.size)
+    for k in tqdm(range(t.size)):
         trackrp[k] = rp6(t[k]) # calculating the value of the radiation pressure at each time point
+        rmag = np.sqrt((sunpos[0]-singletraj[k,0])**2 + (sunpos[1]-singletraj[k,1])**2 + (sunpos[2]-singletraj[k,2])**2)
+        rtrack[k] = rmag
+        vmag = np.sqrt(singletraj[k,3]**2 + singletraj[k,4]**2 + singletraj[k,5]**2)
+
+        rvec = (singletraj[k,0:3]-sunpos)/rmag
+        rxv = np.cross(singletraj[k,0:3], singletraj[k,3:6])
+        Ltrack[k] = np.sqrt(rxv[0]**2 + rxv[1]**2 + rxv[2]**2)
+
+        vdotr = rvec[0]*singletraj[k,3] + rvec[1]*singletraj[k,4] + rvec[2]*singletraj[k,5]
+        Evartrack[k] = Evartrack[k-1] + (t[k]-t[k-1])*rp6(t[k])*vdotr/(rmag**2)
+        Etrack[k] = (vmag**2)/2 - G*msolar/rmag - G*msolar*Evartrack[k]
         if np.sqrt((singletraj[k,0]-sunpos[0])**2 + (singletraj[k,1]-sunpos[1])**2 + (singletraj[k,2]-sunpos[2])**2) <= .00465*au:
             # checking if the orbit is too close to the sun
             print("Orbit too close to sun")
         if singletraj[k,0] >= 100*au:
             print(singletraj[k-1,:])
             print(t[k-1])
+            Etrack = Etrack[:k]
+            t = t[:k]
+            rtrack = rtrack[:k]
+            Ltrack = Ltrack[:k]
             break
 
 print('Finished')
 
 if mode==2:
-    zer = [0]
+    """zer = [0]
     fig3d = plt.figure()
     fig3d.set_figwidth(7)
     fig3d.set_figheight(7)
@@ -257,7 +276,18 @@ if mode==2:
     ax3d.view_init(90,270)
     ax3d.set_title("Individual Orbit at time t$\\approx$.1268 years \n Target at (-.866 au, .5 au) \
         \n At target point v = (9.0 km/s, 6.0 km/s) \n Value of distribution function = 6.195576975435612e-17",fontsize=12)
+    plt.show()"""
+
+    f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
+    l1, = ax1.plot(t,Etrack, color='r')
+    l2, = ax2.plot(t,Ltrack, color='b')
+    l3, = ax3.plot(t,rtrack, color='y')
+    ax1.legend((l1, l2, l3), ('Adjusted Specific Energy', 'Magnitude of Angular Momentum', 'Radius'), loc='upper left')
+    f.subplots_adjust(hspace=.0)
+    f.set_size_inches(8,4)
+    plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
     plt.show()
+
 if mode==1:
     attribs = np.vstack((storefinalvx, storefinalvy, storet))
     print(attribs.size)
