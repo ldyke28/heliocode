@@ -22,9 +22,9 @@ oneyear = 3.156*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 4000000 # time to start backtracing
+finalt = 34000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
-tstep = 10000 # general time resolution
+tstep = 2000 # general time resolution
 tstepclose = 5000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
@@ -218,7 +218,7 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], -10000, -16500, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], 0000, 2500, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp6,))
     trackrp = np.zeros(t.size)
     Ltrack = np.zeros(t.size)
@@ -241,6 +241,7 @@ if mode==2:
         if np.sqrt((singletraj[k,0]-sunpos[0])**2 + (singletraj[k,1]-sunpos[1])**2 + (singletraj[k,2]-sunpos[2])**2) <= .00465*au:
             # checking if the orbit is too close to the sun
             print("Orbit too close to sun")
+            break
         if singletraj[k,0] >= 100*au:
             print(singletraj[k-1,:])
             print(t[k-1])
@@ -274,8 +275,8 @@ if mode==2:
     ax3d.set_ylim3d(bottom = -1, top = 1)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
-    ax3d.set_title("Individual Orbit at time t$\\approx$.1268 years \n Target at (-.866 au, .5 au) \
-        \n At target point v = (9.0 km/s, 6.0 km/s) \n Value of distribution function = 6.195576975435612e-17",fontsize=12)
+    ax3d.set_title("Individual Orbit at time t$\\approx$1.078 years \n Target at (-.866 au, .5 au) \
+        \n At target point v = (0.0 km/s, 2.5 km/s) \n Value of distribution function = 2.7785827915788472e-129",fontsize=12)
     plt.show()"""
 
     f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
