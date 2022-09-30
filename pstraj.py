@@ -10,7 +10,7 @@ from tqdm import tqdm
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 2
+mode = 3
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -22,10 +22,10 @@ oneyear = 3.156*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 260000000 # time to start backtracing
+finalt = 00000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 tstep = 10000 # general time resolution
-tstepclose = 1000 # time resolution for close regime
+tstepclose = 50 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 
@@ -72,12 +72,12 @@ zstart = ibexpos[2]
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
 #vxstart = np.arange(-50000, -15000, 300)
 #vystart = np.arange(-25000, 10000, 300)
-#vxstart = np.arange(400, 2500, 20)
-#vystart = np.arange(29500, 48000, 180)
+vxstart = np.arange(24000, 45000, 250)
+vystart = np.arange(-2000, 6500, 150)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
-vxstart = np.arange(0000, 60000, 1500)
-vystart = np.arange(-30000, 30000, 1500)
+#vxstart = np.arange(0000, 60000, 1500)
+#vystart = np.arange(-30000, 30000, 1500)
 vzstart = 0
 if mode==3:
     startt = finalt
@@ -218,7 +218,7 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], 500, -6700, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], -12000, -1000, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp6,))
     trackrp = np.zeros(t.size)
     Ltrack = np.zeros(t.size)
@@ -275,8 +275,8 @@ if mode==2:
     ax3d.set_ylim3d(bottom = -.5, top = .5)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
-    ax3d.set_title("Individual Orbit at time t$\\approx$8.238 years \n Target at (.9952 au, .0980 au) \
-        \n At target point v = (0.5 km/s, -6.7 km/s) \n Value of distribution function = 2.0499692129178933e-35",fontsize=12)
+    ax3d.set_title("Individual Orbit at time t=0 years \n Target at (.9952 au, .0980 au) \
+        \n At target point v = (-12.0 km/s, -1.0 km/s) \n Value of distribution function = 8.453326374265246e-26",fontsize=12)
     plt.show()
 
     """f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
@@ -314,7 +314,7 @@ if mode==1:
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
     #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_1p735e8_indirect_cosexppi_loctest.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_2p6e8_indirect_cosexppi_loctest_ex.txt", "w")
+    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_t0_indirect_cosexppi_loctest_ex.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
@@ -331,9 +331,9 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t $\\approx$ 8.238 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t = 0 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (.9952 au, .0980 au), Time Resolution Close to Target = 1000 s')
+    plt.title('Target at (.9952 au, .0980 au), Time Resolution Close to Target = 50 s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     

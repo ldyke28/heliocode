@@ -10,7 +10,7 @@ filenum = 1
 
 #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p3e9_center_noatttest.txt", "r")
 #file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper Data/cosexprp_5pi6_6p2e9_center_cosexppi.txt", delimiter=',')
-file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_1p5e8_indirect_cosexppi_loctest.txt", delimiter=',')
+file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_3e8_center_cosexppi.txt", delimiter=',')
 
 
 #file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_6p36675e9_indirect_cosexppi.txt", delimiter=',')
@@ -44,14 +44,14 @@ fig = plt.figure()
 fig.set_figwidth(10)
 fig.set_figheight(6)
 
-#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma')
+plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma')
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma', vmin=0, vmax=.6)
-plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma', norm=matplotlib.colors.LogNorm(vmin=10**(-7), vmax=1))
+#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma', norm=matplotlib.colors.LogNorm(vmin=10**(-7), vmax=1))
 cb = plt.colorbar()
 cb.set_label('PDF(r,v,t)')
 plt.xlabel("vx at Target in km/s")
 plt.ylabel("vy at Target in km/s")
-plt.suptitle('Phase space population at target (t $\\approx$ 4.753 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+plt.suptitle('Phase space population at target (t $\\approx$ 9.506 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
 plt.title('Target at (.9952 au, .0980 au), Time Resolution Close to Target = 1000 s')
 plt.show()
 
