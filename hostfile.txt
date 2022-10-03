@@ -1,0 +1,1 @@
+Localhost slots=3
