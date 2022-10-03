@@ -108,10 +108,10 @@ backtraj = np.zeros((t.size, 6))"""
 nprocs = comm.Get_size()
 
 # creating a shared array with the size of the maximum possible number of points that could exist
-size = vxstart.size + vystart.size
+size = vxstart.size * vystart.size
 itemsize = MPI.FLOAT.Get_size()
 if comm.Get_rank() == 0:
-    nbytes = size*itemsize
+    nbytes = 4*size*itemsize
 else:
     nbytes = 0
 
@@ -121,14 +121,16 @@ win = MPI.Win.Allocate_shared(nbytes, itemsize, comm=comm)
 # creating arrays whose data points to shared memory
 buf, itemsize = win.Shared_query(0)
 assert itemsize == MPI.FLOAT.Get_size()
-farvx = np.ndarray(buffer=buf, dtype='f', shape=(size,))
-farvy = np.ndarray(buffer=buf, dtype='f', shape=(size,))
-fart = np.ndarray(buffer=buf, dtype='f', shape=(size,))
-maxwcolor = np.ndarray(buffer=buf, dtype='f', shape=(size,))
+#farvx = np.ndarray(buffer=buf, dtype='f', shape=(size,))
+#farvy = np.ndarray(buffer=buf, dtype='f', shape=(size,))
+#fart = np.ndarray(buffer=buf, dtype='f', shape=(size,))
+#maxwcolor = np.ndarray(buffer=buf, dtype='f', shape=(size,))
+data = np.ndarray(buffer=buf, dtype='f', shape=(4,size))
 
-bounds = np.zeros(nprocs)
+bounds = np.zeros(nprocs, dtype=int)
+
 for q in range(nprocs-1):
-    bounds[q+1] = np.floor(vxstart.size/(nprocs-1)*(q+1))
+    bounds[q+1] = int(np.floor(vxstart.size/(nprocs-1)*(q+1)))
 
 for m in range(nprocs-1):
     if comm.rank == m+1:
@@ -165,11 +167,11 @@ for m in range(nprocs-1):
                             btintegrand = PIrate2/currentvr*(r1/currentrad)**2
                             # calculation of attenuation factor
                             attfact = scipy.integrate.simps(btintegrand, currentrad)
-                            farvx[bounds[m]*vystart.size + vystart.size*i + j] = np.append(farvx, [backtraj[0,3]])
-                            farvy[bounds[m]*vystart.size + vystart.size*i + j] = np.append(farvy, [backtraj[0,4]])
-                            fart[bounds[m]*vystart.size + vystart.size*i + j] = np.append(fart, [startt - t[kn-1]])
+                            data[0,bounds[m]*vystart.size + vystart.size*i + j] = vxstartn[i]
+                            data[1,bounds[m]*vystart.size + vystart.size*i + j] = vystart[j]
+                            data[2,bounds[m]*vystart.size + vystart.size*i + j] = startt - t[kn-1]
                             # calculating value of phase space density based on the value at the crossing of x = 100 au
-                            maxwcolor[bounds[m]*vystart.size + vystart.size*i + j] = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2)/(5327)**2)])
+                            data[3,bounds[m]*vystart.size + vystart.size*i + j] = np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2)/(5327)**2)
                             break
                         break
 
@@ -177,10 +179,13 @@ comm.Barrier()
 
 print('Finished')
 
-# writing data to a file - need to change each time or it will overwrite previous file
-#file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_1p735e8_indirect_cosexppi_loctest.txt", 'w')
-file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_31pi32_t0_center_cosexppi_test.txt", "w")
-for i in range(farvx.size):
-    file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
-file.close()
+# Figure out how to get rid of zero points, probably in the block below
 
+# writing data to a file - need to change each time or it will overwrite previous file
+if comm.rank == 0:
+    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_1p735e8_indirect_cosexppi_loctest.txt", 'w')
+    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_31pi32_t0_center_cosexppi_test.txt", "w")
+    for i in range(np.size(data, 1)):
+        file.write(str(data[0,i]/1000) + ',' + str(data[1,i]/1000) + ',' + str(data[3,i]) + '\n')
+    file.close()
+    print('All done!')
