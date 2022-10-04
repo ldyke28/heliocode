@@ -17,10 +17,10 @@ for i in range(np.shape(file)[0]):
 
 fig3d = plt.figure()
 fig3d.set_figwidth(10)
-fig3d.set_figheight(6)
+fig3d.set_figheight(7)
 ax3d = plt.axes(projection='3d')
 #scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='plasma', s=.02, vmin=(.75-.243/np.e), vmax=(.75+.243*np.e))
-scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='plasma')
+scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:]/1000, c=f[:], cmap='plasma')
 cb = fig3d.colorbar(scatterplot)
 ax3d.set_xlabel("$v_x$ at Target Point (km/s)")
 ax3d.set_ylabel("$v_y$ at Target Point (km/s)")

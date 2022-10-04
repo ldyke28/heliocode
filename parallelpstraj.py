@@ -48,9 +48,9 @@ zstart = ibexpos[2]
 #vystart = np.arange(-2000, 6500, 150)
 #xstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
-vxstart = np.arange(-25000, 25000, 2000)
-vystart = np.arange(-25000, 25000, 2000)
-vzstart = np.arange(-25000, 25000, 2000)
+vxstart = np.arange(-25000, 25000, 1800)
+vystart = np.arange(-25000, 25000, 1800)
+vzstart = np.arange(-25000, 25000, 1800)
 #vzstart = 0
 
 startt = finalt
@@ -182,12 +182,12 @@ print('Finished')
 
 # writing data to a file - need to change each time or it will overwrite previous file
 if comm.rank == 0:
-    mask = (data == 0)
+    mask = (data[4,:] == 0)
     idx = mask.any(axis=0)
     data = data[:, ~idx]
     #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_1p735e8_indirect_cosexppi_loctest.txt", 'w')
     file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_31pi32_t0_center_cosexppi_test.txt", "w")
     for i in range(np.size(data, 1)):
-        file.write(str(data[0,i]/1000) + ',' + str(data[1,i]/1000) + ',' + str(data[2,i]) + ',' + str(data[4,i]) + '\n')
+        file.write(str(data[0,i]/1000) + ',' + str(data[1,i]/1000) + ',' + str(data[2,i]/1000) + ',' + str(data[4,i]) + '\n')
     file.close()
     print('All done!')
