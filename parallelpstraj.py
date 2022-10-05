@@ -48,9 +48,9 @@ zstart = ibexpos[2]
 #vystart = np.arange(-2000, 6500, 150)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
-vxstart = np.arange(-42000, -5000, 5000)
-vystart = np.arange(-32000, 32000, 8000)
-vzstart = np.arange(-32000, 32000, 8000)
+vxstart = np.arange(-50000, 000, 1000)
+vystart = np.arange(-40000, 40000, 2000)
+vzstart = np.arange(-40000, 40000, 2000)
 #vzstart = 0
 
 startt = finalt
