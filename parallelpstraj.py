@@ -46,11 +46,11 @@ zstart = ibexpos[2]
 #vystart = np.arange(-25000, 10000, 300)
 #vxstart = np.arange(24000, 45000, 250)
 #vystart = np.arange(-2000, 6500, 150)
-#xstart = np.arange(-25000, 25000, 500)
+#vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
-vxstart = np.arange(-25000, 25000, 1800)
-vystart = np.arange(-25000, 25000, 1800)
-vzstart = np.arange(-25000, 25000, 1800)
+vxstart = np.arange(-42000, -5000, 5000)
+vystart = np.arange(-32000, 32000, 8000)
+vzstart = np.arange(-32000, 32000, 8000)
 #vzstart = 0
 
 startt = finalt
@@ -122,7 +122,7 @@ win = MPI.Win.Allocate_shared(nbytes, itemsize, comm=comm)
 # creating arrays whose data points to shared memory
 buf, itemsize = win.Shared_query(0)
 assert itemsize == MPI.FLOAT.Get_size()
-data = np.ndarray(buffer=buf, dtype='f', shape=(5,size))
+data = np.ndarray(buffer=buf, dtype='f', shape=(size,5))
 
 bounds = np.zeros(nprocs, dtype=int)
 
@@ -165,12 +165,12 @@ for m in range(nprocs-1):
                                 btintegrand = PIrate2/currentvr*(r1/currentrad)**2
                                 # calculation of attenuation factor
                                 attfact = scipy.integrate.simps(btintegrand, currentrad)
-                                data[0,bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l] = vxstartn[i]
-                                data[1,bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l] = vystart[j]
-                                data[2,bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l] = vzstart[l]
-                                data[3,bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l] = startt - t[kn-1]
+                                data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,0] = vxstartn[i]
+                                data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,1] = vystart[j]
+                                data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
+                                data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,3] = startt - t[kn-1]
                                 # calculating value of phase space density based on the value at the crossing of x = 100 au
-                                data[4,bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l] = np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2)/(5327)**2)
+                                data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2)/(5327)**2)
                                 break
                             break
 
@@ -182,12 +182,10 @@ print('Finished')
 
 # writing data to a file - need to change each time or it will overwrite previous file
 if comm.rank == 0:
-    mask = (data[4,:] == 0)
-    idx = mask.any(axis=0)
-    data = data[:, ~idx]
-    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_1p735e8_indirect_cosexppi_loctest.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_31pi32_t0_center_cosexppi_test.txt", "w")
-    for i in range(np.size(data, 1)):
-        file.write(str(data[0,i]/1000) + ',' + str(data[1,i]/1000) + ',' + str(data[2,i]/1000) + ',' + str(data[4,i]) + '\n')
+    data = data[~np.all(data == 0, axis=1)]
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_31pi32_t0_direct_cosexppi_test.txt", 'w')
+    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_31pi32_t0_direct_cosexppi_test.txt", "w")
+    for i in range(np.size(data, 0)):
+        file.write(str(data[i,0]/1000) + ',' + str(data[i,1]/1000) + ',' + str(data[i,2]/1000) + ',' + str(data[i,4]) + '\n')
     file.close()
     print('All done!')

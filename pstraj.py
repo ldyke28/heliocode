@@ -70,14 +70,14 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-#vxstart = np.arange(-50000, -15000, 300)
-#vystart = np.arange(-25000, 10000, 300)
+vxstart = np.arange(-45000, -5000, 1500)
+vystart = np.arange(-35000, -10000, 1500)
 #vxstart = np.arange(24000, 45000, 250)
 #vystart = np.arange(-2000, 6500, 150)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
-vxstart = np.arange(-25000, 25000, 2000)
-vystart = np.arange(-25000, 25000, 2000)
+#vxstart = np.arange(-25000, 25000, 2000)
+#vystart = np.arange(-25000, 25000, 2000)
 vzstart = 0
 if mode==3:
     startt = finalt
@@ -313,8 +313,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_1p735e8_indirect_cosexppi_loctest.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_31pi32_t0_center_cosexppi_test2.txt", "w")
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_31pi32_t0_direct_cosexppi_test2.txt", 'w')
+    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_31pi32_t0_direct_cosexppi_test2.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
