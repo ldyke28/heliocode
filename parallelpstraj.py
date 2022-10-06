@@ -173,6 +173,7 @@ for m in range(nprocs-1):
                                 data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2)/(5327)**2)
                                 break
                             break
+        break
 
 comm.Barrier()
 
