@@ -22,7 +22,7 @@ oneyear = 3.156*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 133000000 # time to start backtracing
+finalt = 143000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 tstep = 10000 # general time resolution
 tstepclose = 1000 # time resolution for close regime
@@ -74,14 +74,14 @@ zstart = ibexpos[2]
 #vystart = np.arange(-35000, -10000, 1500)
 #vxstart = np.arange(24000, 45000, 250)
 #vystart = np.arange(-2000, 6500, 150)
-vxstart = np.arange(-25000, 25000, 500)
-vystart = np.arange(-25000, 25000, 500)
-#vxstart = np.arange(-7500, -2500, 30)
-#vystart = np.arange(000, 5000, 30)
+#vxstart = np.arange(-25000, 25000, 500)
+#vystart = np.arange(-25000, 25000, 500)
+vxstart = np.arange(000, 5000, 30)
+vystart = np.arange(000, 5000, 30)
 vzstart = 0
 if mode==3:
     startt = finalt
-    lastt = -2000000000
+    lastt = -3000000000
     tmid = startt - 200000000 # time at which we switch from high resolution to low resolution - a little more than half of a cycle
     tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (close regime)
     tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
@@ -218,7 +218,7 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], -12000, -1000, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], 2220, 390, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp6,))
     trackrp = np.zeros(t.size)
     Ltrack = np.zeros(t.size)
@@ -271,12 +271,12 @@ if mode==2:
     ax3d.set_xlabel("x (au)")
     ax3d.set_ylabel("y (au)")
     ax3d.set_zlabel("z (au)")
-    ax3d.set_xlim3d(left = -1.5, right = 4)
-    ax3d.set_ylim3d(bottom = -.5, top = .5)
+    ax3d.set_xlim3d(left = -1.5, right = 10)
+    ax3d.set_ylim3d(bottom = -.1, top = 1)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
-    ax3d.set_title("Individual Orbit at time t=0 years \n Target at (.9952 au, .0980 au) \
-        \n At target point v = (-12.0 km/s, -1.0 km/s) \n Value of distribution function = 8.453326374265246e-26",fontsize=12)
+    ax3d.set_title("Individual Orbit at time t$\\approx$4.526 years \n Target at (.9952 au, .0980 au) \
+        \n At target point v = (2.22 km/s, 0.39 km/s) \n Value of distribution function = 9.701229925479516e-07",fontsize=12)
     plt.show()
 
     """f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
@@ -313,8 +313,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi32_4p8e8_center_cosexppi_test.txt", 'w')
-    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_4p6e8_center_cosexppi.txt", "w")
+    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi32_4p9e8_center_cosexppi.txt", 'w')
+    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_4p9e8_center_cosexppi_zoom_ex.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
@@ -328,12 +328,12 @@ if mode==3:
     #cb.set_label('Time at which orbit passes through 100 au (s)')
     #cb.set_label('Travel Time from 100 au to Point of Interest (s)')
     cb.set_label('PDF(r,v,t)')
-    plt.xlim([-25, 25])
-    plt.ylim([-25, 25])
+    #plt.xlim([-25, 25])
+    #plt.ylim([-25, 25])
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t $\\approx$ 15.209 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t $\\approx$ 15.526 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
     plt.title('Target at (.9952 au, .0980 au), Time Resolution Close to Target = 1000 s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
