@@ -10,7 +10,7 @@ from tqdm import tqdm
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -42,7 +42,7 @@ ttotal = 7000000000
 if mode==1:
     t = np.arange(0, ttotal, tstep)
 if mode==2:
-    t = np.arange(finalt, -2000000000, -tstep)
+    t = np.arange(finalt, -10000000000, -tstep)
 tscale = int(.7*ttotal/tstep)
 #tscale = 0
 
@@ -81,7 +81,7 @@ vystart = np.arange(000, 5000, 30)
 vzstart = 0
 if mode==3:
     startt = finalt
-    lastt = -3000000000
+    lastt = -10000000000
     tmid = startt - 200000000 # time at which we switch from high resolution to low resolution - a little more than half of a cycle
     tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (close regime)
     tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
@@ -218,7 +218,7 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], 2220, 390, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], 1050, 3540, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp6,))
     trackrp = np.zeros(t.size)
     Ltrack = np.zeros(t.size)
@@ -271,12 +271,12 @@ if mode==2:
     ax3d.set_xlabel("x (au)")
     ax3d.set_ylabel("y (au)")
     ax3d.set_zlabel("z (au)")
-    ax3d.set_xlim3d(left = -1.5, right = 10)
-    ax3d.set_ylim3d(bottom = -.1, top = 1)
+    ax3d.set_xlim3d(left = -1.5, right = 40)
+    ax3d.set_ylim3d(bottom = -12, top = 1)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
     ax3d.set_title("Individual Orbit at time t$\\approx$4.526 years \n Target at (.9952 au, .0980 au) \
-        \n At target point v = (2.22 km/s, 0.39 km/s) \n Value of distribution function = 9.701229925479516e-07",fontsize=12)
+        \n At target point v = (1.05 km/s, 3.54 km/s) \n Value of distribution function = 1.5856660733189278e-06",fontsize=12)
     plt.show()
 
     """f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
@@ -313,8 +313,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi32_4p9e8_center_cosexppi.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_4p9e8_center_cosexppi_zoom_ex.txt", "w")
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi32_4p9e8_center_cosexppi_zoom_tlong2.txt", 'w')
+    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_4p9e8_center_cosexppi_zoom_ex.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
