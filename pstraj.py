@@ -22,7 +22,7 @@ oneyear = 3.156*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 4000000 # time to start backtracing
+finalt = 23000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 tstep = 10000 # general time resolution
 tstepclose = 1000 # time resolution for close regime
@@ -32,7 +32,7 @@ phase = 0 # phase for implementing rotation of target point around sun
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-ibexpos = np.array([-.9952*au, .098*au, 0])
+ibexpos = np.array([.9952*au, .098*au, 0])
 # implementation of target point that orbits around the sun
 #ibexpos = np.array([np.cos(np.pi*finalt/oneyear + phase)*au, np.sin(np.pi*finalt/oneyear + phase)*au, 0])
 
@@ -42,7 +42,7 @@ ttotal = 7000000000
 if mode==1:
     t = np.arange(0, ttotal, tstep)
 if mode==2:
-    t = np.arange(finalt, -10000000000, -tstep)
+    t = np.arange(finalt, -3000000000, -tstep)
 tscale = int(.7*ttotal/tstep)
 #tscale = 0
 
@@ -81,7 +81,7 @@ vystart = np.arange(-25000, 25000, 500)
 vzstart = 0
 if mode==3:
     startt = finalt
-    lastt = -10000000000
+    lastt = -2000000000
     tmid = startt - 200000000 # time at which we switch from high resolution to low resolution - a little more than half of a cycle
     tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (close regime)
     tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
@@ -313,7 +313,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_31pi32_4e6_center_cosexppi.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi32_2p3e7_center_cosexppi_tcolor.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_4p9e8_center_cosexppi_zoom_ex.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
@@ -323,7 +323,7 @@ if mode==3:
     f = plt.figure()
     f.set_figwidth(10)
     f.set_figheight(6)
-    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='plasma')
+    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=fart[:], marker='o', cmap='plasma')
     cb = plt.colorbar()
     #cb.set_label('Time at which orbit passes through 100 au (s)')
     cb.set_label('Travel Time from 100 au to Point of Interest (s)')
@@ -333,9 +333,9 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t $\\approx$ .1268 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t $\\approx$ .724 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (-.9952 au, .0980 au), Time Resolution Close to Target = 1000 s')
+    plt.title('Target at (.9952 au, .0980 au), Time Resolution Close to Target = 1000 s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     
