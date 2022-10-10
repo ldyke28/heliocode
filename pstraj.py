@@ -22,8 +22,9 @@ oneyear = 3.156*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 23000000 # time to start backtracing
+finalt = 00000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
+initialt = -2000000000
 tstep = 10000 # general time resolution
 tstepclose = 1000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
@@ -42,7 +43,7 @@ ttotal = 7000000000
 if mode==1:
     t = np.arange(0, ttotal, tstep)
 if mode==2:
-    t = np.arange(finalt, -3000000000, -tstep)
+    t = np.arange(finalt, initialt, -tstep)
 tscale = int(.7*ttotal/tstep)
 #tscale = 0
 
@@ -74,14 +75,14 @@ zstart = ibexpos[2]
 #vystart = np.arange(-35000, -10000, 1500)
 #vxstart = np.arange(24000, 45000, 250)
 #vystart = np.arange(-2000, 6500, 150)
-vxstart = np.arange(-25000, 25000, 500)
-vystart = np.arange(-25000, 25000, 500)
-#vxstart = np.arange(000, 5000, 30)
-#vystart = np.arange(000, 5000, 30)
+#vxstart = np.arange(-25000, 25000, 500)
+#vystart = np.arange(-25000, 25000, 500)
+vxstart = np.arange(-25000, 25000, 200)
+vystart = np.arange(-25000, 25000, 200)
 vzstart = 0
 if mode==3:
     startt = finalt
-    lastt = -2000000000
+    lastt = initialt
     tmid = startt - 200000000 # time at which we switch from high resolution to low resolution - a little more than half of a cycle
     tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (close regime)
     tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
@@ -249,7 +250,12 @@ if mode==2:
             t = t[:k]
             rtrack = rtrack[:k]
             Ltrack = Ltrack[:k]
+            perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
+            print(perihelion)
             break
+        if k == t.size-1:
+            perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
+            print(perihelion)
 
 print('Finished')
 
@@ -276,7 +282,8 @@ if mode==2:
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
     ax3d.set_title("Individual Orbit at time t$\\approx$.407 years \n Target at (-.9952 au, .0980 au) \
-        \n At target point v = (21.5 km/s, 5.0 km/s) \n Value of distribution function = unknown",fontsize=12)
+        \n At target point v = (21.5 km/s, 5.0 km/s) \n Value of distribution function = unknown \
+        \n Perihelion at $\\sim$ " + str(perihelion/au) + " au",fontsize=12)
     plt.show()
 
     """f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
@@ -313,7 +320,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi32_2p3e7_center_cosexppi_tcolor.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi32_t0_center_cosexppi_highspatialres.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_4p9e8_center_cosexppi_zoom_ex.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
@@ -323,11 +330,11 @@ if mode==3:
     f = plt.figure()
     f.set_figwidth(10)
     f.set_figheight(6)
-    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=fart[:], marker='o', cmap='plasma')
+    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='plasma')
     cb = plt.colorbar()
     #cb.set_label('Time at which orbit passes through 100 au (s)')
-    cb.set_label('Travel Time from 100 au to Point of Interest (s)')
-    #cb.set_label('PDF(r,v,t)')
+    #cb.set_label('Travel Time from 100 au to Point of Interest (s)')
+    cb.set_label('PDF(r,v,t)')
     plt.xlim([-25, 25])
     plt.ylim([-25, 25])
     plt.xlabel("vx at Target in km/s")
