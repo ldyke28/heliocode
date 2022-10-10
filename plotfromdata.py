@@ -9,8 +9,8 @@ f = np.array([])
 filenum = 1
 
 #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p5s2adj_pi4_6p3e9_center_noatttest.txt", "r")
-#file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi32_4p7e8_center_cosexppi_test.txt", delimiter=',')
-file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_4p9e8_center_cosexppi_ex.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi32_t0_center_cosexppi_highspatialres.txt", delimiter=',')
+#file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_4p9e8_center_cosexppi_ex.txt", delimiter=',')
 
 
 #file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_6p36675e9_indirect_cosexppi.txt", delimiter=',')
@@ -53,7 +53,7 @@ plt.xlim([-25,25])
 plt.ylim([-25,25])
 plt.xlabel("vx at Target in km/s")
 plt.ylabel("vy at Target in km/s")
-plt.suptitle('Phase space population at target (t $\\approx$ 15.526 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+plt.suptitle('Phase space population at target (t = 0 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
 plt.title('Target at (.9952 au, .0980 au), Time Resolution Close to Target = 1000 s')
 plt.show()
 
