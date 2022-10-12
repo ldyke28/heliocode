@@ -142,6 +142,9 @@ for m in range(nprocs-1):
                     if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                         # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                         continue
+                    if all(backtraj[:,0]-sunpos[0] < 100*au):
+                        # forgoes the following checks if the trajectory never passes through x = 100 au
+                        continue
                     for k in range(t.size - tclose.size):
                         if backtraj[k+tclose.size,0] >= 100*au and backtraj[k-1+tclose.size,0] <= 100*au:
                             # adjusting the indexing to avoid checking in the close regime
