@@ -223,7 +223,10 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], 10000, -1500, 0]
+    indxic = 10000
+    indyic = -1500
+    indzic = 0
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     singletraj = odeint(dr_dt, init, t, args=(rp6,))
     trackrp = np.zeros(t.size)
     Ltrack = np.zeros(t.size)
@@ -304,8 +307,9 @@ if mode==2:
     ax3d.set_ylim3d(bottom = -20, top = 1)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
-    ax3d.set_title("Individual Orbit at time t$\\approx$.724 years \n Target at (.9952 au, .0980 au) \
-        \n At target point v = (10.0 km/s, -1.5 km/s) \n Value of distribution function = " + str(psd) + "\
+    ax3d.set_title("Individual Orbit at time t$\\approx$" + str(round(finalt/(3.47*10(8), 3))) + " years \n Target at (" + str(ibexpos[0]/au) + " au, " + str(ibexpos[1]/au) + " au) \
+        \n At target point v = (" + str(indxic/1000) + " km/s, " + str(indyic/1000) + " km/s, " + str(indzic/1000) + " km/s) \
+        \n Value of distribution function = " + str(psd) + "\
         \n Perihelion at $\\sim$ " + str(perihelion/au) + " au \
         \n Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years",fontsize=12)
     plt.show()
@@ -364,9 +368,9 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t $\\approx$ .1268 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t $\\approx$ ' + str(round(finalt/(3.47*10(8), 3))) + ' years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (-.866 au, .5 au), Time Resolution Close to Target = 1000 s')
+    plt.title('Target at (' + str(ibexpos[0]/au) + ' au, ' + str(ibexpos[1]/au) + ' au), Time Resolution Close to Target = ' + str(tstepclose) + ' s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     
