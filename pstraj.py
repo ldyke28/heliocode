@@ -11,7 +11,7 @@ from tqdm import tqdm
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -223,8 +223,8 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    indxic = 10000
-    indyic = -1500
+    indxic = -14000
+    indyic = -8000
     indzic = 0
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     singletraj = odeint(dr_dt, init, t, args=(rp6,))
@@ -254,28 +254,30 @@ if mode==2:
             print(singletraj[k-1,:])
             print(t[k-1])
             Etrack = Etrack[:k]
-            t = t[:k]
             rtrack = rtrack[:k]
             Ltrack = Ltrack[:k]
             perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
             ttime = t[0] - t[-1]
+
             omt = 2*np.pi/(3.47*10**(8))*t[0:k+1]
             # function for the photoionization rate at each point in time
             PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
             r1 = 1*au # reference radius
-            currentrad = np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)
+            currentrad = np.sqrt((sunpos[0]-singletraj[0:k+1,0])**2 + (sunpos[1]-singletraj[0:k+1,1])**2 + (sunpos[2]-singletraj[0:k+1,2])**2)
             # calculating the component of the radial unit vector in each direction at each point in time
-            nrvecx = (-sunpos[0]+backtraj[0:k+1,0])/currentrad
-            nrvecy= (-sunpos[1]+backtraj[0:k+1,1])/currentrad
-            nrvecz = (-sunpos[2]+backtraj[0:k+1,2])/currentrad
+            nrvecx = (-sunpos[0]+singletraj[0:k+1,0])/currentrad
+            nrvecy= (-sunpos[1]+singletraj[0:k+1,1])/currentrad
+            nrvecz = (-sunpos[2]+singletraj[0:k+1,2])/currentrad
             # calculating the magnitude of v_r at each point in time
-            currentvr = backtraj[0:k+1,3]*nrvecx[0:kn+1] + backtraj[0:k+1,4]*nrvecy[0:kn+1] + backtraj[0:k+1,5]*nrvecz[0:k+1]
+            currentvr = singletraj[0:k+1,3]*nrvecx[0:k+1] + singletraj[0:k+1,4]*nrvecy[0:k+1] + singletraj[0:k+1,5]*nrvecz[0:k+1]
             # integrand for the photoionization losses
             btintegrand = PIrate2/currentvr*(r1/currentrad)**2
             # calculation of attenuation factor
             attfact = scipy.integrate.simps(btintegrand, currentrad)
-            psd = np.exp(-np.abs(attfact))*np.exp(-((backtraj[k-1,3]+26000)**2 + backtraj[k-1,4]**2 + backtraj[k-1,5]**2)/(5327)**2)
+            psd = np.exp(-np.abs(attfact))*np.exp(-((singletraj[k-1,3]+26000)**2 + singletraj[k-1,4]**2 + singletraj[k-1,5]**2)/(5327)**2)
+
             print(perihelion)
+            t = t[:k]
             break
         if k == t.size-1:
             perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
@@ -307,10 +309,10 @@ if mode==2:
     ax3d.set_ylim3d(bottom = -20, top = 1)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
-    ax3d.set_title("Individual Orbit at time t$\\approx$" + str(round(finalt/(3.47*10(8), 3))) + " years \n Target at (" + str(ibexpos[0]/au) + " au, " + str(ibexpos[1]/au) + " au) \
+    ax3d.set_title("Individual Orbit at time t$\\approx$" + str(round(finalt/(oneyear), 3)) + " years \n Target at (" + str(ibexpos[0]/au) + " au, " + str(ibexpos[1]/au) + " au) \
         \n At target point v = (" + str(indxic/1000) + " km/s, " + str(indyic/1000) + " km/s, " + str(indzic/1000) + " km/s) \
         \n Value of distribution function = " + str(psd) + "\
-        \n Perihelion at $\\sim$ " + str(perihelion/au) + " au \
+        \n Perihelion at $\\sim$ " + str(round(perihelion/au, 5)) + " au \
         \n Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years",fontsize=12)
     plt.show()
 
@@ -368,7 +370,7 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t $\\approx$ ' + str(round(finalt/(3.47*10(8), 3))) + ' years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t $\\approx$ ' + str(round(finalt/(oneyear), 3)) + ' years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
     plt.title('Target at (' + str(ibexpos[0]/au) + ' au, ' + str(ibexpos[1]/au) + ' au), Time Resolution Close to Target = ' + str(tstepclose) + ' s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
