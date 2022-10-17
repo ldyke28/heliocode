@@ -1,3 +1,4 @@
+from time import thread_time
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
@@ -22,7 +23,7 @@ oneyear = 3.156*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 23000000 # time to start backtracing
+finalt = 4000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -2000000000
 tstep = 10000 # general time resolution
@@ -33,7 +34,7 @@ phase = 0 # phase for implementing rotation of target point around sun
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-ibexpos = np.array([.707*au, .707*au, 0])
+ibexpos = np.array([-.866*au, .5*au, 0])
 # implementation of target point that orbits around the sun
 #ibexpos = np.array([np.cos(np.pi*finalt/oneyear + phase)*au, np.sin(np.pi*finalt/oneyear + phase)*au, 0])
 
@@ -215,14 +216,14 @@ if mode==3:
                         farvy = np.append(farvy, [backtraj[0,4]])
                         fart = np.append(fart, [startt - t[kn-1]])
                         # calculating value of phase space density based on the value at the crossing of x = 100 au
-                        maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2)/(5327)**2)])
+                        maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(5327)**2)])
                         break
                     break
 
 
 # single trajectory plotting code
 if mode==2:
-    init = [ibexpos[0], ibexpos[1], ibexpos[2], 21500, 5000, 0]
+    init = [ibexpos[0], ibexpos[1], ibexpos[2], 10000, -1500, 0]
     singletraj = odeint(dr_dt, init, t, args=(rp6,))
     trackrp = np.zeros(t.size)
     Ltrack = np.zeros(t.size)
@@ -254,10 +255,29 @@ if mode==2:
             rtrack = rtrack[:k]
             Ltrack = Ltrack[:k]
             perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
+            ttime = t[0] - t[-1]
+            omt = 2*np.pi/(3.47*10**(8))*t[0:k+1]
+            # function for the photoionization rate at each point in time
+            PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
+            r1 = 1*au # reference radius
+            currentrad = np.sqrt((sunpos[0]-backtraj[0:k+1,0])**2 + (sunpos[1]-backtraj[0:k+1,1])**2 + (sunpos[2]-backtraj[0:k+1,2])**2)
+            # calculating the component of the radial unit vector in each direction at each point in time
+            nrvecx = (-sunpos[0]+backtraj[0:k+1,0])/currentrad
+            nrvecy= (-sunpos[1]+backtraj[0:k+1,1])/currentrad
+            nrvecz = (-sunpos[2]+backtraj[0:k+1,2])/currentrad
+            # calculating the magnitude of v_r at each point in time
+            currentvr = backtraj[0:k+1,3]*nrvecx[0:kn+1] + backtraj[0:k+1,4]*nrvecy[0:kn+1] + backtraj[0:k+1,5]*nrvecz[0:k+1]
+            # integrand for the photoionization losses
+            btintegrand = PIrate2/currentvr*(r1/currentrad)**2
+            # calculation of attenuation factor
+            attfact = scipy.integrate.simps(btintegrand, currentrad)
+            psd = np.exp(-np.abs(attfact))*np.exp(-((backtraj[k-1,3]+26000)**2 + backtraj[k-1,4]**2 + backtraj[k-1,5]**2)/(5327)**2)
             print(perihelion)
             break
         if k == t.size-1:
             perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
+            ttime = 0
+            psd = 0
             print(perihelion)
 
 print('Finished')
@@ -284,9 +304,10 @@ if mode==2:
     ax3d.set_ylim3d(bottom = -20, top = 1)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
-    ax3d.set_title("Individual Orbit at time t$\\approx$.407 years \n Target at (-.9952 au, .0980 au) \
-        \n At target point v = (21.5 km/s, 5.0 km/s) \n Value of distribution function = unknown \
-        \n Perihelion at $\\sim$ " + str(perihelion/au) + " au",fontsize=12)
+    ax3d.set_title("Individual Orbit at time t$\\approx$.724 years \n Target at (.9952 au, .0980 au) \
+        \n At target point v = (10.0 km/s, -1.5 km/s) \n Value of distribution function = " + str(psd) + "\
+        \n Perihelion at $\\sim$ " + str(perihelion/au) + " au \
+        \n Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years",fontsize=12)
     plt.show()
 
     """f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
@@ -323,7 +344,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi4_2p3e7_center_cosexppi_test.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_4e6_center_cosexppi_highspatialres.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_2p3e7_center_cosexppi_tcolor_higherspatialres.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
@@ -343,9 +364,9 @@ if mode==3:
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t $\\approx$ .724 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
+    plt.suptitle('Phase space population at target (t $\\approx$ .1268 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (.707 au, .707 au), Time Resolution Close to Target = 1000 s')
+    plt.title('Target at (-.866 au, .5 au), Time Resolution Close to Target = 1000 s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     
