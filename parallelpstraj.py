@@ -9,6 +9,7 @@ from mpi4py import MPI
 
 comm = MPI.COMM_WORLD
 
+file = open("3Dinputfile.txt", "r")
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -21,17 +22,21 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 00000000 # time to start backtracing
+finalt = float(file.readline().strip()) # time to start backtracing
 #6.36674976e9 force free for cosexprp
+initialt = -2000000000
 tstep = 10000 # general time resolution
-tstepclose = 1000 # time resolution for close regime
+tstepclose = float(file.readline().strip()) # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-ibexpos = np.array([-.9952*au, .0980*au, 0])
+theta = float(file.readline().strip())
+ibexx = np.cos(theta*np.pi/180)
+ibexy = np.sin(theta*np.pi/180)
+ibexpos = np.array([ibexx*au, ibexy*au, 0])
 # implementation of target point that orbits around the sun
 #ibexpos = np.array([np.cos(np.pi*finalt/oneyear + phase)*au, np.sin(np.pi*finalt/oneyear + phase)*au, 0])
 
@@ -49,9 +54,9 @@ zstart = ibexpos[2]
 #vystart = np.arange(-2000, 6500, 150)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
-vxstart = np.arange(-50000, 000, 1000)
-vystart = np.arange(-40000, 40000, 2000)
-vzstart = np.arange(-40000, 40000, 2000)
+vxstart = np.arange(file.readline().strip(), file.readline().strip(), file.readline().strip())
+vystart = np.arange(file.readline().strip(), file.readline().strip(), file.readline().strip())
+vzstart = np.arange(file.readline().strip(), file.readline().strip(), file.readline().strip())
 #vzstart = 0
 
 startt = finalt
@@ -98,13 +103,6 @@ def dr_dt(x,t,rp):
     dx4 = (msolar*G/(r**3))*(sunpos[1]-x[1])*(1-rp(t))
     dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-rp(t))
     return [dx0, dx1, dx2, dx3, dx4, dx5]
-
-
-"""farvx = np.array([])
-farvy = np.array([])
-fart = np.array([])
-maxwcolor = np.array([])
-backtraj = np.zeros((t.size, 6))"""
 
 # identify the total number of processes
 nprocs = comm.Get_size()
@@ -188,9 +186,11 @@ print('Finished')
 # writing data to a file - need to change each time or it will overwrite previous file
 if comm.rank == 0:
     data = data[~np.all(data == 0, axis=1)]
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_31pi32_t0_direct_cosexppi_test.txt", 'w')
+    dfile = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_31pi32_t0_direct_cosexppi_test.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_31pi32_t0_direct_cosexppi_test.txt", "w")
     for i in range(np.size(data, 0)):
-        file.write(str(data[i,0]/1000) + ',' + str(data[i,1]/1000) + ',' + str(data[i,2]/1000) + ',' + str(data[i,4]) + '\n')
-    file.close()
+        dfile.write(str(data[i,0]/1000) + ',' + str(data[i,1]/1000) + ',' + str(data[i,2]/1000) + ',' + str(data[i,4]) + '\n')
+    dfile.close()
     print('All done!')
+
+file.close()
