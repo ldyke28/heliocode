@@ -22,7 +22,7 @@ G = 6.6743*10**(-11) # value for gravitational constant in SI units
 # one year in s = 3.156e7 s (Julian year, average length of a year)
 # 11 Julian years = 3.471e8 s
 # Note to self: solar maximum in April 2014
-oneyear = 3.1545454545*10**7
+oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
