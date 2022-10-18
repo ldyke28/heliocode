@@ -312,7 +312,7 @@ if mode==2:
     ax3d.set_ylabel("y (au)")
     ax3d.set_zlabel("z (au)")
     ax3d.set_xlim3d(left = -2, right = 10)
-    ax3d.set_ylim3d(bottom = -.1, top = 1)
+    ax3d.set_ylim3d(bottom = -1, top = 1)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
     ax3d.set_title("Individual Orbit at time t$\\approx$" + str(round(finalt/(oneyear), 3)) + " years \n Target at (" + str(round(ibexpos[0]/au, 4)) + " au, " + str(round(ibexpos[1]/au, 4)) + " au) \
