@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
-oneyear = 3.156*10**7
+oneyear = 3.15545454545*10**7
 
 def realRP(t):
     omegat = 2*np.pi/(3.47*10**(8))*t
@@ -14,10 +14,10 @@ def realbeta(t):
     return PIrate2
 
 def elevenyears(t):
-    return t/(11)
+    return t/(10.996830884471336)
 
 def eleveninverse(t):
-    return (11)*t
+    return (10.996830884471336)*t
 
 t = np.arange(0, 2*3.47*10**8, 1000)
 rp = np.zeros(t.size)
