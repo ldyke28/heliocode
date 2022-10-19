@@ -1,13 +1,12 @@
-from time import thread_time
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 from scipy.integrate import odeint
 import scipy
-from mpl_toolkits import mplot3d
 from tqdm import tqdm
+import os
 
-file = open("inputfile.txt", "r")
+file = open("inputfile3.txt", "r")
 
 # MODE LIST
 # 1 = generate a list of trajectories that come within proximity
@@ -357,7 +356,7 @@ if mode==1:
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
     #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_4e6_center_cosexppi_test.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_5pi6_4e6_center_cosexppi_test.txt", "w")
+    file = open(os.getcwd() + file.readline().strip(), "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()

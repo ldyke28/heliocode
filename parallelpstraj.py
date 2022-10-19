@@ -1,11 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib
 from scipy.integrate import odeint
 import scipy
-from mpl_toolkits import mplot3d
-from tqdm import tqdm
 from mpi4py import MPI
+import os
 
 comm = MPI.COMM_WORLD
 
@@ -54,9 +51,9 @@ zstart = ibexpos[2]
 #vystart = np.arange(-2000, 6500, 150)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
-vxstart = np.arange(file.readline().strip(), file.readline().strip(), file.readline().strip())
-vystart = np.arange(file.readline().strip(), file.readline().strip(), file.readline().strip())
-vzstart = np.arange(file.readline().strip(), file.readline().strip(), file.readline().strip())
+vxstart = np.arange(float(file.readline().strip()), float(file.readline().strip()), float(file.readline().strip()))
+vystart = np.arange(float(file.readline().strip()), float(file.readline().strip()), float(file.readline().strip()))
+vzstart = np.arange(float(file.readline().strip()), float(file.readline().strip()), float(file.readline().strip()))
 #vzstart = 0
 
 startt = finalt
@@ -186,8 +183,7 @@ print('Finished')
 # writing data to a file - need to change each time or it will overwrite previous file
 if comm.rank == 0:
     data = data[~np.all(data == 0, axis=1)]
-    dfile = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_31pi32_t0_direct_cosexppi_test.txt", 'w')
-    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_31pi32_t0_direct_cosexppi_test.txt", "w")
+    dfile = open(os.getcwd() + file.readline().strip(), 'w')
     for i in range(np.size(data, 0)):
         dfile.write(str(data[i,0]/1000) + ',' + str(data[i,1]/1000) + ',' + str(data[i,2]/1000) + ',' + str(data[i,4]) + '\n')
     dfile.close()

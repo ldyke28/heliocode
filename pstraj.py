@@ -1,17 +1,15 @@
-from time import thread_time
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 from scipy.integrate import odeint
 import scipy
-from mpl_toolkits import mplot3d
 from tqdm import tqdm
 
 # MODE LIST
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 2
+mode = 3
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
