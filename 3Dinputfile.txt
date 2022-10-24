@@ -1,6 +1,6 @@
--46000000
+290000000
 1500
-150
+5.625
 -25000
 25000
 250
@@ -10,11 +10,12 @@
 -25000
 25000
 250
-test5.txt
+pi32_2p9e8.txt
 
 Order of inputs:
 Final time (s)
 Time resolution in close regime (s)
+Angle from upwind axis (radians)
 vx lower bound (m/s)
 vx upper bound (m/s)
 vx resolution (m/s)
