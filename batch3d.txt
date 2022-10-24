@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=multicore_job
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=21
-#SBATCH --time=12:00:00
+#SBATCH --ntasks-per-node=16
+#SBATCH --time=16:00:00
 #SBATCH --mail-type=BEGIN,END,FAIL
 
-mpiexec -n 21 python3 parallelpstraj.py
+mpiexec -n 16 python3 parallelpstraj.py

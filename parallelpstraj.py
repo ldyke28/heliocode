@@ -183,7 +183,7 @@ print('Finished')
 # writing data to a file - need to change each time or it will overwrite previous file
 if comm.rank == 0:
     data = data[~np.all(data == 0, axis=1)]
-    dfile = open(os.getcwd() + file.readline().strip(), 'w')
+    dfile = open(file.readline().strip(), 'w')
     for i in range(np.size(data, 0)):
         dfile.write(str(data[i,0]/1000) + ',' + str(data[i,1]/1000) + ',' + str(data[i,2]/1000) + ',' + str(data[i,4]) + '\n')
     dfile.close()
