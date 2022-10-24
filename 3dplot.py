@@ -26,10 +26,10 @@ ax3d.set_xlabel("$v_x$ at Target Point (km/s)")
 ax3d.set_ylabel("$v_y$ at Target Point (km/s)")
 ax3d.set_zlabel("$v_z$ at Target Point (km/s)")
 #ax3d.view_init(90,270)
-ax3d.view_init(0,270)
+#ax3d.view_init(0,270)
 ax3d.set_xlim([-25, 25])
 ax3d.set_ylim([-25, 25])
 ax3d.set_zlim([-25, 25])
-ax3d.set_title("Phase space population at target (t $\\approx$ .1268 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s \
-    \n Target at (-.866 au, .5 au), Time Resolution Close to Target = 2000 s")
+ax3d.set_title("Phase space population at target (t $\\approx$ -1.458 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s \
+    \n Target at (-.866 au, .5 au), Time Resolution Close to Target = 1500 s")
 plt.show()
