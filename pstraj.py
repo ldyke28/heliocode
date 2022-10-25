@@ -9,7 +9,7 @@ from tqdm import tqdm
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -22,7 +22,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 4000000 # time to start backtracing
+finalt = 250000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -2000000000
 tstep = 10000 # general time resolution
@@ -33,7 +33,10 @@ phase = 0 # phase for implementing rotation of target point around sun
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-ibexpos = np.array([-.866*au, .5*au, 0])
+theta = 5.625
+ibexx = np.cos(theta*np.pi/180)
+ibexy = np.sin(theta*np.pi/180)
+ibexpos = np.array([ibexx*au, ibexy*au, 0])
 # implementation of target point that orbits around the sun
 #ibexpos = np.array([np.cos(np.pi*finalt/oneyear + phase)*au, np.sin(np.pi*finalt/oneyear + phase)*au, 0])
 
@@ -43,7 +46,12 @@ ttotal = 7000000000
 if mode==1:
     t = np.arange(0, ttotal, tstep)
 if mode==2:
-    t = np.arange(finalt, initialt, -tstepclose)
+    startt = finalt
+    lastt = initialt
+    tmid = startt - 200000000 # time at which we switch from high resolution to low resolution - a little more than half of a cycle
+    tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (close regime)
+    tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
+    t = np.concatenate((tclose, tfar))
 tscale = int(.7*ttotal/tstep)
 #tscale = 0
 
@@ -222,11 +230,13 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    indxic = 9000
-    indyic = 6000
-    indzic = 0
+    indxic = -25000
+    indyic = -2500
+    indzic = 4500
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
+    print("Calculating trajectory...")
     singletraj = odeint(dr_dt, init, t, args=(rp6,))
+    print("Trajectory Calculated")
     trackrp = np.zeros(t.size)
     Ltrack = np.zeros(t.size)
     Evartrack = np.zeros(t.size)
@@ -275,14 +285,15 @@ if mode==2:
             attfact = scipy.integrate.simps(btintegrand, currentrad)
             psd = np.exp(-np.abs(attfact))*np.exp(-((singletraj[k-1,3]+26000)**2 + singletraj[k-1,4]**2 + singletraj[k-1,5]**2)/(5327)**2)
 
-            print(perihelion)
+            print(np.sqrt((singletraj[k-1,3]+26000)**2 + (singletraj[k-1,4])**2 + (singletraj[k-1,5])**2))
+            #print(perihelion)
             t = t[:k]
             break
         if k == t.size-1:
             perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
             ttime = 0
             psd = 0
-            print(perihelion)
+            #print(perihelion)
 
 print('Finished')
 
@@ -308,7 +319,7 @@ if mode==2:
     ax3d.set_ylim3d(bottom = -1, top = 1)
     ax3d.set_zlim3d(bottom = -1, top = 1)
     ax3d.view_init(90,270)
-    ax3d.set_title("Individual Orbit at time t$\\approx$" + str(round(finalt/(oneyear), 3)) + " years \n Target at (" + str(ibexpos[0]/au) + " au, " + str(ibexpos[1]/au) + " au) \
+    ax3d.set_title("Individual Orbit at time t$\\approx$" + str(round(finalt/(oneyear), 3)) + " years \n Target at (" + str(round(ibexpos[0]/au, 4)) + " au, " + str(round(ibexpos[1]/au, 4)) + " au) \
         \n At target point v = (" + str(indxic/1000) + " km/s, " + str(indyic/1000) + " km/s, " + str(indzic/1000) + " km/s) \
         \n Value of distribution function = " + str(psd) + "\
         \n Perihelion at $\\sim$ " + str(round(perihelion/au, 5)) + " au \
