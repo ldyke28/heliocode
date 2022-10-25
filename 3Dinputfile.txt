@@ -1,4 +1,4 @@
-250000000
+-37000000
 1500
 5.625
 -25000
@@ -10,7 +10,7 @@
 -25000
 25000
 250
-pi32_2p5e8.txt
+pi32_3p1e8.txt
 
 Order of inputs:
 Final time (s)
@@ -25,4 +25,4 @@ vy resolution (m/s)
 vz lower bound (m/s)
 vz upper bound (m/s)
 vz resolution (m/s)
-Data file name preceded by \
+Data file name
