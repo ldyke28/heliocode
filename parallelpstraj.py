@@ -187,11 +187,12 @@ comm.Reduce(losscount, losscounttotal, op=MPI.SUM, root=0)
 # writing data to a file - need to change each time or it will overwrite previous file
 if comm.rank == 0:
     data = data[~np.all(data == 0, axis=1)]
-    dfile = open(file.readline().strip(), 'w')
+    fname = file.readline().strip()
+    dfile = open(fname, 'w')
     for i in range(np.size(data, 0)):
         dfile.write(str(data[i,0]/1000) + ',' + str(data[i,1]/1000) + ',' + str(data[i,2]/1000) + ',' + str(data[i,4]) + '\n')
     dfile.close()
-    lossfile = open('losses.txt', 'w')
+    lossfile = open('losses_' + fname, 'w')
     lossfile.write(str(losscounttotal[0]))
     lossfile.close()
     print('All done!')
