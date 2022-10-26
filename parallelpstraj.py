@@ -125,6 +125,9 @@ bounds = np.zeros(nprocs, dtype=int)
 for q in range(nprocs-1):
     bounds[q+1] = int(np.floor(vxstart.size/(nprocs-1)*(q+1)))
 
+losscount = np.zeros(1)
+losscounttotal = np.zeros(1)
+
 for m in range(nprocs-1):
     if comm.rank == m+1:
         vxstartn = vxstart[bounds[m]:(bounds[m+1]+1)]
@@ -136,9 +139,11 @@ for m in range(nprocs-1):
                     backtraj = odeint(dr_dt, init, t, args=(rp6,))
                     if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                         # tells the code to not consider the trajectory if it at any point intersects the width of the sun
+                        losscount[0] += 1
                         continue
                     if all(backtraj[:,0]-sunpos[0] < 100*au):
                         # forgoes the following checks if the trajectory never passes through x = 100 au
+                        losscount[0] += 1
                         continue
                     for k in range(t.size - tclose.size):
                         if backtraj[k+tclose.size,0] >= 100*au and backtraj[k-1+tclose.size,0] <= 100*au:
@@ -177,7 +182,7 @@ comm.Barrier()
 
 print('Finished')
 
-# Figure out how to get rid of zero points, probably in the block below
+comm.Reduce(losscount, losscounttotal, op=MPI.SUM, root=0)
 
 # writing data to a file - need to change each time or it will overwrite previous file
 if comm.rank == 0:
@@ -186,6 +191,9 @@ if comm.rank == 0:
     for i in range(np.size(data, 0)):
         dfile.write(str(data[i,0]/1000) + ',' + str(data[i,1]/1000) + ',' + str(data[i,2]/1000) + ',' + str(data[i,4]) + '\n')
     dfile.close()
+    lossfile = open('losses.txt', 'w')
+    lossfile.write(str(losscounttotal[0]))
+    lossfile.close()
     print('All done!')
 
 file.close()

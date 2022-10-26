@@ -7,8 +7,8 @@ vy = np.array([])
 vz = np.array([])
 f = np.array([])
 
-#file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/pi32_3p1e8.txt", delimiter=',')
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/pi32_3p1e8.txt", delimiter=',')
+file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/5pi6_6p2e9_test.txt", delimiter=',')
+#file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/pi32_3p1e8.txt", delimiter=',')
 
 #file = file[np.any(file > 1, axis=1)]
 
@@ -28,11 +28,11 @@ ax3d.set_xlabel("$v_x$ at Target Point (km/s)")
 ax3d.set_ylabel("$v_y$ at Target Point (km/s)")
 ax3d.set_zlabel("$v_z$ at Target Point (km/s)")
 #ax3d.view_init(90,270)
-ax3d.view_init(0,270)
+#ax3d.view_init(0,270)
 #ax3d.view_init(0,180)
-ax3d.set_xlim([-25, 25])
-ax3d.set_ylim([-25, 25])
-ax3d.set_zlim([-25, 25])
-ax3d.set_title("Phase space population at target (t $\\approx$ 9.824 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s \
+#ax3d.set_xlim([-25, 25])
+#ax3d.set_ylim([-25, 25])
+#ax3d.set_zlim([-25, 25])
+ax3d.set_title("Phase space population at target (t $\\approx$ -1.458 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s \
     \n Target at (.9952 au, .0980 au), Time Resolution Close to Target = 1500 s")
 plt.show()
