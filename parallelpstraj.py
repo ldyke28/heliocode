@@ -125,8 +125,10 @@ bounds = np.zeros(nprocs, dtype=int)
 for q in range(nprocs-1):
     bounds[q+1] = int(np.floor(vxstart.size/(nprocs-1)*(q+1)))
 
-losscount = np.zeros(1)
-losscounttotal = np.zeros(1)
+sunlosscount = np.zeros(1)
+sunlosscounttotal = np.zeros(1)
+dirlosscount = np.zeros(1)
+dirlosscounttotal = np.zeros(1)
 
 for m in range(nprocs-1):
     if comm.rank == m+1:
@@ -139,11 +141,11 @@ for m in range(nprocs-1):
                     backtraj = odeint(dr_dt, init, t, args=(rp6,))
                     if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                         # tells the code to not consider the trajectory if it at any point intersects the width of the sun
-                        losscount[0] += 1
+                        sunlosscount[0] += 1
                         continue
                     if all(backtraj[:,0]-sunpos[0] < 100*au):
                         # forgoes the following checks if the trajectory never passes through x = 100 au
-                        losscount[0] += 1
+                        dirlosscount[0] += 1
                         continue
                     for k in range(t.size - tclose.size):
                         if backtraj[k+tclose.size,0] >= 100*au and backtraj[k-1+tclose.size,0] <= 100*au:
@@ -182,7 +184,8 @@ comm.Barrier()
 
 print('Finished')
 
-comm.Reduce(losscount, losscounttotal, op=MPI.SUM, root=0)
+comm.Reduce(sunlosscount, sunlosscounttotal, op=MPI.SUM, root=0)
+comm.Reduce(dirlosscount, dirlosscounttotal, op=MPI.SUM, root=0)
 
 # writing data to a file - need to change each time or it will overwrite previous file
 if comm.rank == 0:
@@ -193,7 +196,7 @@ if comm.rank == 0:
         dfile.write(str(data[i,0]/1000) + ',' + str(data[i,1]/1000) + ',' + str(data[i,2]/1000) + ',' + str(data[i,4]) + '\n')
     dfile.close()
     lossfile = open('losses_' + fname, 'w')
-    lossfile.write(str(losscounttotal[0]))
+    lossfile.write('Particle losses to the sun: ' + str(sunlosscounttotal[0]) + '\n' + 'Trajectories not intersecting x = 100 au plane: ' + str(dirlosscounttotal[0]))
     lossfile.close()
     print('All done!')
 
