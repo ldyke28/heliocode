@@ -57,7 +57,7 @@ vzstart = np.arange(float(file.readline().strip()), float(file.readline().strip(
 #vzstart = 0
 
 startt = finalt
-lastt = -2000000000
+lastt = initialt
 tmid = startt - 200000000 # time at which we switch from high resolution to low resolution - a little more than half of a cycle
 tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (close regime)
 tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
