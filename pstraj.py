@@ -235,10 +235,10 @@ if mode==2:
     indzic = 5600
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
-    #singletraj = odeint(dr_dt, init, t, mxstep=1000, args=(rp6,))
-    singletraj = odeint(dr_dt, init, t, args=(rp6,))
+    singletraj = odeint(dr_dt, init, t, mxstep=750, args=(rp6,))
+    #singletraj = odeint(dr_dt, init, t, args=(rp6,))
     print("Trajectory Calculated")
-    print(singletraj)
+    #print(singletraj)
     trackrp = np.zeros(t.size)
     Ltrack = np.zeros(t.size)
     Evartrack = np.zeros(t.size)
