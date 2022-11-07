@@ -3,10 +3,14 @@ from scipy.integrate import odeint
 import scipy
 from mpi4py import MPI
 import os
+import warnings
 
 comm = MPI.COMM_WORLD
 
+warnings.filterwarnings("error", category=Warning)
+
 file = open("3Dinputfile.txt", "r")
+file2 = open("extrapoints.txt", "w")
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -138,7 +142,11 @@ for m in range(nprocs-1):
                 for l in range(vzstart.size):
                     init = [xstart, ystart, zstart, vxstartn[i], vystart[j], vzstart[l]]
                     # calculating trajectories for each initial condition in phase space given
-                    backtraj = odeint(dr_dt, init, t, args=(rp6,))
+                    try:
+                        backtraj = odeint(dr_dt, init, t, args=(rp6,))
+                    except:
+                        # Collects the points that seem to cause issues to be ran again with different temporal resolution
+                        file2.write(str(vxstartn[i]) + ',' + vystart[j] + ',' + vzstart[l])
                     if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                         # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                         sunlosscount[0] += 1
@@ -201,3 +209,4 @@ if comm.rank == 0:
     print('All done!')
 
 file.close()
+file2.close()

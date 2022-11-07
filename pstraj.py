@@ -26,7 +26,7 @@ finalt = 000000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -2000000000
 tstep = 10000 # general time resolution
-tstepclose = 1500 # time resolution for close regime
+tstepclose = 15000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 
@@ -235,8 +235,8 @@ if mode==2:
     indzic = 5600
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
-    singletraj = odeint(dr_dt, init, t, mxstep=750, args=(rp6,))
-    #singletraj = odeint(dr_dt, init, t, args=(rp6,))
+    #singletraj = odeint(dr_dt, init, t, mxstep=750, args=(rp6,))
+    singletraj = odeint(dr_dt, init, t, args=(rp6,))
     print("Trajectory Calculated")
     #print(singletraj)
     trackrp = np.zeros(t.size)
@@ -257,13 +257,13 @@ if mode==2:
         vdotr = rvec[0]*singletraj[k,3] + rvec[1]*singletraj[k,4] + rvec[2]*singletraj[k,5]
         Evartrack[k] = Evartrack[k-1] + (t[k]-t[k-1])*rp6(t[k])*vdotr/(rmag**2)
         Etrack[k] = (vmag**2)/2 - G*msolar/rmag - G*msolar*Evartrack[k]"""
-        """if np.sqrt((singletraj[k,0]-sunpos[0])**2 + (singletraj[k,1]-sunpos[1])**2 + (singletraj[k,2]-sunpos[2])**2) <= .00465*au:
+        if np.sqrt((singletraj[k,0]-sunpos[0])**2 + (singletraj[k,1]-sunpos[1])**2 + (singletraj[k,2]-sunpos[2])**2) <= .00465*au:
             # checking if the orbit is too close to the sun
             print("Orbit too close to sun")
             psd = 0
             perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
             ttime = 0
-            break"""
+            break
         if singletraj[k,0] >= 100*au:
             print(singletraj[k-1,:])
             print(t[k-1])
