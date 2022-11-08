@@ -7,8 +7,8 @@ vy = np.array([])
 vz = np.array([])
 f = np.array([])
 
-file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/pi_t0.txt", delimiter=',')
-#file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/5pi6_2p262502e8.txt", delimiter=',')
+#file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/pi_t0.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/pi_t0_errortest.txt", delimiter=',')
 
 #file = file[np.any(file > 1, axis=1)]
 
@@ -23,7 +23,7 @@ fig3d.set_figheight(7)
 ax3d = plt.axes(projection='3d')
 #scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='plasma', s=.02, vmin=(.75-.243/np.e), vmax=(.75+.243*np.e))
 #scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='plasma', s=.001, alpha=.15)
-scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='plasma', s=.001)
+scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='plasma', s=.05)
 cb = fig3d.colorbar(scatterplot)
 ax3d.set_xlabel("$v_x$ at Target Point (km/s)")
 ax3d.set_ylabel("$v_y$ at Target Point (km/s)")
