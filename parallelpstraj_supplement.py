@@ -148,7 +148,7 @@ for m in range(nprocs-1):
                 backtraj = odeint(dr_dt, init, t, args=(rp6,))
             except Warning:
                 # Collects the points that seem to cause issues to be ran again with different temporal resolution
-                lostpoints = np.append(lostpoints, [vxstartn[i], vystart[j], vzstart[l]])
+                lostpoints = np.append(lostpoints, [vxstartn[i], vystart[i], vzstart[i]])
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 sunlosscount[0] += 1
