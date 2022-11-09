@@ -180,19 +180,21 @@ for m in range(nprocs-1):
                         btintegrand = PIrate2/currentvr*(r1/currentrad)**2
                         # calculation of attenuation factor
                         attfact = scipy.integrate.simps(btintegrand, currentrad)
-                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,0] = vxstartn[i]
-                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,1] = vystart[j]
-                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
-                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,3] = startt - t[kn-1]
+                        data[bounds[m] + i,0] = vxstartn[i]
+                        data[bounds[m] + i,1] = vystart[i]
+                        data[bounds[m] + i,2] = vzstart[i]
+                        data[bounds[m] + i,3] = startt - t[kn-1]
                         # calculating value of phase space density based on the value at the crossing of x = 100 au
-                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(5327)**2)
+                        data[bounds[m] + i,4] = np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(5327)**2)
                         break
                     break
         break
 
+print('Waiting ' + str(comm.rank))
+
 comm.Barrier()
 
-print('Finished')
+print('Finished ' + str(comm.rank))
 
 sendcounts = np.array(comm.gather(len(lostpoints), 0))
 if comm.rank == 0:
