@@ -1,0 +1,2 @@
+Particle losses to the sun: 1818.0
+Trajectories not intersecting x = 100 au plane: 46491.0

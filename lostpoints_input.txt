@@ -1,0 +1,10 @@
+00000000
+1200
+180
+pi_t0_ex.txt
+
+Order of inputs:
+Final time (s)
+Time resolution in close regime (s)
+Angle from upwind axis (degrees)
+Data file name
