@@ -6,6 +6,7 @@ import os
 import warnings
 
 comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
 
 warnings.filterwarnings("error", category=Warning)
 
@@ -48,18 +49,15 @@ xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
 
-# Multiple sets of initial vx/vy conditions for convenience
-# In order of how I use them - direct, indirect, center, extra one for zoomed testing
-#vxstart = np.arange(-50000, -15000, 300)
-#vystart = np.arange(-25000, 10000, 300)
-#vxstart = np.arange(24000, 45000, 250)
-#vystart = np.arange(-2000, 6500, 150)
-#vxstart = np.arange(-25000, 25000, 500)
-#vystart = np.arange(-25000, 25000, 500)
-vxstart = file3[:,0]
-vystart = file3[:,1]
-vzstart = file3[:,2]
-#vzstart = 0
+# Initial conditions on vx/vy/vz read in from file
+vxstart = np.array(file3[:,0])
+vystart = np.array(file3[:,1])
+vzstart = np.array(file3[:,2])
+
+vxstart = vxstart.astype(float)
+vxstart = vxstart.astype(float)
+vxstart = vxstart.astype(float)
+
 
 startt = finalt
 lastt = initialt
@@ -112,7 +110,7 @@ nprocs = comm.Get_size()
 # creating a shared array with the size of the maximum possible number of points that could exist
 size = vxstart.size
 itemsize = MPI.FLOAT.Get_size()
-if comm.Get_rank() == 0:
+if rank == 0:
     nbytes = 5*size*itemsize
 else:
     nbytes = 0
@@ -136,91 +134,105 @@ dirlosscount = np.zeros(1)
 dirlosscounttotal = np.zeros(1)
 
 lostpoints = np.array([[]])
-for m in range(nprocs-1):
-    if comm.rank == m+1:
+
+"""for m in range(nprocs-1):
+    if rank == m+1:
         vxstartn = vxstart[bounds[m]:(bounds[m+1]+1)]
-        vystart = vystart[bounds[m]:(bounds[m+1]+1)]
-        vzstart = vzstart[bounds[m]:(bounds[m+1]+1)]
+        vystartn = vystart[bounds[m]:(bounds[m+1]+1)]
+        vzstartn = vzstart[bounds[m]:(bounds[m+1]+1)]
         for i in range(vxstartn.size): # displays progress bars for both loops to measure progress
-            init = [xstart, ystart, zstart, vxstartn[i], vystart[i], vzstart[i]]
+            init = [xstart, ystart, zstart, vxstartn[i], vystartn[i], vzstartn[i]]
             # calculating trajectories for each initial condition in phase space given
             try:
                 backtraj = odeint(dr_dt, init, t, args=(rp6,))
+                if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
+                    # tells the code to not consider the trajectory if it at any point intersects the width of the sun
+                    sunlosscount[0] += 1
+                    continue
+                if all(backtraj[:,0]-sunpos[0] < 100*au):
+                    # forgoes the following checks if the trajectory never passes through x = 100 au
+                    dirlosscount[0] += 1
+                    continue
+                for k in range(t.size - tclose.size):
+                    if backtraj[k+tclose.size,0] >= 100*au and backtraj[k-1+tclose.size,0] <= 100*au:
+                        # adjusting the indexing to avoid checking in the close regime
+                        kn = k+tclose.size
+                        # radius in paper given to be 14 km/s
+                        # only saving initial conditions corresponding to points that lie within this Maxwellian at x = 100 au
+                        #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
+                        if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 14000:
+                            omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
+                            # function for the photoionization rate at each point in time
+                            PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
+                            r1 = 1*au # reference radius
+                            currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
+                            # calculating the component of the radial unit vector in each direction at each point in time
+                            nrvecx = (-sunpos[0]+backtraj[0:kn+1,0])/currentrad
+                            nrvecy= (-sunpos[1]+backtraj[0:kn+1,1])/currentrad
+                            nrvecz = (-sunpos[2]+backtraj[0:kn+1,2])/currentrad
+                            # calculating the magnitude of v_r at each point in time
+                            currentvr = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
+                            # integrand for the photoionization losses
+                            btintegrand = PIrate2/currentvr*(r1/currentrad)**2
+                            # calculation of attenuation factor
+                            attfact = scipy.integrate.simps(btintegrand, currentrad)
+                            data[bounds[m] + i,0] = vxstartn[i]
+                            data[bounds[m] + i,1] = vystart[i]
+                            data[bounds[m] + i,2] = vzstart[i]
+                            data[bounds[m] + i,3] = startt - t[kn-1]
+                            # calculating value of phase space density based on the value at the crossing of x = 100 au
+                            data[bounds[m] + i,4] = np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(5327)**2)
+                            break
+                        break
             except Warning:
                 # Collects the points that seem to cause issues to be ran again with different temporal resolution
-                lostpoints = np.append(lostpoints, [vxstartn[i], vystart[i], vzstart[i]])
-            if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
-                # tells the code to not consider the trajectory if it at any point intersects the width of the sun
-                sunlosscount[0] += 1
-                continue
-            if all(backtraj[:,0]-sunpos[0] < 100*au):
-                # forgoes the following checks if the trajectory never passes through x = 100 au
-                dirlosscount[0] += 1
-                continue
-            for k in range(t.size - tclose.size):
-                if backtraj[k+tclose.size,0] >= 100*au and backtraj[k-1+tclose.size,0] <= 100*au:
-                    # adjusting the indexing to avoid checking in the close regime
-                    kn = k+tclose.size
-                    # radius in paper given to be 14 km/s
-                    # only saving initial conditions corresponding to points that lie within this Maxwellian at x = 100 au
-                    #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
-                    if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 14000:
-                        omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
-                        # function for the photoionization rate at each point in time
-                        PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
-                        r1 = 1*au # reference radius
-                        currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
-                        # calculating the component of the radial unit vector in each direction at each point in time
-                        nrvecx = (-sunpos[0]+backtraj[0:kn+1,0])/currentrad
-                        nrvecy= (-sunpos[1]+backtraj[0:kn+1,1])/currentrad
-                        nrvecz = (-sunpos[2]+backtraj[0:kn+1,2])/currentrad
-                        # calculating the magnitude of v_r at each point in time
-                        currentvr = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
-                        # integrand for the photoionization losses
-                        btintegrand = PIrate2/currentvr*(r1/currentrad)**2
-                        # calculation of attenuation factor
-                        attfact = scipy.integrate.simps(btintegrand, currentrad)
-                        data[bounds[m] + i,0] = vxstartn[i]
-                        data[bounds[m] + i,1] = vystart[i]
-                        data[bounds[m] + i,2] = vzstart[i]
-                        data[bounds[m] + i,3] = startt - t[kn-1]
-                        # calculating value of phase space density based on the value at the crossing of x = 100 au
-                        data[bounds[m] + i,4] = np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(5327)**2)
-                        break
-                    break
+                lostpoints = np.append(lostpoints, [vxstartn[i], vystartn[i], vzstartn[i]])
+            
         break
-
-print('Waiting ' + str(comm.rank))
+"""
+print('Waiting ' + str(rank))
 
 comm.Barrier()
 
-print('Finished ' + str(comm.rank))
+print('Finished ' + str(rank))
 
+warnings.filterwarnings("default", category=Warning)
+
+print(lostpoints)
 sendcounts = np.array(comm.gather(len(lostpoints), 0))
-if comm.rank == 0:
+if rank == 0:
     recvbuf = np.empty(sum(sendcounts), dtype=float)
+    print("Receiving buffer created")
 else:
     recvbuf = None
-comm.Gatherv(sendbuf=lostpoints, recvbuf=(recvbuf, sendcounts), root=0)
+comm.Gatherv(sendbuf=lostpoints, recvbuf=recvbuf, root=0) # if recvbuf=(recvbuf, sendcounts) then the data type is derived from recvbuf
+
+print('Gathered ' + str(rank))
 
 comm.Reduce(sunlosscount, sunlosscounttotal, op=MPI.SUM, root=0)
 comm.Reduce(dirlosscount, dirlosscounttotal, op=MPI.SUM, root=0)
 
 # writing data to a file - need to change each time or it will overwrite previous file
-if comm.rank == 0:
+if rank == 0:
     data = data[~np.all(data == 0, axis=1)]
     fname = file.readline().strip()
     dfile = open(fname, 'w')
     for i in range(np.size(data, 0)):
         dfile.write(str(data[i,0]/1000) + ',' + str(data[i,1]/1000) + ',' + str(data[i,2]/1000) + ',' + str(data[i,4]) + '\n')
     dfile.close()
+
     lossfile = open('losses_' + fname, 'w')
     lossfile.write('Particle losses to the sun: ' + str(sunlosscounttotal[0]) + '\n' + 'Trajectories not intersecting x = 100 au plane: ' + str(dirlosscounttotal[0]))
     lossfile.close()
+
     file2 = open("lostpoints_ex.txt", "w")
     for i in range(int(np.floor(np.size(recvbuf, 0)/3))):
         file2.write(str(recvbuf[3*i]) + ',' + str(recvbuf[3*i+1]) + ',' + str(recvbuf[3*i+2]) + '\n')
     file2.close()
     print('All done!')
+
+print('Waiting again ' + str(rank))
+
+comm.Barrier()
 
 file.close()
