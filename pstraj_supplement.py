@@ -24,7 +24,7 @@ finalt = 000000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -2000000000
 tstep = 10000 # general time resolution
-tstepclose = 1200 # time resolution for close regime
+tstepclose = 20000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
