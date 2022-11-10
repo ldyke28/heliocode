@@ -18,6 +18,12 @@ juliadiffeqtesting - used to familiarize myself with solving differential equati
 
 pstrajjulia - an attempt to see if Julia could handle the trajectory solving process from pstraj
 
+parallel_pstraj - parallelized version of the original pstraj code, intended for longer/larger runs
+
+3dplot - code for plotting one or more data files of 3D trajectory information
+
+pstraj_supplement/parallelpstraj_supplement - the serial and parallel versions, respectively, of code that reads in points that caused issues in the main code in order to re-run them with different initial time/target point location conditions to attempt to "recover" said points
+
 # Radiation pressure labels and related info
 no rp - mu = 0
 
