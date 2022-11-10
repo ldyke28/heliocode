@@ -9,6 +9,7 @@ f = np.array([])
 
 #file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/pi_t0.txt", delimiter=',')
 file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/pi_t0_errortest.txt", delimiter=',')
+file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/GitHub/heliocode/supplementaldata1.txt", delimiter=',')
 
 #file = file[np.any(file > 1, axis=1)]
 
@@ -16,6 +17,16 @@ vx = file[:,0]
 vy = file[:,1]
 vz = file[:,2]
 f = file[:,3]
+
+vx2 = file2[:,0]
+vy2 = file2[:,1]
+vz2 = file2[:,2]
+f2 = file2[:,3]
+
+vx = np.concatenate((vx, vx2))
+vy = np.concatenate((vy, vy2))
+vz = np.concatenate((vz, vz2))
+f = np.concatenate((f, f2))
 
 fig3d = plt.figure()
 fig3d.set_figwidth(10)

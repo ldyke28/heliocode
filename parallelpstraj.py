@@ -136,7 +136,7 @@ dirlosscount = np.zeros(1)
 dirlosscounttotal = np.zeros(1)
 
 
-lostpoints = np.array([[]])
+lostpoints = np.array([0,0,0])
 for m in range(nprocs-1):
     if rank == m+1:
         vxstartn = vxstart[bounds[m]:(bounds[m+1]+1)]

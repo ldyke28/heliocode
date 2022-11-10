@@ -2,7 +2,6 @@ import numpy as np
 from scipy.integrate import odeint
 import scipy
 from mpi4py import MPI
-import os
 import warnings
 
 comm = MPI.COMM_WORLD
@@ -10,9 +9,9 @@ rank = comm.Get_rank()
 
 warnings.filterwarnings("error", category=Warning)
 
-file = open("lostpoints_input.txt", "r")
-file3 = np.loadtxt("lostpoints.txt", delimiter=',')
 
+file3 = np.loadtxt("lostpoints.txt", delimiter=',')
+file = open("lostpoints_input.txt", "r")
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -135,7 +134,7 @@ dirlosscounttotal = np.zeros(1)
 
 lostpoints = np.array([[]])
 
-"""for m in range(nprocs-1):
+for m in range(nprocs-1):
     if rank == m+1:
         vxstartn = vxstart[bounds[m]:(bounds[m+1]+1)]
         vystartn = vystart[bounds[m]:(bounds[m+1]+1)]
@@ -189,7 +188,7 @@ lostpoints = np.array([[]])
                 lostpoints = np.append(lostpoints, [vxstartn[i], vystartn[i], vzstartn[i]])
             
         break
-"""
+
 print('Waiting ' + str(rank))
 
 comm.Barrier()
