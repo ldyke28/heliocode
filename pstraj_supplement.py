@@ -6,8 +6,10 @@ import warnings
 
 warnings.filterwarnings("error", category=Warning)
 
-file = np.loadtxt("lostpoints.txt", delimiter=',')
-file2 = open("lostpoints.txt", "w")
+filename = "lostpoints.txt"
+
+file = np.loadtxt(filename, delimiter=',')
+file2 = open(filename, "w")
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11

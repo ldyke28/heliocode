@@ -8,7 +8,7 @@ vz = np.array([])
 f = np.array([])
 
 #file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/pi_t0.txt", delimiter=',')
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/2pi3_t0.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/upwind_t0_lowtres.txt", delimiter=',')
 #file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/GitHub/heliocode/supplementaldata1.txt", delimiter=',')
 
 #file = file[np.any(file > 1, axis=1)]
@@ -41,10 +41,10 @@ ax3d.set_ylabel("$v_y$ at Target Point (km/s)")
 ax3d.set_zlabel("$v_z$ at Target Point (km/s)")
 #ax3d.view_init(90,270)
 #ax3d.view_init(0,270)
-#ax3d.view_init(0,180)
+ax3d.view_init(0,180)
 #ax3d.set_xlim([-25, 25])
 #ax3d.set_ylim([-25, 25])
 #ax3d.set_zlim([-25, 25])
 ax3d.set_title("Phase space population at target (t = 0 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s \
-    \n Target at (-.5 au, .866 au, 0 au), Time Resolution Close to Target = 1500 s")
+    \n Target at (1 au, 0 au, 0 au), Time Resolution Close to Target = 20000 s")
 plt.show()
