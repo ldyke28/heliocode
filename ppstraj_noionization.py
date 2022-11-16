@@ -6,10 +6,14 @@ import os
 import warnings
 
 comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
+rank = comm.Get_rank() # obtaining the rank of each node to split the workload later
 
+# Filtering warnings (specifically odeint's ODEintWarning) as errors
+# This allows us to catch these warnings as errors to later run trajectories that may
+# have issues with the temporal resolution
 warnings.filterwarnings("error", category=Warning)
 
+# Opening the file to read in the input data
 file = open("3Dinputfile.txt", "r")
 
 
@@ -35,7 +39,7 @@ phase = 0 # phase for implementing rotation of target point around sun
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = float(file.readline().strip())
+theta = float(file.readline().strip()) # azimuthal angle of the target point from the upwind axis
 ibexx = np.cos(theta*np.pi/180)
 ibexy = np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -48,18 +52,10 @@ xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
 
-# Multiple sets of initial vx/vy conditions for convenience
-# In order of how I use them - direct, indirect, center, extra one for zoomed testing
-#vxstart = np.arange(-50000, -15000, 300)
-#vystart = np.arange(-25000, 10000, 300)
-#vxstart = np.arange(24000, 45000, 250)
-#vystart = np.arange(-2000, 6500, 150)
-#vxstart = np.arange(-25000, 25000, 500)
-#vystart = np.arange(-25000, 25000, 500)
+# Set of initial conditions in velocity space
 vxstart = np.arange(float(file.readline().strip()), float(file.readline().strip()), float(file.readline().strip()))
 vystart = np.arange(float(file.readline().strip()), float(file.readline().strip()), float(file.readline().strip()))
 vzstart = np.arange(float(file.readline().strip()), float(file.readline().strip()), float(file.readline().strip()))
-#vzstart = 0
 
 startt = finalt
 lastt = initialt
@@ -67,7 +63,6 @@ tmid = startt - 200000000 # time at which we switch from high resolution to low 
 tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (close regime)
 tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
 t = np.concatenate((tclose, tfar))
-mode3dt = startt-lastt
 
 def radPressure(t):
     # dummy function to model radiation pressure
@@ -113,7 +108,7 @@ nprocs = comm.Get_size()
 size = vxstart.size * vystart.size * vzstart.size
 itemsize = MPI.FLOAT.Get_size()
 if rank == 0:
-    nbytes = 4*size*itemsize
+    nbytes = 4*size*itemsize # saving four variables - need to multiply by 4 here
 else:
     nbytes = 0
 
@@ -123,19 +118,22 @@ win = MPI.Win.Allocate_shared(nbytes, itemsize, comm=comm)
 # creating arrays whose data points to shared memory
 buf, itemsize = win.Shared_query(0)
 assert itemsize == MPI.FLOAT.Get_size()
-data = np.ndarray(buffer=buf, dtype='f', shape=(size,5))
+data = np.ndarray(buffer=buf, dtype='f', shape=(size,4))
 
+# Initializing an array to determine where to slice initial conditions for vx
 bounds = np.zeros(nprocs, dtype=int)
 
+# Setting the location of these bounds by dividing the total number of initial vx conditions as evenly as possible
 for q in range(nprocs-1):
     bounds[q+1] = int(np.floor(vxstart.size/(nprocs-1)*(q+1)))
 
+# To sum loss counts at the end, we need to have them as numpy objects
 sunlosscount = np.zeros(1)
 sunlosscounttotal = np.zeros(1)
 dirlosscount = np.zeros(1)
 dirlosscounttotal = np.zeros(1)
 
-
+# Initializing array to collect problematic points to test afterward
 lostpoints = np.array([0,0,0])
 for m in range(nprocs-1):
     if rank == m+1:
@@ -144,8 +142,10 @@ for m in range(nprocs-1):
             for j in range(vystart.size):
                 for l in range(vzstart.size):
                     init = [xstart, ystart, zstart, vxstartn[i], vystart[j], vzstart[l]]
-                    # calculating trajectories for each initial condition in phase space given
                     try:
+                        # Main code in try block
+                        # If an ODEintWarning is raised, point will be set aside for testing later on
+                        # calculating trajectories for each initial condition in phase space given
                         backtraj = odeint(dr_dt, init, t, args=(rp6,))
                         if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                             # tells the code to not consider the trajectory if it at any point intersects the width of the sun
@@ -178,33 +178,46 @@ for m in range(nprocs-1):
                     
         break
 
+# Forces processes to wait until all have finished before moving on
 comm.Barrier()
 
 print('Finished')
 
+# Resets warnings to be treated as warnings once more
 warnings.filterwarnings("default", category=Warning)
 
+# Determining how many array elements are in each array of problem points on each process
 sendcounts = np.array(comm.gather(len(lostpoints), 0))
 if rank == 0:
+    # Creates an array on the master node to collect all of the points
     recvbuf = np.empty(sum(sendcounts), dtype=float)
 else:
     recvbuf = None
+
+# Gathers the problem points into a single array into a single array on the master node
 comm.Gatherv(sendbuf=lostpoints, recvbuf=(recvbuf, sendcounts), root=0)
 
+# Sums up all of the loss counts into a single count on the master node
 comm.Reduce(sunlosscount, sunlosscounttotal, op=MPI.SUM, root=0)
 comm.Reduce(dirlosscount, dirlosscounttotal, op=MPI.SUM, root=0)
 
 # writing data to a file - need to change each time or it will overwrite previous file
 if rank == 0:
+    # masking the points in the completed trajectories that are irrelevant
     data = data[~np.all(data == 0, axis=1)]
     fname = file.readline().strip()
     dfile = open(fname, 'w')
     for i in range(np.size(data, 0)):
+        # writing relevant data points to a file
         dfile.write(str(data[i,0]/1000) + ',' + str(data[i,1]/1000) + ',' + str(data[i,2]/1000) + '\n')
     dfile.close()
+
+    # writing loss counts to a file
     lossfile = open('losses_' + fname, 'w')
     lossfile.write('Particle losses to the sun: ' + str(sunlosscounttotal[0]) + '\n' + 'Trajectories not intersecting x = 100 au plane: ' + str(dirlosscounttotal[0]))
     lossfile.close()
+
+    # writing problem points to a file
     file2 = open("lostpoints.txt", "w")
     for i in range(int(np.floor(np.size(recvbuf, 0)/3))):
         file2.write(str(recvbuf[3*i]) + ',' + str(recvbuf[3*i+1]) + ',' + str(recvbuf[3*i+2]) + '\n')

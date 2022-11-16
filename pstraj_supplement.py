@@ -6,6 +6,7 @@ import warnings
 
 warnings.filterwarnings("error", category=Warning)
 
+# Naming the file needed to read in problem points to try them at different temporal resolution
 filename = "lostpoints.txt"
 
 file = np.loadtxt(filename, delimiter=',')
@@ -26,7 +27,7 @@ finalt = 000000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -2000000000
 tstep = 10000 # general time resolution
-tstepclose = 20000 # time resolution for close regime
+tstepclose = int(input("Enter time resolution for close regime in seconds: ")) # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
@@ -42,6 +43,7 @@ xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
 
+# Reading in initial condition points for velocity points
 vxstart = file[:,0]
 vystart = file[:,1]
 vzstart = file[:,2]
@@ -52,9 +54,9 @@ tmid = startt - 200000000 # time at which we switch from high resolution to low 
 tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (close regime)
 tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
 t = np.concatenate((tclose, tfar))
-mode3dt = startt-lastt
 
 def rp6(t):
+    # function for radiation pressure dependent on time
     # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
     omegat = 2*np.pi/(3.47*10**(8))*t
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
@@ -71,17 +73,21 @@ def dr_dt(x,t,rp):
     dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-rp(t))
     return [dx0, dx1, dx2, dx3, dx4, dx5]
 
+# initializing arrays to store variables for relevant trajectories
 farvx = np.array([])
 farvy = np.array([])
 farvz = np.array([])
 fart = np.array([])
 maxwcolor = np.array([])
+# initializing loss counts
 sunloss = 0
 directionloss = 0
 for i in tqdm(range(vxstart.size)): # displays progress bar to measure progress
     init = [xstart, ystart, zstart, vxstart[i], vystart[i], vzstart[i]]
-    # calculating trajectories for each initial condition in phase space given
     try:
+        # Code in try block to attempt to run trajectory
+        # If ODEintWarning is caught, point is marked as problem point
+        # calculating trajectories for each initial condition in phase space given
         backtraj = odeint(dr_dt, init, t, args=(rp6,))
         if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
             # tells the code to not consider the trajectory if it at any point intersects the width of the sun
@@ -129,7 +135,7 @@ for i in tqdm(range(vxstart.size)): # displays progress bar to measure progress
         # Collects the points that seem to cause issues to be ran again with different temporal resolution
         file2.write(str(vxstart[i]) + ',' + str(vystart[i]) + ',' + str(vzstart[i]) + '\n')
     
-# w for write mode (clears existing contents), a for append (adds onto end of file)
+# Adds to the file of points that have been resolved
 file3 = open("supplementaldata1.txt", "a")
 for i in range(farvx.size):
     file3.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(farvz[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
