@@ -235,7 +235,7 @@ if rank == 0:
     lossfile.close()
 
     # writing problem points to a file
-    file2 = open("lostpoints.txt", "w")
+    file2 = open("lostpoints_" + fname, "w")
     for i in range(int(np.floor(np.size(recvbuf, 0)/3))):
         file2.write(str(recvbuf[3*i]) + ',' + str(recvbuf[3*i+1]) + ',' + str(recvbuf[3*i+2]) + '\n')
     file2.close()

@@ -1,2 +1,0 @@
-Particle losses to the sun: 0.0
-Trajectories not intersecting x = 100 au plane: 0.0
