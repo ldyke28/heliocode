@@ -24,6 +24,8 @@ parallel_pstraj - parallelized version of the original pstraj code, intended for
 
 pstraj_supplement/parallelpstraj_supplement - the serial and parallel versions, respectively, of code that reads in points that caused issues in the main code in order to re-run them with different initial time/target point location conditions to attempt to "recover" said points
 
+ppstraj_noionization - version of parallel_pstraj that solves the trajectories without ionization, which can be done later through pstraj_supplement
+
 # Radiation pressure labels and related info
 no rp - mu = 0
 
