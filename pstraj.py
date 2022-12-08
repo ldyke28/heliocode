@@ -9,7 +9,7 @@ from tqdm import tqdm
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 2
+mode = 3
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -24,16 +24,16 @@ oneyear = 3.15545454545*10**7
 # 226250200 for second force free
 finalt = 000000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
-initialt = -2000000000
+initialt = -4000000000
 tstep = 10000 # general time resolution
-tstepclose = 15000 # time resolution for close regime
+tstepclose = 1200 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 180
+theta = 90
 ibexx = np.cos(theta*np.pi/180)
 ibexy = np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -81,12 +81,12 @@ zstart = ibexpos[2]
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
 #vxstart = np.arange(-45000, -5000, 1500)
 #vystart = np.arange(-35000, -10000, 1500)
-#vxstart = np.arange(24000, 45000, 250)
-#vystart = np.arange(-2000, 6500, 150)
+vxstart = np.arange(4500, 7200, 50)
+vystart = np.arange(27000, 47000, 350)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
-vxstart = np.arange(-25000, 25000, 250)
-vystart = np.arange(-25000, 25000, 250)
+#vxstart = np.arange(-25000, 25000, 250)
+#vystart = np.arange(-25000, 25000, 250)
 vzstart = 0
 if mode==3:
     startt = finalt
@@ -365,7 +365,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_4e6_center_cosexppi_highspatialres.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_t0_indirect_cosexppi_fill.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_2p3e7_center_cosexppi_tcolor_higherspatialres.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
@@ -380,8 +380,8 @@ if mode==3:
     #cb.set_label('Time at which orbit passes through 100 au (s)')
     #cb.set_label('Travel Time from 100 au to Point of Interest (s)')
     cb.set_label('PDF(r,v,t)')
-    plt.xlim([-25, 25])
-    plt.ylim([-25, 25])
+    #plt.xlim([-25, 25])
+    #plt.ylim([-25, 25])
     plt.xlabel("vx at Target in km/s")
     plt.ylabel("vy at Target in km/s")
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
