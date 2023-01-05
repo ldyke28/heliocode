@@ -11,6 +11,9 @@ from tqdm import tqdm
 # 3 = generate phase space diagram
 mode = 3
 
+# storing noise values, if need be
+nfile = open("noisevals.txt", "w")
+
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
 msolar = 1.98847*10**30 # mass of the sun in kg
@@ -26,14 +29,14 @@ finalt = 000000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -4000000000
 tstep = 10000 # general time resolution
-tstepclose = 1200 # time resolution for close regime
+tstepclose = 1000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 90
+theta = 150
 ibexx = np.cos(theta*np.pi/180)
 ibexy = np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -81,12 +84,12 @@ zstart = ibexpos[2]
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
 #vxstart = np.arange(-45000, -5000, 1500)
 #vystart = np.arange(-35000, -10000, 1500)
-vxstart = np.arange(4500, 7200, 50)
-vystart = np.arange(27000, 47000, 350)
+#vxstart = np.arange(4500, 7200, 50)
+#vystart = np.arange(27000, 47000, 350)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
-#vxstart = np.arange(-25000, 25000, 250)
-#vystart = np.arange(-25000, 25000, 250)
+vxstart = np.arange(-25000, 25000, 200)
+vystart = np.arange(-25000, 25000, 200)
 vzstart = 0
 if mode==3:
     startt = finalt
@@ -97,6 +100,11 @@ if mode==3:
     t = np.concatenate((tclose, tfar))
     mode3dt = startt-lastt
 
+# generating an array of noise values to be shared amongst all trajectories, simulating experimental noise
+randscale = .001
+# noise is shifted to be centered around 0 on the interval [-1.0, 1.0) before scaling with possibility to be positive or negative
+noise = randscale * ((np.random.random(t.size) - .5) * 2)
+nfile.write(str(noise) + '\n')
 
 
 def radPressure(t):
@@ -125,7 +133,41 @@ def rp6(t):
     omegat = 2*np.pi/(3.47*10**(8))*t
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
 
+munoise = np.zeros(t.size)
+for i in range(t.size):
+    munoise[i] = rp6(t[i]) + noise[i]
+
+
+"""def rp6noise(tval):
+    # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
+    omegat = 2*np.pi/(3.47*10**(8))*tval
+    indexloc = np.where(t.astype(float) == tval)
+    print(indexloc)
+    n = indexloc[0][0]
+    #print(noise)
+    return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + noise[n]"""
+
+def rp6noise(tval):
+    return np.interp(tval, t, munoise)
+
+def rpnoise(t):
+    # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + .05*np.sin(omegat)
+
 def dr_dt(x,t,rp):
+    # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
+    # dx0-2 = vx, vy, and vz, dx3-5 = ax, ay, and az
+    r = np.sqrt((sunpos[0]-x[0])**2 + (sunpos[1]-x[1])**2 + (sunpos[2]-x[2])**2)
+    dx0 = x[3]
+    dx1 = x[4]
+    dx2 = x[5]
+    dx3 = (msolar*G/(r**3))*(sunpos[0]-x[0])*(1-rp(t))
+    dx4 = (msolar*G/(r**3))*(sunpos[1]-x[1])*(1-rp(t))
+    dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-rp(t))
+    return [dx0, dx1, dx2, dx3, dx4, dx5]
+
+def dr_dt_noise(x,t,rp):
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
     # dx0-2 = vx, vy, and vz, dx3-5 = ax, ay, and az
     r = np.sqrt((sunpos[0]-x[0])**2 + (sunpos[1]-x[1])**2 + (sunpos[2]-x[2])**2)
@@ -186,7 +228,7 @@ if mode==3:
         for j in tqdm(range(vystart.size)):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
-            backtraj[:,:] = odeint(dr_dt, init, t, args=(rp6,))
+            backtraj[:,:] = odeint(dr_dt, init, t, args=(rpnoise,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
@@ -364,8 +406,9 @@ if mode==1:
     print(vxavg, '||', vyavg, '||', tavg)
 
 if mode==3:
+    nfile.close()
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi2_t0_indirect_cosexppi_fill.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_t0_center_cosexppi_fluctest_noise.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_2p3e7_center_cosexppi_tcolor_higherspatialres.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
@@ -387,7 +430,7 @@ if mode==3:
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
     plt.suptitle('Phase space population at target (t $\\approx$ ' + str(round(finalt/(oneyear), 3)) + ' years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (' + str(ibexpos[0]/au) + ' au, ' + str(ibexpos[1]/au) + ' au), Time Resolution Close to Target = ' + str(tstepclose) + ' s')
+    plt.title('Target at (' + str(round(ibexpos[0]/au, 3)) + ' au, ' + str(round(ibexpos[1]/au, 3)) + ' au), Time Resolution Close to Target = ' + str(tstepclose) + ' s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()
     
