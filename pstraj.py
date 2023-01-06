@@ -11,9 +11,6 @@ from tqdm import tqdm
 # 3 = generate phase space diagram
 mode = 3
 
-# storing noise values, if need be
-nfile = open("noisevals.txt", "w")
-
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
 msolar = 1.98847*10**30 # mass of the sun in kg
@@ -104,7 +101,6 @@ if mode==3:
 randscale = .001
 # noise is shifted to be centered around 0 on the interval [-1.0, 1.0) before scaling with possibility to be positive or negative
 noise = randscale * ((np.random.random(t.size) - .5) * 2)
-nfile.write(str(noise) + '\n')
 
 
 def radPressure(t):
@@ -406,7 +402,6 @@ if mode==1:
     print(vxavg, '||', vyavg, '||', tavg)
 
 if mode==3:
-    nfile.close()
     # writing data to a file - need to change each time or it will overwrite previous file
     file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_t0_center_cosexppi_fluctest_noise.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_pi32_2p3e7_center_cosexppi_tcolor_higherspatialres.txt", "w")
