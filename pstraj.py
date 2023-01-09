@@ -9,7 +9,7 @@ from tqdm import tqdm
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -22,7 +22,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 000000000 # time to start backtracing
+finalt = 4000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -4000000000
 tstep = 10000 # general time resolution
@@ -268,9 +268,9 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    indxic = 19400
-    indyic = 4200
-    indzic = 5600
+    indxic = 9000
+    indyic = 6000
+    indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
     #singletraj = odeint(dr_dt, init, t, mxstep=750, args=(rp6,))
