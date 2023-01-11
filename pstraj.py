@@ -24,7 +24,7 @@ oneyear = 3.15545454545*10**7
 # 226250200 for second force free
 finalt = 000000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
-initialt = -4000000000
+initialt = -2000000000
 tstep = 10000 # general time resolution
 tstepclose = 1000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
@@ -242,7 +242,7 @@ if mode==3:
                     # radius in paper given to be 14 km/s
                     # only saving initial conditions corresponding to points that lie within this Maxwellian at x = 100 au
                     #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
-                    if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 14000:
+                    if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 27000:
                         omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
                         # function for the photoionization rate at each point in time
                         PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
@@ -404,8 +404,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_t0_center_cosexppi_fluctest_noise.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_5pi6_t0_center_cosexppi_fluctest_noise27.txt", "w")
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_t0_center_cosexppi_fluctest_noise27.txt", 'w')
+    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_5pi6_t0_center_cosexppi_fluctest_noise27.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
