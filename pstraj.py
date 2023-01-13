@@ -26,7 +26,7 @@ finalt = 000000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -2000000000
 tstep = 10000 # general time resolution
-tstepclose = 400 # time resolution for close regime
+tstepclose = 200 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 
@@ -79,10 +79,10 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-vxstart = np.arange(-67000, 2000, 500)
-vystart = np.arange(-58000, -8000, 400)
-#vxstart = np.arange(4500, 7200, 50)
-#vystart = np.arange(27000, 47000, 350)
+#vxstart = np.arange(-67000, 5000, 500)
+#vystart = np.arange(-58000, -8000, 400)
+vxstart = np.arange(-45000, 25000, 500)
+vystart = np.arange(35000, 62000, 200)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(-25000, 25000, 200)
@@ -404,8 +404,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/norp_5pi6_p1268y_direct_cosexppi_redo.txt", 'w')
-    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/norp_5pi6_p1268y_direct_cosexppi_tclose400.txt", "w")
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/norp_5pi6_p1268y_indirect_cosexppi_tclose200.txt", 'w')
+    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/norp_5pi6_p1268y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
@@ -414,18 +414,19 @@ if mode==3:
     f = plt.figure()
     f.set_figwidth(10)
     f.set_figheight(6)
+    fsize = 18
     plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='hsv')
-    plt.rcParams.update({'font.size': 16})
+    plt.rcParams.update({'font.size': fsize})
     cb = plt.colorbar()
     #cb.set_label('Time at which orbit passes through 100 au (s)')
     #cb.set_label('Travel Time from 100 au to Point of Interest (s)')
     cb.set_label('Normalized Phase Space Density')
     #plt.xlim([-25, 25])
     #plt.ylim([-25, 25])
-    plt.xticks(fontsize=16)
-    plt.yticks(fontsize=16)
-    plt.xlabel("$v_x$ at Target in km/s", fontsize=16)
-    plt.ylabel("$v_y$ at Target in km/s", fontsize=16)
+    plt.xticks(fontsize=fsize)
+    plt.yticks(fontsize=fsize)
+    plt.xlabel("$v_x$ at Target in km/s", fontsize=fsize)
+    plt.ylabel("$v_y$ at Target in km/s", fontsize=fsize)
     #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
     #plt.suptitle('VDF at target, at t $\\approx$ ' + str(round(finalt/(oneyear), 3)) + ' years, drawn from Maxwellian at 100 au centered on $v_x$ = -26 km/s')
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')

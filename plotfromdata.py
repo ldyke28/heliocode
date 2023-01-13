@@ -10,7 +10,7 @@ filenum = 1
 
 #file = open("C:\Users\lucas\Downloads\cosexprp_pi32_1p5e8_indirect_cosexppi.txt", "r")
 #file = np.loadtxt("C:/Users/lucas/Downloads/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_t0_center_cosexppi_fluctest_control.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/norp_5pi6_p1268y_indirect_cosexppi_tclose200.txt", delimiter=',')
 #file = np.loadtxt("/Users/ldyke/Downloads/drive-download-20221019T183112Z-001/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')
 
 
@@ -45,7 +45,7 @@ fig = plt.figure()
 fig.set_figwidth(10)
 fig.set_figheight(6)
 
-plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma')
+"""plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma')
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma', vmin=0, vmax=.6)
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma', norm=matplotlib.colors.LogNorm(vmin=10**(-100), vmax=1))
 cb = plt.colorbar()
@@ -58,14 +58,27 @@ plt.xlabel("$v_x$ at Target in km/s", fontsize=16)
 plt.ylabel("$v_y$ at Target in km/s", fontsize=16)
 plt.suptitle('Phase space population at target (t = 0 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
 plt.title('Target at (-.866 au, .5 au), Time Resolution Close to Target = 1000 s')
-plt.show()
-
-"""cb.set_label('PDF(r,v,t)', fontsize=12)
-plt.xlabel("vx at Target in km/s", fontsize=14)
-plt.ylabel("vy at Target in km/s", fontsize=14)
-plt.suptitle('Phase space population at target (t = 6.2e9 s) \n Drawn from Maxwellian at 100 au centered on vx = -26 km/s', fontsize=14)
-plt.title('Target at (-.866 au, .5 au), Time Resolution Close to Target = 1000 s', fontsize=14)
 plt.show()"""
+
+fsize = 18
+plt.scatter(vx[:]/1000, vy[:]/1000, c=f[:], marker='o', cmap='hsv')
+plt.rcParams.update({'font.size': fsize})
+cb = plt.colorbar()
+#cb.set_label('Time at which orbit passes through 100 au (s)')
+#cb.set_label('Travel Time from 100 au to Point of Interest (s)')
+cb.set_label('Normalized Phase Space Density')
+#plt.xlim([-25, 25])
+#plt.ylim([-25, 25])
+plt.xticks(fontsize=fsize)
+plt.yticks(fontsize=fsize)
+plt.xlabel("$v_x$ at Target in km/s", fontsize=fsize)
+plt.ylabel("$v_y$ at Target in km/s", fontsize=fsize)
+#plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
+#plt.suptitle('VDF at target, at t $\\approx$ ' + str(round(finalt/(oneyear), 3)) + ' years, drawn from Maxwellian at 100 au centered on $v_x$ = -26 km/s')
+#plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
+#plt.title('Target at (' + str(round(ibexpos[0]/au, 3)) + ' au, ' + str(round(ibexpos[1]/au, 3)) + ' au), Time Resolution Close to Target = ' + str(tstepclose) + ' s')
+#plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
+plt.show()
 
 
 
