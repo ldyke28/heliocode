@@ -26,7 +26,7 @@ finalt = 4000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -2000000000
 tstep = 10000 # general time resolution
-tstepclose = 400 # time resolution for close regime
+tstepclose = 50 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 
@@ -81,8 +81,8 @@ zstart = ibexpos[2]
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
 #vxstart = np.arange(-65000, -10000, 350)
 #vystart = np.arange(-40000, 35000, 400)
-vxstart = np.arange(15000, 50000, 1500)
-vystart = np.arange(000, 45000, 1500)
+vxstart = np.arange(17000, 50000, 200)
+vystart = np.arange(2000, 45000, 300)
 #vxstart = np.arange(-25000, 25000, 500)
 #vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(-65000, 65000, 500)
@@ -404,7 +404,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi4_p1268y_indirect_cosexppi_tclose400.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi4_p1268y_indirect_cosexppi_tclose50.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/norp_5pi6_p1268y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
