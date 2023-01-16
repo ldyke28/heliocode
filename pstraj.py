@@ -22,18 +22,18 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 4000000 # time to start backtracing
+finalt = 120749800 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -2000000000
 tstep = 10000 # general time resolution
-tstepclose = 1000 # time resolution for close regime
+tstepclose = 200 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 150
+theta = 85
 ibexx = np.cos(theta*np.pi/180)
 ibexy = np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -79,14 +79,14 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-#vxstart = np.arange(-65000, -10000, 350)
-#vystart = np.arange(-40000, 35000, 400)
-#vxstart = np.arange(17000, 50000, 200)
-#vystart = np.arange(2000, 45000, 300)
+vxstart = np.arange(-62000, -7000, 400)
+vystart = np.arange(-35000, 32000, 500)
+#vxstart = np.arange(2000, 25000, 150)
+#vystart = np.arange(10000, 62000, 300)
 #vxstart = np.arange(-25000, 25000, 250)
 #vystart = np.arange(-25000, 25000, 250)
-vxstart = np.arange(-18000, -8000, 50)
-vystart = np.arange(-18000, -8000, 50)
+#vxstart = np.arange(-18000, -8000, 50)
+#vystart = np.arange(-18000, -8000, 50)
 vzstart = 0
 if mode==3:
     startt = finalt
@@ -405,7 +405,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_p1268y_centerzoom_cosexppi_tclose1000.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_17pi36_3p824y_direct_cosexppi_tclose400.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/norp_5pi6_p1268y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
