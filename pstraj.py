@@ -22,11 +22,11 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 120749800 # time to start backtracing
+finalt = 0000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -2000000000
 tstep = 10000 # general time resolution
-tstepclose = 200 # time resolution for close regime
+tstepclose = 400 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 
@@ -79,10 +79,10 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-vxstart = np.arange(-62000, -7000, 400)
-vystart = np.arange(-35000, 32000, 500)
-#vxstart = np.arange(2000, 25000, 150)
-#vystart = np.arange(10000, 62000, 300)
+vxstart = np.arange(-75000, -10000, 450)
+vystart = np.arange(-52000, 22000, 500)
+#vxstart = np.arange(7000, 42000, 250)
+#vystart = np.arange(18000, 72000, 400)
 #vxstart = np.arange(-25000, 25000, 250)
 #vystart = np.arange(-25000, 25000, 250)
 #vxstart = np.arange(-18000, -8000, 50)
@@ -225,7 +225,7 @@ if mode==3:
         for j in tqdm(range(vystart.size)):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
-            backtraj[:,:] = odeint(dr_dt, init, t, args=(rp6,))
+            backtraj[:,:] = odeint(dr_dt, init, t, args=(radPressure,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
@@ -276,7 +276,7 @@ if mode==2:
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
     #singletraj = odeint(dr_dt, init, t, mxstep=750, args=(rp6,))
-    singletraj = odeint(dr_dt, init, t, args=(rp6,))
+    singletraj = odeint(dr_dt, init, t, args=(radPressure,))
     print("Trajectory Calculated")
     #print(singletraj)
     trackrp = np.zeros(t.size)
@@ -405,8 +405,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_17pi36_3p824y_direct_cosexppi_tclose400.txt", 'w')
-    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/norp_5pi6_p1268y_direct_cosexppi_tclose400.txt", "w")
+    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_17pi36_0y_indirect_nopi_tclose400.txt", 'w')
+    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/cosexprp_17pi36_0y_direct_nopi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
