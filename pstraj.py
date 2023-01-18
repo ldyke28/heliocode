@@ -22,7 +22,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 150000000 # time to start backtracing
+finalt = 34000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -6000000000
 tstep = 10000 # general time resolution
@@ -33,7 +33,7 @@ phase = 0 # phase for implementing rotation of target point around sun
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 5.625
+theta = 150
 ibexx = np.cos(theta*np.pi/180)
 ibexy = np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -270,8 +270,8 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    indxic = 24200
-    indyic = 2850
+    indxic = 21000
+    indyic = -7250
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
@@ -311,7 +311,7 @@ if mode==2:
             rtrack = rtrack[:k]
             Ltrack = Ltrack[:k]
             perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
-            ttime = t[0] - t[-1]
+            
 
             omt = 2*np.pi/(3.47*10**(8))*t[0:k+1]
             # function for the photoionization rate at each point in time
@@ -333,8 +333,10 @@ if mode==2:
             print(np.sqrt((singletraj[k-1,3]+26000)**2 + (singletraj[k-1,4])**2 + (singletraj[k-1,5])**2))
             print("Perihelion distance in au is: " + str(perihelion/au))
             print("PSD value: " + str(psd))
-            print("Travel time from 100 au in years: " + str(ttime/oneyear))
+            
             t = t[:k]
+            ttime = t[0] - t[-1]
+            print("Travel time from 100 au in years: " + str(ttime/oneyear))
             break
         if k == t.size-1:
             perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
@@ -382,10 +384,11 @@ if mode==2:
     plt.scatter(zer, zer, c='orange', zorder=3)
     plt.grid(zorder=0)
     cb.set_label("Value of $\mu$", fontsize=fosize)
+    cb.ax.tick_params(labelsize=fosize)
     plt.xlabel("x (au)", fontsize=fosize)
     plt.ylabel("y (au)", fontsize=fosize)
-    plt.xlim([-1.5,5])
-    plt.ylim([-.5,.5])
+    plt.xlim([-13,2])
+    plt.ylim([-3,3])
     
     plt.xticks(fontsize=fosize)
     plt.yticks(fontsize=fosize)
