@@ -28,30 +28,34 @@ for i in range(t.size):
 
 ticks = [0, 2.75, 5.5, 8.25, 11, 13.75, 16.5, 19.25, 22]
 
+fsize = 18
 
-"""fig, ax = plt.subplots()
+fig, ax = plt.subplots()
 fig.set_figwidth(10)
 fig.set_figheight(7.5)
 ax.plot(t/oneyear, rp)
-plt.xticks(ticks)
+plt.xticks(ticks, fontsize=fsize)
 plt.grid()
-ax.set_xlabel("Time (in years)", fontsize=14)
-ax.set_ylabel("Value of μ(t)", fontsize=14)
+ax.set_xlabel("Time (in years)", fontsize=fsize)
+ax.set_ylabel("Value of μ(t)", fontsize=fsize)
 secax = ax.secondary_xaxis('top', functions=(elevenyears, eleveninverse))
-secax.set_xlabel('Number of Solar Cycles', fontsize=14)
-plt.title("Magnitude of Radiation Pressure Force Relative to Gravitational Force", fontsize=16)
-plt.show()"""
-
-
-fig, ax = plt.subplots()
-fig.set_figwidth(8)
-fig.set_figheight(6)
-ax.plot(t/oneyear, beta)
-plt.xticks(ticks)
-plt.grid()
-ax.set_xlabel("Time (in years)", fontsize=14)
-ax.set_ylabel("Value of the Photoionization Rate $\\tilde{\\beta}_{ph1}$ ($10^{-7}$ s$^{-1}$)", fontsize=14)
-secax = ax.secondary_xaxis('top', functions=(elevenyears, eleveninverse))
-secax.set_xlabel('Number of Solar Cycles', fontsize=14)
-plt.title("Photoionization Rate over Time", fontsize=16)
+secax.set_xlabel('Number of Solar Cycles', fontsize=fsize)
+secax.tick_params(labelsize=fsize)
+#plt.title("Magnitude of Radiation Pressure Force Relative to Gravitational Force", fontsize=fsize)
 plt.show()
+
+
+"""fig, ax = plt.subplots()
+fig.set_figwidth(11)
+fig.set_figheight(7.5)
+ax.plot(t/oneyear, beta)
+plt.xticks(ticks, fontsize=fsize)
+plt.yticks(fontsize=fsize)
+plt.grid()
+ax.set_xlabel("Time (in years)", fontsize=fsize)
+ax.set_ylabel("Value of the Photoionization Rate $\\tilde{\\beta}_{ph1}$ ($10^{-7}$ s$^{-1}$)", fontsize=fsize)
+secax = ax.secondary_xaxis('top', functions=(elevenyears, eleveninverse))
+secax.set_xlabel('Number of Solar Cycles', fontsize=fsize)
+secax.tick_params(labelsize=fsize)
+#plt.title("Photoionization Rate over Time", fontsize=fsize)
+plt.show()"""

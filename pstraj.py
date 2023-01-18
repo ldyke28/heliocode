@@ -9,7 +9,7 @@ from tqdm import tqdm
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -22,18 +22,18 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 0000000 # time to start backtracing
+finalt = 150000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
-initialt = -2000000000
+initialt = -6000000000
 tstep = 10000 # general time resolution
-tstepclose = 200 # time resolution for close regime
+tstepclose = 1000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 85
+theta = 5.625
 ibexx = np.cos(theta*np.pi/180)
 ibexy = np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -50,7 +50,7 @@ if mode==2:
     lastt = initialt
     tmid = startt - 200000000 # time at which we switch from high resolution to low resolution - a little more than half of a cycle
     tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (close regime)
-    tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
+    tfar = np.arange(tmid, lastt, -tstepclose) # low resolution time array (far regime)
     t = np.concatenate((tclose, tfar))
 tscale = int(.7*ttotal/tstep)
 #tscale = 0
@@ -270,13 +270,13 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    indxic = 9000
-    indyic = 6000
+    indxic = 24200
+    indyic = 2850
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
     #singletraj = odeint(dr_dt, init, t, mxstep=750, args=(rp6,))
-    singletraj = odeint(dr_dt, init, t, args=(radPressure,))
+    singletraj = odeint(dr_dt, init, t, args=(rp6,))
     print("Trajectory Calculated")
     #print(singletraj)
     trackrp = np.zeros(t.size)
@@ -331,7 +331,9 @@ if mode==2:
             psd = np.exp(-np.abs(attfact))*np.exp(-((singletraj[k-1,3]+26000)**2 + singletraj[k-1,4]**2 + singletraj[k-1,5]**2)/(5327)**2)
 
             print(np.sqrt((singletraj[k-1,3]+26000)**2 + (singletraj[k-1,4])**2 + (singletraj[k-1,5])**2))
-            #print(perihelion)
+            print("Perihelion distance in au is: " + str(perihelion/au))
+            print("PSD value: " + str(psd))
+            print("Travel time from 100 au in years: " + str(ttime/oneyear))
             t = t[:k]
             break
         if k == t.size-1:
@@ -344,7 +346,8 @@ print('Finished')
 
 if mode==2:
     zer = [0]
-    fig3d = plt.figure()
+    fosize = 18
+    """fig3d = plt.figure()
     fig3d.set_figwidth(7)
     fig3d.set_figheight(7)
     ax3d = plt.axes(projection='3d')
@@ -368,7 +371,24 @@ if mode==2:
         \n At target point v = (" + str(indxic/1000) + " km/s, " + str(indyic/1000) + " km/s, " + str(indzic/1000) + " km/s) \
         \n Value of distribution function = " + str(psd) + "\
         \n Perihelion at $\\sim$ " + str(round(perihelion/au, 5)) + " au \
-        \n Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years",fontsize=12)
+        \n Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years",fontsize=12)"""
+    fig = plt.figure()
+    fig.set_figwidth(10)
+    fig.set_figheight(6)
+    
+    plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=(.75-.243/np.e), vmax=(.75+.243*np.e), zorder=2)
+    cb = plt.colorbar()
+    plt.scatter(ibexpos[0]/au, ibexpos[1]/au, c='springgreen', zorder=3)
+    plt.scatter(zer, zer, c='orange', zorder=3)
+    plt.grid(zorder=0)
+    cb.set_label("Value of $\mu$", fontsize=fosize)
+    plt.xlabel("x (au)", fontsize=fosize)
+    plt.ylabel("y (au)", fontsize=fosize)
+    plt.xlim([-1.5,5])
+    plt.ylim([-.5,.5])
+    
+    plt.xticks(fontsize=fosize)
+    plt.yticks(fontsize=fosize)
     plt.show()
 
     """f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
