@@ -9,7 +9,7 @@ from tqdm import tqdm
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 2
+mode = 3
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -22,9 +22,9 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 34000000 # time to start backtracing
+finalt = 0000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
-initialt = -6000000000
+initialt = -5000000000
 tstep = 10000 # general time resolution
 tstepclose = 1000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
@@ -33,7 +33,7 @@ phase = 0 # phase for implementing rotation of target point around sun
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 150
+theta = 45
 ibexx = np.cos(theta*np.pi/180)
 ibexy = np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -81,10 +81,10 @@ zstart = ibexpos[2]
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
 #vxstart = np.arange(-75000, -10000, 450)
 #vystart = np.arange(-52000, 22000, 500)
-vxstart = np.arange(7000, 42000, 250)
-vystart = np.arange(18000, 72000, 400)
-#vxstart = np.arange(-25000, 25000, 250)
-#vystart = np.arange(-25000, 25000, 250)
+#vxstart = np.arange(7000, 42000, 250)
+#vystart = np.arange(18000, 72000, 400)
+vxstart = np.arange(-25000, 25000, 250)
+vystart = np.arange(-25000, 25000, 250)
 #vxstart = np.arange(-18000, -8000, 50)
 #vystart = np.arange(-18000, -8000, 50)
 vzstart = 0
@@ -129,9 +129,9 @@ def rp6(t):
     omegat = 2*np.pi/(3.47*10**(8))*t
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
 
-munoise = np.zeros(t.size)
-for i in range(t.size):
-    munoise[i] = rp6(t[i]) + noise[i]
+#munoise = np.zeros(t.size)
+#for i in range(t.size):
+#    munoise[i] = rp6(t[i]) + noise[i]
 
 
 """def rp6noise(tval):
@@ -143,8 +143,8 @@ for i in range(t.size):
     #print(noise)
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + noise[n]"""
 
-def rp6noise(tval):
-    return np.interp(tval, t, munoise)
+#def rp6noise(tval):
+#    return np.interp(tval, t, munoise)
 
 def rpnoise(t):
     # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
@@ -225,7 +225,7 @@ if mode==3:
         for j in tqdm(range(vystart.size)):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
-            backtraj[:,:] = odeint(dr_dt, init, t, args=(radPressure,))
+            backtraj[:,:] = odeint(dr_dt, init, t, args=(rpnoise,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
@@ -428,7 +428,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_17pi36_0y_indirect_nopi_tclose200.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/fluccosexprp_pi4_0y_center_cosexppi_tclose1000.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/norp_17pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
