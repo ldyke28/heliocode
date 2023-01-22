@@ -26,14 +26,14 @@ finalt = 0000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5000000000
 tstep = 10000 # general time resolution
-tstepclose = 1000 # time resolution for close regime
+tstepclose = 400 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 5.625
+theta = 150
 ibexx = np.cos(theta*np.pi/180)
 ibexy = np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -79,12 +79,12 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-#vxstart = np.arange(-75000, -10000, 450)
-#vystart = np.arange(-52000, 22000, 500)
+vxstart = np.arange(-65000, 10000, 500)
+vystart = np.arange(-42000, 6000, 350)
 #vxstart = np.arange(7000, 42000, 250)
 #vystart = np.arange(18000, 72000, 400)
-vxstart = np.arange(-25000, 25000, 250)
-vystart = np.arange(-25000, 25000, 250)
+#vxstart = np.arange(-25000, 25000, 250)
+#vystart = np.arange(-25000, 25000, 250)
 #vxstart = np.arange(-18000, -8000, 50)
 #vystart = np.arange(-18000, -8000, 50)
 vzstart = 0
