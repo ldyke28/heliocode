@@ -428,8 +428,8 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/fluccosexprp_pi4_0y_indirect_cosexppi_tclose400.txt", 'w')
-    #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/norp_17pi36_0y_direct_cosexppi_tclose400.txt", "w")
+    #file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/fluccosexprp_pi4_0y_indirect_cosexppi_tclose400.txt", 'w')
+    file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/fluccosexprp_pi4_0y_indirect_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
