@@ -33,7 +33,7 @@ phase = 0 # phase for implementing rotation of target point around sun
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 5.625
+theta = 180
 ibexx = np.cos(theta*np.pi/180)
 ibexy = np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -150,7 +150,7 @@ def rpnoise(t):
     # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
     omegat = 2*np.pi/(3.47*10**(8))*t
     omeganoiset = 2*np.pi/(2.333*10**6)*t # period of 27 days (rotational period of the sun)
-    return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + .1*np.sin(omeganoiset)
+    return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + .05*np.sin(omeganoiset)
 
 def dr_dt(x,t,rp):
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
@@ -428,7 +428,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p1fluccosexprp_pi32_0y_center_cosexppi_tclose1000.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p05fluccosexprp_pi_0y_center_cosexppi_tclose1000.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/fluccosexprp_pi4_0y_indirect_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
