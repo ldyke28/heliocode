@@ -6,7 +6,7 @@ oneyear = 3.15545454545*10**7
 
 def realRP(t):
     omegat = 2*np.pi/(3.47*10**(8))*t
-    omeganoiset = 2*np.pi/(2*2.333*10**6)*t # 2.333*10**6 s = period of 27 days (rotational period of the sun)
+    omeganoiset = 2*np.pi/(2.333*10**6)*t # 2.333*10**6 s = period of 27 days (rotational period of the sun)
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + .1*np.sin(omeganoiset)
 
 def realbeta(t):
