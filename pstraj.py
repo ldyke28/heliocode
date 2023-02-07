@@ -149,7 +149,7 @@ def rp6(t):
 def rpnoise(t):
     # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
     omegat = 2*np.pi/(3.47*10**(8))*t
-    omeganoiset = 2*np.pi/(2.333*10**6)*t # period of 27 days (rotational period of the sun)
+    omeganoiset = 2*np.pi/(2*2.333*10**6)*t # 2.333*10**6 s = period of 27 days (rotational period of the sun)
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + .1*np.sin(omeganoiset)
 
 def dr_dt(x,t,rp):
@@ -428,7 +428,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p1fluccosexprp_pi4_1p207498e8_direct_cosexppi_tclose400.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p1fluccosexprp_halffreq_pi4_1p207498e8_direct_cosexppi_tclose400.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/fluccosexprp_pi4_0y_indirect_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
