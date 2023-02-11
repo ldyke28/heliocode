@@ -22,7 +22,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 100000000 # time to start backtracing
+finalt = -110000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5000000000
 tstep = 10000 # general time resolution
@@ -79,8 +79,8 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-vxstart = np.arange(00000, 30000, 250)
-vystart = np.arange(-10000, 85000, 600)
+vxstart = np.arange(00000, 30000, 200)
+vystart = np.arange(-10000, 75000, 550)
 #vxstart = np.arange(15000, 55000, 300)
 #vystart = np.arange(000, 50000, 400)
 #vxstart = np.arange(-25000, 25000, 250)
@@ -428,7 +428,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p1fluccosexprp_17pi36_10e7_indirect_cosexppi_tclose200.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p1fluccosexprp_17pi36_-1p1e8_indirect_cosexppi_tclose200.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
