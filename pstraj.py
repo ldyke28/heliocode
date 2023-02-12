@@ -79,8 +79,8 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-vxstart = np.arange(00000, 30000, 200)
-vystart = np.arange(-10000, 75000, 550)
+vxstart = np.arange(00000, 10000, 70)
+vystart = np.arange(20000, 85000, 500)
 #vxstart = np.arange(15000, 55000, 300)
 #vystart = np.arange(000, 50000, 400)
 #vxstart = np.arange(-25000, 25000, 250)
