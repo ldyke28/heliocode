@@ -5,6 +5,8 @@ from scipy.integrate import odeint
 import scipy
 from tqdm import tqdm
 
+# add another sine function to the noise function so the fluctuations vary in magnitude
+
 # MODE LIST
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
