@@ -11,7 +11,7 @@ from tqdm import tqdm
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -24,7 +24,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = -110000000 # time to start backtracing
+finalt = -50000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5000000000
 tstep = 10000 # general time resolution
@@ -50,9 +50,9 @@ if mode==1:
 if mode==2:
     startt = finalt
     lastt = initialt
-    tmid = startt - 200000000 # time at which we switch from high resolution to low resolution - a little more than half of a cycle
+    tmid = startt - 500000000 # time at which we switch from high resolution to low resolution - a little more than half of a cycle
     tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (close regime)
-    tfar = np.arange(tmid, lastt, -tstepclose) # low resolution time array (far regime)
+    tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
     t = np.concatenate((tclose, tfar))
 tscale = int(.7*ttotal/tstep)
 #tscale = 0
@@ -131,28 +131,22 @@ def rp6(t):
     omegat = 2*np.pi/(3.47*10**(8))*t
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
 
-#munoise = np.zeros(t.size)
-#for i in range(t.size):
-#    munoise[i] = rp6(t[i]) + noise[i]
-
-
-"""def rp6noise(tval):
-    # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
-    omegat = 2*np.pi/(3.47*10**(8))*tval
-    indexloc = np.where(t.astype(float) == tval)
-    print(indexloc)
-    n = indexloc[0][0]
-    #print(noise)
-    return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + noise[n]"""
-
-#def rp6noise(tval):
-#    return np.interp(tval, t, munoise)
-
 def rpnoise(t):
+    # a different form of the radiation pressure with fluctuations
     # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
     omegat = 2*np.pi/(3.47*10**(8))*t
     omeganoiset = 2*np.pi/(2.333*10**6)*t # 2.333*10**6 s = period of 27 days (rotational period of the sun)
-    return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + .1*np.sin(omeganoiset)
+    flucmag = .1
+    return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + flucmag*np.sin(omeganoiset)
+
+def rpnoisefluc(t):
+    # a different form of the radiation pressure with fluctuations
+    # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    omeganoiset = 2*np.pi/(2.333*10**6)*t # 2.333*10**6 s = period of 27 days (rotational period of the sun)
+    omegaoverallfluct = omegat*10 # fluctuations of the noise itself
+    flucmag = .1
+    return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + flucmag*np.sin(omeganoiset)*np.cos(omegaoverallfluct)
 
 def dr_dt(x,t,rp):
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
@@ -272,13 +266,13 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    indxic = 21000
-    indyic = -7250
+    indxic = 00
+    indyic = 37400
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
     #singletraj = odeint(dr_dt, init, t, mxstep=750, args=(rp6,))
-    singletraj = odeint(dr_dt, init, t, args=(rp6,))
+    singletraj = odeint(dr_dt, init, t, args=(rpnoise,))
     print("Trajectory Calculated")
     #print(singletraj)
     trackrp = np.zeros(t.size)
@@ -287,7 +281,7 @@ if mode==2:
     Etrack = np.zeros(t.size)
     rtrack = np.zeros(t.size)
     for k in tqdm(range(t.size)):
-        trackrp[k] = rp6(t[k]) # calculating the value of the radiation pressure at each time point
+        trackrp[k] = rpnoise(t[k]) # calculating the value of the radiation pressure at each time point
         """rmag = np.sqrt((sunpos[0]-singletraj[k,0])**2 + (sunpos[1]-singletraj[k,1])**2 + (sunpos[2]-singletraj[k,2])**2)
         rtrack[k] = rmag
         vmag = np.sqrt(singletraj[k,3]**2 + singletraj[k,4]**2 + singletraj[k,5]**2)
@@ -350,7 +344,7 @@ print('Finished')
 
 if mode==2:
     zer = [0]
-    fosize = 18
+    fosize = 10
     """fig3d = plt.figure()
     fig3d.set_figwidth(7)
     fig3d.set_figheight(7)
@@ -377,7 +371,7 @@ if mode==2:
         \n Perihelion at $\\sim$ " + str(round(perihelion/au, 5)) + " au \
         \n Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years",fontsize=12)"""
     fig = plt.figure()
-    fig.set_figwidth(10)
+    fig.set_figwidth(9)
     fig.set_figheight(6)
     
     plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=(.75-.243/np.e), vmax=(.75+.243*np.e), zorder=2)
@@ -389,11 +383,14 @@ if mode==2:
     cb.ax.tick_params(labelsize=fosize)
     plt.xlabel("x (au)", fontsize=fosize)
     plt.ylabel("y (au)", fontsize=fosize)
-    plt.xlim([-13,2])
-    plt.ylim([-3,3])
+    plt.xlim([-2,5])
+    plt.ylim([-2,2])
     
     plt.xticks(fontsize=fosize)
     plt.yticks(fontsize=fosize)
+    plt.title("Individual Orbit at time t$\\approx$" + str(round(finalt/(oneyear), 3)) + " years, Target at (" + str(round(ibexpos[0]/au, 4)) + " au, " + str(round(ibexpos[1]/au, 4)) + " au, " + str(round(ibexpos[2]/au, 4)) + " au) \
+        \n At target point v = (" + str(indxic/1000) + " km/s, " + str(indyic/1000) + " km/s, " + str(indzic/1000) + " km/s), Value of distribution function = " + str(psd) + " \
+        \n Perihelion at $\\sim$ " + str(round(perihelion/au, 5)) + " au, Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years", fontsize=10)
     plt.show()
 
     """f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)

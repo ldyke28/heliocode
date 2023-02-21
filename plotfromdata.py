@@ -10,7 +10,7 @@ filenum = 1
 
 #file = open("C:\Users\lucas\Downloads\cosexprp_pi32_1p5e8_indirect_cosexppi.txt", "r")
 #file = np.loadtxt("C:/Users/lucas/Downloads/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p1fluccosexprp_17pi36_1p207498e8_indirect_cosexppi_tclose200_1.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p1fluccosexprp_17pi36_-5e7_indirect_cosexppi_tclose200.txt", delimiter=',')
 #file = np.loadtxt("/Users/ldyke/Downloads/drive-download-20221019T183112Z-001/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')
 
 
