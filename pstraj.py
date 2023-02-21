@@ -266,8 +266,8 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    indxic = 00
-    indyic = 37400
+    indxic = 12000
+    indyic = 9000
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
@@ -383,7 +383,7 @@ if mode==2:
     cb.ax.tick_params(labelsize=fosize)
     plt.xlabel("x (au)", fontsize=fosize)
     plt.ylabel("y (au)", fontsize=fosize)
-    plt.xlim([-2,5])
+    plt.xlim([-1,5])
     plt.ylim([-2,2])
     
     plt.xticks(fontsize=fosize)
