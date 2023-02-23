@@ -24,7 +24,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = -50000000 # time to start backtracing
+finalt = 100000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5000000000
 tstep = 10000 # general time resolution
@@ -266,8 +266,8 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    indxic = 12000
-    indyic = 9000
+    indxic = 3250
+    indyic = 15200
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
@@ -374,7 +374,7 @@ if mode==2:
     fig.set_figwidth(9)
     fig.set_figheight(6)
     
-    plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=(.75-.243/np.e), vmax=(.75+.243*np.e), zorder=2)
+    plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=((.75-.243/np.e)-.1), vmax=((.75+.243*np.e)+.1), zorder=2)
     cb = plt.colorbar()
     plt.scatter(ibexpos[0]/au, ibexpos[1]/au, c='springgreen', zorder=3)
     plt.scatter(zer, zer, c='orange', zorder=3)
@@ -383,7 +383,7 @@ if mode==2:
     cb.ax.tick_params(labelsize=fosize)
     plt.xlabel("x (au)", fontsize=fosize)
     plt.ylabel("y (au)", fontsize=fosize)
-    plt.xlim([-1,5])
+    plt.xlim([-2,2])
     plt.ylim([-2,2])
     
     plt.xticks(fontsize=fosize)
