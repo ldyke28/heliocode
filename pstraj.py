@@ -24,7 +24,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 100000000 # time to start backtracing
+finalt = 110000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5000000000
 tstep = 10000 # general time resolution
@@ -266,8 +266,8 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    indxic = 3250
-    indyic = 15200
+    indxic = 10000
+    indyic = 10000
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
