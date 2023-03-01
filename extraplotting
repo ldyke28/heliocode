@@ -9,6 +9,16 @@ def realRP(t):
     omeganoiset = 2*np.pi/(2.333*10**6)*t # 2.333*10**6 s = period of 27 days (rotational period of the sun)
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + .1*np.sin(omeganoiset)
 
+def rpnoisefluc(t):
+    # a different form of the radiation pressure with fluctuations
+    # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    omeganoiset = 2*np.pi/(2.333*10**6)*t # 2.333*10**6 s = period of 27 days (rotational period of the sun)
+    omegaoverallfluct = omegat*20 # fluctuations of the noise itself
+    flucmag = .1
+    return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + flucmag*np.sin(omeganoiset)*np.cos(omegaoverallfluct)
+
+
 def realbeta(t):
     omt = 2*np.pi/(3.47*10**(8))*t
     PIrate2 = (1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
@@ -24,7 +34,7 @@ t = np.arange(0, 2*3.47*10**8, 1000)
 rp = np.zeros(t.size)
 beta = np.zeros(t.size)
 for i in range(t.size):
-    rp[i] = realRP(t[i])
+    rp[i] = rpnoisefluc(t[i])
     beta[i] = realbeta(t[i])
 
 ticks = [0, 2.75, 5.5, 8.25, 11, 13.75, 16.5, 19.25, 22]
