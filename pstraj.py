@@ -222,7 +222,7 @@ if mode==3:
         for j in tqdm(range(vystart.size)):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
-            backtraj[:,:] = odeint(dr_dt, init, t, args=(rpnoisefluc,))
+            backtraj[:,:] = odeint(dr_dt, init, t, args=(rpnoise,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
@@ -428,7 +428,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p1doublefluccosexprp_17pi36_1p207498_center_cosexppi_tclose1000.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p1fluccosexprp_17pi36_1p207498_center_cosexppi_tclose1000_ex.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
