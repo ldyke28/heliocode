@@ -24,7 +24,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 120749800 # time to start backtracing
+finalt = 00000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5000000000
 tstep = 10000 # general time resolution
@@ -428,7 +428,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p1fluccosexprp_17pi36_1p207498_center_cosexppi_tclose1000_ex.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p1fluccosexprp_17pi36_0y_center_cosexppi_tclose1000_ex.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
