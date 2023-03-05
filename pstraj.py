@@ -100,11 +100,6 @@ if mode==3:
     t = np.concatenate((tclose, tfar))
     mode3dt = startt-lastt
 
-# generating an array of noise values to be shared amongst all trajectories, simulating experimental noise
-randscale = .001
-# noise is shifted to be centered around 0 on the interval [-1.0, 1.0) before scaling with possibility to be positive or negative
-noise = randscale * ((np.random.random(t.size) - .5) * 2)
-
 
 def radPressure(t):
     # dummy function to model radiation pressure
@@ -150,18 +145,6 @@ def rpnoisefluc(t):
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + flucmag*np.sin(omeganoiset)*np.cos(omegaoverallfluct)
 
 def dr_dt(x,t,rp):
-    # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
-    # dx0-2 = vx, vy, and vz, dx3-5 = ax, ay, and az
-    r = np.sqrt((sunpos[0]-x[0])**2 + (sunpos[1]-x[1])**2 + (sunpos[2]-x[2])**2)
-    dx0 = x[3]
-    dx1 = x[4]
-    dx2 = x[5]
-    dx3 = (msolar*G/(r**3))*(sunpos[0]-x[0])*(1-rp(t))
-    dx4 = (msolar*G/(r**3))*(sunpos[1]-x[1])*(1-rp(t))
-    dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-rp(t))
-    return [dx0, dx1, dx2, dx3, dx4, dx5]
-
-def dr_dt_noise(x,t,rp):
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
     # dx0-2 = vx, vy, and vz, dx3-5 = ax, ay, and az
     r = np.sqrt((sunpos[0]-x[0])**2 + (sunpos[1]-x[1])**2 + (sunpos[2]-x[2])**2)
