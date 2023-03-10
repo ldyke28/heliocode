@@ -88,8 +88,8 @@ zstart = ibexpos[2]
 #vystart = np.arange(000, 50000, 400)
 #vxstart = np.arange(-25000, 25000, 300)
 #vystart = np.arange(-25000, 25000, 300)
-vxstart = np.arange(4000, 6000, 20)
-vystart = np.arange(-4000, -2000, 20)
+vxstart = np.arange(5000, 5250, 2)
+vystart = np.arange(-3750, -3500, 2)
 vzstart = 0
 if mode==3:
     startt = finalt
@@ -411,7 +411,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p1fluccosexprp_17pi36_0y_zoom_cosexppi_tclose1000_2.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/p1fluccosexprp_17pi36_0y_zoom_cosexppi_tclose1000_3.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
