@@ -30,11 +30,12 @@ oneyear = 3.15545454545*10**7
 # 226250200 for second force free
 finalt = float(file.readline().strip()) # time to start backtracing
 #6.36674976e9 force free for cosexprp
-initialt = -2000000000
+initialt = -5000000000
 tstep = 10000 # general time resolution
 tstepclose = float(file.readline().strip()) # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
+refdist = 100
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
@@ -151,18 +152,18 @@ for m in range(nprocs-1):
                             # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                             sunlosscount[0] += 1
                             continue
-                        if all(backtraj[:,0]-sunpos[0] < 100*au):
+                        if all(backtraj[:,0]-sunpos[0] < refdist*au):
                             # forgoes the following checks if the trajectory never passes through x = 100 au
                             dirlosscount[0] += 1
                             continue
                         for k in range(t.size - tclose.size):
-                            if backtraj[k+tclose.size,0] >= 100*au and backtraj[k-1+tclose.size,0] <= 100*au:
+                            if backtraj[k+tclose.size,0] >= 100*au and backtraj[k-1+tclose.size,0] <= refdist*au:
                                 # adjusting the indexing to avoid checking in the close regime
                                 kn = k+tclose.size
                                 # radius in paper given to be 14 km/s
                                 # only saving initial conditions corresponding to points that lie within this Maxwellian at x = 100 au
                                 #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
-                                if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 14000:
+                                if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 27000:
                                     omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
                                     # function for the photoionization rate at each point in time
                                     PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
@@ -183,7 +184,7 @@ for m in range(nprocs-1):
                                     data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
                                     data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,3] = startt - t[kn-1]
                                     # calculating value of phase space density based on the value at the crossing of x = 100 au
-                                    data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(5327)**2)
+                                    data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)
                                     break
                                 break
                     except Warning:
