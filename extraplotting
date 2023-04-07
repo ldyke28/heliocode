@@ -7,7 +7,7 @@ oneyear = 3.15545454545*10**7
 def realRP(t):
     omegat = 2*np.pi/(3.47*10**(8))*t
     omeganoiset = 2*np.pi/(2.333*10**6)*t # 2.333*10**6 s = period of 27 days (rotational period of the sun)
-    return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + .1*np.sin(omeganoiset)
+    return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
 
 def rpnoisefluc(t):
     # a different form of the radiation pressure with fluctuations
@@ -30,18 +30,18 @@ def elevenyears(t):
 def eleveninverse(t):
     return (10.996830884471336)*t
 
-t = np.arange(0, 2*3.47*10**8, 1000)
+t = np.arange(-3.47*10**8, 3.47*10**8, 1000)
 rp = np.zeros(t.size)
 beta = np.zeros(t.size)
 for i in range(t.size):
-    rp[i] = rpnoisefluc(t[i])
+    rp[i] = realRP(t[i])
     beta[i] = realbeta(t[i])
 
-ticks = [0, 2.75, 5.5, 8.25, 11, 13.75, 16.5, 19.25, 22]
+ticks = [-11, -8.25, -5.5, -2.75, 0, 2.75, 5.5, 8.25, 11]
 
 fsize = 18
 
-fig, ax = plt.subplots()
+"""fig, ax = plt.subplots()
 fig.set_figwidth(10)
 fig.set_figheight(7.5)
 ax.plot(t/oneyear, rp)
@@ -53,10 +53,10 @@ secax = ax.secondary_xaxis('top', functions=(elevenyears, eleveninverse))
 secax.set_xlabel('Number of Solar Cycles', fontsize=fsize)
 secax.tick_params(labelsize=fsize)
 #plt.title("Magnitude of Radiation Pressure Force Relative to Gravitational Force", fontsize=fsize)
-plt.show()
+plt.show()"""
 
 
-"""fig, ax = plt.subplots()
+fig, ax = plt.subplots()
 fig.set_figwidth(11)
 fig.set_figheight(7.5)
 ax.plot(t/oneyear, beta)
@@ -69,4 +69,4 @@ secax = ax.secondary_xaxis('top', functions=(elevenyears, eleveninverse))
 secax.set_xlabel('Number of Solar Cycles', fontsize=fsize)
 secax.tick_params(labelsize=fsize)
 #plt.title("Photoionization Rate over Time", fontsize=fsize)
-plt.show()"""
+plt.show()
