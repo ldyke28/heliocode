@@ -63,7 +63,7 @@ plt.show()"""
 fsize = 18
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv', vmin=0, vmax=0.4408809475715252)
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv')
-plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv', norm=matplotlib.colors.LogNorm(vmin=10**(-6), vmax=10**(-2)))
+plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv', norm=matplotlib.colors.LogNorm(vmin=10**(-4), vmax=10**(0)))
 plt.rcParams.update({'font.size': fsize})
 cb = plt.colorbar()
 #cb.set_label('Time at which orbit passes through 100 au (s)')
