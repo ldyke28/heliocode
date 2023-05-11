@@ -108,6 +108,10 @@ def radPressure(t):
     #return .7
     return 0
 
+def LyaRP(t,v_r):
+    lyafunction = np.exp(-(v_r-55000)**2/(2*25000**2)) + np.exp(-(v_r+55000)**2/(2*25000**2))
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
 
 # extra radiation pressure functions for overlayed plots
 def rp2(t):
@@ -154,6 +158,24 @@ def dr_dt(x,t,rp):
     dx3 = (msolar*G/(r**3))*(sunpos[0]-x[0])*(1-rp(t))
     dx4 = (msolar*G/(r**3))*(sunpos[1]-x[1])*(1-rp(t))
     dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-rp(t))
+    return [dx0, dx1, dx2, dx3, dx4, dx5]
+
+def Lya_dr_dt(x,t,rp):
+    # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
+    # dx0-2 = vx, vy, and vz, dx3-5 = ax, ay, and az
+    r = np.sqrt((sunpos[0]-x[0])**2 + (sunpos[1]-x[1])**2 + (sunpos[2]-x[2])**2)
+    # calculating the component of the radial unit vector in each direction at each point in time
+    nrvecx = x[0]/r
+    nrvecy = x[1]/r
+    nrvecz = x[2]/r
+    # calculating the magnitude of v_r at each point in time
+    v_r = x[3]*nrvecx + x[4]*nrvecy + x[5]*nrvecz
+    dx0 = x[3]
+    dx1 = x[4]
+    dx2 = x[5]
+    dx3 = (msolar*G/(r**3))*(sunpos[0]-x[0])*(1-rp(t,v_r))
+    dx4 = (msolar*G/(r**3))*(sunpos[1]-x[1])*(1-rp(t,v_r))
+    dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-rp(t,v_r))
     return [dx0, dx1, dx2, dx3, dx4, dx5]
 
 
@@ -205,7 +227,7 @@ if mode==3:
         for j in tqdm(range(vystart.size)):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
-            backtraj[:,:] = odeint(dr_dt, init, t, args=(radPressure,))
+            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
@@ -230,7 +252,7 @@ if mode==3:
                         currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
                         # calculating the component of the radial unit vector in each direction at each point in time
                         nrvecx = (-sunpos[0]+backtraj[0:kn+1,0])/currentrad
-                        nrvecy= (-sunpos[1]+backtraj[0:kn+1,1])/currentrad
+                        nrvecy = (-sunpos[1]+backtraj[0:kn+1,1])/currentrad
                         nrvecz = (-sunpos[2]+backtraj[0:kn+1,2])/currentrad
                         # calculating the magnitude of v_r at each point in time
                         currentvr = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
