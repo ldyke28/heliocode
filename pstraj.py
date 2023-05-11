@@ -109,7 +109,7 @@ def radPressure(t):
     return 0
 
 def LyaRP(t,v_r):
-    lyafunction = np.exp(-(v_r-55000)**2/(2*25000**2)) + np.exp(-(v_r+55000)**2/(2*25000**2))
+    lyafunction = 1.25*np.exp(-(v_r-55000)**2/(2*25000**2)) + 1.25*np.exp(-(v_r+55000)**2/(2*25000**2)) + .55*np.exp(-v_r**2/(2*25000**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
     return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
 
