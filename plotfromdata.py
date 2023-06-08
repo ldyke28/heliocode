@@ -10,7 +10,7 @@ filenum = 1
 
 #file = open("C:\Users\lucas\Downloads\cosexprp_pi32_1p5e8_indirect_cosexppi.txt", "r")
 #file = np.loadtxt("C:/Users/lucas/Downloads/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')
-file = np.loadtxt("C:/Users/lucas/Downloads/Data Files-20230406T214257Z-001/Data Files/cosexprp_5pi6_p1268y_center_nopi_tclose1000.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/Downloads/Data Files-20230406T214257Z-001/Data Files/cosexprp_5pi6_p1268y_indirect_cosexppi_tclose200.txt", delimiter=',')
 #file = np.loadtxt("/Users/ldyke/Downloads/drive-download-20221019T183112Z-001/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')
 
 
@@ -61,9 +61,9 @@ plt.title('Target at (-.866 au, .5 au), Time Resolution Close to Target = 1000 s
 plt.show()"""
 
 fsize = 18
-#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv', vmin=0, vmax=0.4408809475715252)
+plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv', vmin=0, vmax=0.06218571051524244)
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv')
-plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv', norm=matplotlib.colors.LogNorm(vmin=10**(-4), vmax=10**(0)))
+#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv', norm=matplotlib.colors.LogNorm(vmin=10**(-4), vmax=10**(0)))
 plt.rcParams.update({'font.size': fsize})
 cb = plt.colorbar()
 #cb.set_label('Time at which orbit passes through 100 au (s)')
