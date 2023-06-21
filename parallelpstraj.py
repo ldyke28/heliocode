@@ -30,12 +30,12 @@ oneyear = 3.15545454545*10**7
 # 226250200 for second force free
 finalt = float(file.readline().strip()) # time to start backtracing
 #6.36674976e9 force free for cosexprp
-initialt = -5000000000
+initialt = -10000000000
 tstep = 10000 # general time resolution
 tstepclose = float(file.readline().strip()) # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
-refdist = 100
+refdist = 300
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
@@ -102,6 +102,29 @@ def dr_dt(x,t,rp):
     dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-rp(t))
     return [dx0, dx1, dx2, dx3, dx4, dx5]
 
+def LyaRP(t,v_r):
+    lyafunction = 1.25*np.exp(-(v_r-55000)**2/(2*25000**2)) + 1.25*np.exp(-(v_r+55000)**2/(2*25000**2)) + .55*np.exp(-v_r**2/(2*25000**2))
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
+
+def Lya_dr_dt(x,t,rp):
+    # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
+    # dx0-2 = vx, vy, and vz, dx3-5 = ax, ay, and az
+    r = np.sqrt((sunpos[0]-x[0])**2 + (sunpos[1]-x[1])**2 + (sunpos[2]-x[2])**2)
+    # calculating the component of the radial unit vector in each direction at each point in time
+    nrvecx = x[0]/r
+    nrvecy = x[1]/r
+    nrvecz = x[2]/r
+    # calculating the magnitude of v_r at each point in time
+    v_r = x[3]*nrvecx + x[4]*nrvecy + x[5]*nrvecz
+    dx0 = x[3]
+    dx1 = x[4]
+    dx2 = x[5]
+    dx3 = (msolar*G/(r**3))*(sunpos[0]-x[0])*(1-rp(t,v_r))
+    dx4 = (msolar*G/(r**3))*(sunpos[1]-x[1])*(1-rp(t,v_r))
+    dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-rp(t,v_r))
+    return [dx0, dx1, dx2, dx3, dx4, dx5]
+
 # identify the total number of processes
 nprocs = comm.Get_size()
 
@@ -147,7 +170,7 @@ for m in range(nprocs-1):
                         # Main code in try block
                         # If an ODEintWarning is raised, point will be set aside for testing later on
                         # calculating trajectories for each initial condition in phase space given
-                        backtraj = odeint(dr_dt, init, t, args=(rp6,))
+                        backtraj = odeint(Lya_dr_dt, init, t, args=(LyaRP,))
                         if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                             # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                             sunlosscount[0] += 1
