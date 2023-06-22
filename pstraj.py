@@ -11,7 +11,7 @@ from tqdm import tqdm
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -24,11 +24,11 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = -90000000 # time to start backtracing
+finalt = -80000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
-initialt = -10000000000
+initialt = -100000000000
 tstep = 10000 # general time resolution
-tstepclose = 1000 # time resolution for close regime
+tstepclose = 500 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 300 # upwind reference distance for backtraced trajectories, in au
@@ -272,22 +272,29 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    indxic = 10000
-    indyic = 10000
+    indxic = -10000
+    indyic = -9750
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
     #singletraj = odeint(dr_dt, init, t, mxstep=750, args=(rp6,))
-    singletraj = odeint(dr_dt, init, t, args=(rpnoise,))
+    singletraj = odeint(Lya_dr_dt, init, t, args=(LyaRP,))
     print("Trajectory Calculated")
     #print(singletraj)
     trackrp = np.zeros(t.size)
     Ltrack = np.zeros(t.size)
     Evartrack = np.zeros(t.size)
     Etrack = np.zeros(t.size)
-    rtrack = np.zeros(t.size)
+    #rtrack = np.zeros(t.size)
+    rtrack = np.sqrt((sunpos[0]-singletraj[:,0])**2 + (sunpos[1]-singletraj[:,1])**2 + (sunpos[2]-singletraj[:,2])**2)
+    # calculating the component of the radial unit vector in each direction at each point in time
+    nrvecxk = singletraj[:,0]/rtrack
+    nrvecyk = singletraj[:,1]/rtrack
+    nrveczk = singletraj[:,2]/rtrack
+    # calculating the magnitude of v_r at each point in time
+    v_rtrack = singletraj[:,3]*nrvecxk[:] + singletraj[:,4]*nrvecyk[:] + singletraj[:,5]*nrveczk[:]
     for k in tqdm(range(t.size)):
-        trackrp[k] = rpnoise(t[k]) # calculating the value of the radiation pressure at each time point
+        trackrp[k] = LyaRP(t[k],v_rtrack[k]) # calculating the value of the radiation pressure at each time point
         """rmag = np.sqrt((sunpos[0]-singletraj[k,0])**2 + (sunpos[1]-singletraj[k,1])**2 + (sunpos[2]-singletraj[k,2])**2)
         rtrack[k] = rmag
         vmag = np.sqrt(singletraj[k,3]**2 + singletraj[k,4]**2 + singletraj[k,5]**2)
@@ -312,6 +319,7 @@ if mode==2:
             Etrack = Etrack[:k]
             rtrack = rtrack[:k]
             Ltrack = Ltrack[:k]
+            rprange = trackrp[:k]
             perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
             
 
@@ -383,7 +391,8 @@ if mode==2:
     # for fluctuating force
     # plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=((.75-.243/np.e)-.1), vmax=((.75+.243*np.e)+.1), zorder=2)
     # for non-fluctuating force
-    plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=((.75-.243/np.e)), vmax=((.75+.243*np.e)), zorder=2)
+    #plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=((.75-.243/np.e)), vmax=((.75+.243*np.e)), zorder=2)
+    plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=min(rprange), zorder=2)
     cb = plt.colorbar()
     plt.scatter(ibexpos[0]/au, ibexpos[1]/au, c='springgreen', zorder=3)
     plt.scatter(zer, zer, c='orange', zorder=3)
@@ -392,8 +401,8 @@ if mode==2:
     cb.ax.tick_params(labelsize=fosize)
     plt.xlabel("x (au)", fontsize=fosize)
     plt.ylabel("y (au)", fontsize=fosize)
-    plt.xlim([-2,2])
-    plt.ylim([-2,2])
+    plt.xlim([-2.5,15])
+    plt.ylim([-1,12])
     
     plt.xticks(fontsize=fosize)
     plt.yticks(fontsize=fosize)
@@ -436,7 +445,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/lyarp_5pi6_-9e7s_center_cosexppi_tclose1000.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/lyarp_5pi6_-8e7s_center_cosexppi_tclose1000_longer.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
