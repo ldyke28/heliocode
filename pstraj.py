@@ -28,7 +28,7 @@ finalt = 00000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5*10**(10)
 tstep = 10000 # general time resolution
-tstepclose = 400 # time resolution for close regime
+tstepclose = 200 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 300 # upwind reference distance for backtraced trajectories, in au
@@ -82,15 +82,16 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-vxstart = np.arange(-70000, 0000, 450)
-vystart = np.arange(-55000, -10000, 300)
-#vxstart = np.arange(-41000, 25000, 400)
-#vystart = np.arange(15000, 48000, 200)
+#vxstart = np.arange(-70000, 0000, 450)
+#vystart = np.arange(-55000, -10000, 300)
+vxstart = np.arange(-43000, 26000, 450)
+vystart = np.arange(35000, 62000, 175)
 #vxstart = np.arange(-25000, 25000, 250)
 #vystart = np.arange(-25000, 25000, 250)
 #vxstart = np.arange(5000, 10000, 25)
 #vystart = np.arange(5000, 10000, 25)
 vzstart = 0
+
 if mode==3:
     startt = finalt
     lastt = initialt
@@ -227,6 +228,7 @@ if mode==3:
         for j in tqdm(range(vystart.size)):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
+            
             backtraj[:,:] = odeint(dr_dt, init, t, args=(radPressure,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
@@ -445,7 +447,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/norp_5pi6_0y_direct_cosexppi_tclose400.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/norp_5pi6_0y_indirect_cosexppi_tclose200.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
