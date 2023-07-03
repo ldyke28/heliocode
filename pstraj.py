@@ -82,8 +82,11 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-vxstart = np.arange(-70000, 5000, 450)
-vystart = np.arange(-45000, 5000, 300)
+#vxstart = np.arange(-70000, 5000, 450)
+#vystart = np.arange(-45000, 5000, 300)
+vxstart = np.arange(-30000, -15000, 450)
+vystart = np.arange(-45000, -10000, 300)
+
 #vxstart = np.arange(-43000, 26000, 450)
 #vystart = np.arange(35000, 62000, 175)
 #vxstart = np.arange(-25000, 25000, 250)
@@ -232,7 +235,7 @@ if mode==3:
         for j in tqdm(range(vystart.size)):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
-            #if np.sqrt(vxstart[i]**2 + vystart[j]**2) >= 25000:
+            #if np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2) > 20:
             #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
             #else:
             #   continue
@@ -454,7 +457,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/lyaminrp_5pi6_0y_direct_cosexppi_tclose400.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/lyaminrp_5pi6_0y_direct_cosexppi_tclose400_2.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
