@@ -200,8 +200,14 @@ for m in range(nprocs-1):
                                     currentvr = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
                                     # integrand for the photoionization losses
                                     btintegrand = PIrate2/currentvr*(r1/currentrad)**2
+                                    # calculation of heliographic latitude angle (polar angle)
+                                    latangle = np.arccos(np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2)/currentrad)
+                                    # calculation of attenuation factor based on heliographic latitude angle
+                                    btintegrand = btintegrand*(.85*(np.sin(latangle))**2 + (np.cos(latangle))**2)
+
                                     # calculation of attenuation factor
                                     attfact = scipy.integrate.simps(btintegrand, currentrad)
+                                    
                                     data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,0] = vxstartn[i]
                                     data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,1] = vystart[j]
                                     data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
