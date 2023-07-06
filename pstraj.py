@@ -28,7 +28,7 @@ finalt = 00000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5*10**(10)
 tstep = 10000 # general time resolution
-tstepclose = 200 # time resolution for close regime
+tstepclose = 1000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 300 # upwind reference distance for backtraced trajectories, in au
@@ -84,10 +84,10 @@ zstart = ibexpos[2]
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
 #vxstart = np.arange(-70000, 5000, 450)
 #vystart = np.arange(-45000, 5000, 300)
-vxstart = np.arange(-46000, 24000, 450)
-vystart = np.arange(22000, 52000, 200)
-#vxstart = np.arange(-25000, 25000, 250)
-#vystart = np.arange(-25000, 25000, 250)
+#vxstart = np.arange(-46000, 24000, 450)
+#vystart = np.arange(22000, 52000, 200)
+vxstart = np.arange(-25000, 25000, 500)
+vystart = np.arange(-25000, 25000, 500)
 #vxstart = np.arange(5000, 10000, 25)
 #vystart = np.arange(5000, 10000, 25)
 vzstart = 0
@@ -113,6 +113,18 @@ def LyaRP(t,v_r):
     lyafunction = 1.25*np.exp(-(v_r-55000)**2/(2*25000**2)) + 1.25*np.exp(-(v_r+55000)**2/(2*25000**2)) + .55*np.exp(-v_r**2/(2*25000**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
     return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
+
+def LyaRP2(t,v_r):
+    # My Ly-a line profile function
+    #lyafunction = 1.25*np.exp(-(v_r-55000)**2/(2*25000**2)) + 1.25*np.exp(-(v_r+55000)**2/(2*25000**2)) + .55*np.exp(-v_r**2/(2*25000**2))
+    # Ly-a line profile function from Tarnopolski 2007
+    lyafunction = np.e**(-3.8312*10**-5*(v_r/1000)**2)*(1 + .73879* \
+    np.e**(.040396*(v_r/1000) - 3.5135*10**-4*(v_r/1000)**2) + .47817* \
+    np.e**(-.046841*(v_r/1000) - 3.3373*10**-4*(v_r/1000)**2))
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    tdependence = 5.6*10**11 - np.e/(np.e + 1/np.e)*2.4*10**11 + 2.4*10**11/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+    #return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
+    return 2.4543*10**-9*(1 + 4.5694*10**-4*tdependence)*lyafunction
 
 def LyaminRP(t,v_r):
     lyafunction = 1.25*np.exp(-(v_r-55000)**2/(2*25000**2)) + 1.25*np.exp(-(v_r+55000)**2/(2*25000**2)) + .55*np.exp(-v_r**2/(2*25000**2))
@@ -236,7 +248,7 @@ if mode==3:
             #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
             #else:
             #   continue
-            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
+            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP2,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
@@ -454,7 +466,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/lyaminrp_5pi6_0y_indirect_cosexppi_tclose200_1.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/tplyarp_5pi6_0y_center_cosexppi_tclose1000_test.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
