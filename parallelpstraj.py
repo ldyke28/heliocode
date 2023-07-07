@@ -107,6 +107,18 @@ def LyaRP(t,v_r):
     omegat = 2*np.pi/(3.47*10**(8))*t
     return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
 
+def LyaRP2(t,v_r):
+    # My Ly-a line profile function
+    #lyafunction = 1.25*np.exp(-(v_r-55000)**2/(2*25000**2)) + 1.25*np.exp(-(v_r+55000)**2/(2*25000**2)) + .55*np.exp(-v_r**2/(2*25000**2))
+    # Ly-a line profile function from Tarnopolski 2007
+    lyafunction = np.e**(-3.8312*10**-5*(v_r/1000)**2)*(1 + .73879* \
+    np.e**(.040396*(v_r/1000) - 3.5135*10**-4*(v_r/1000)**2) + .47817* \
+    np.e**(-.046841*(v_r/1000) - 3.3373*10**-4*(v_r/1000)**2))
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    tdependence = 5.6*10**11 - np.e/(np.e + 1/np.e)*2.4*10**11 + 2.4*10**11/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+    #return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
+    return 2.4543*10**-9*(1 + 4.5694*10**-4*tdependence)*lyafunction
+
 def Lya_dr_dt(x,t,rp):
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
     # dx0-2 = vx, vy, and vz, dx3-5 = ax, ay, and az
@@ -170,7 +182,7 @@ for m in range(nprocs-1):
                         # Main code in try block
                         # If an ODEintWarning is raised, point will be set aside for testing later on
                         # calculating trajectories for each initial condition in phase space given
-                        backtraj = odeint(Lya_dr_dt, init, t, args=(LyaRP,))
+                        backtraj = odeint(Lya_dr_dt, init, t, args=(LyaRP2,))
                         if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                             # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                             sunlosscount[0] += 1
