@@ -24,21 +24,22 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 00000000 # time to start backtracing
+finalt = 4000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
-initialt = -5*10**(10)
+initialt = -1*10**(12)
 tstep = 10000 # general time resolution
-tstepclose = 2000 # time resolution for close regime
+tstepclose = 1000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
-refdist = 300 # upwind reference distance for backtraced trajectories, in au
+refdist = 100 # upwind reference distance for backtraced trajectories, in au
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 150
-ibexx = np.cos(theta*np.pi/180)
-ibexy = np.sin(theta*np.pi/180)
+theta = 85
+ibexrad = 10
+ibexx = ibexrad*np.cos(theta*np.pi/180)
+ibexy = ibexrad*np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
 # implementation of target point that orbits around the sun
 #ibexpos = np.array([np.cos(np.pi*finalt/oneyear + phase)*au, np.sin(np.pi*finalt/oneyear + phase)*au, 0])
@@ -82,12 +83,12 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-#vxstart = np.arange(0000, 10000, 450)
-#vystart = np.arange(-45000, -10000, 400)
-vxstart = np.arange(-60000, -25000, 400)
-vystart = np.arange(30000, 60000, 400)
-#vxstart = np.arange(-25000, 25000, 500)
-#vystart = np.arange(-25000, 25000, 500)
+#vxstart = np.arange(-47000, -10000, 200)
+#vystart = np.arange(-21000, 15000, 200)
+#vxstart = np.arange(-40000, -30000, 400)
+#vystart = np.arange(25000, 30000, 400)
+vxstart = np.arange(-25000, 25000, 250)
+vystart = np.arange(-25000, 25000, 250)
 #vxstart = np.arange(5000, 10000, 25)
 #vystart = np.arange(5000, 10000, 25)
 vzstart = 0
@@ -248,7 +249,7 @@ if mode==3:
             #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
             #else:
             #   continue
-            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP2,))
+            backtraj[:,:] = odeint(dr_dt, init, t, args=(rp6,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
@@ -269,6 +270,7 @@ if mode==3:
                         omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
                         # function for the photoionization rate at each point in time
                         PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
+                        #PIrate2 = 1.21163*10**(-7) # time average of above
                         r1 = 1*au # reference radius
                         currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
                         # calculating the component of the radial unit vector in each direction at each point in time
@@ -466,7 +468,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/tplyarp_5pi6_0y_indirect_cosexppi_tclose2000_test3.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_17pi36_4e6_center_cosexppi_tclose1000_r=10au.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
