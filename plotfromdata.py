@@ -9,7 +9,7 @@ f = np.array([])
 filenum = 1
 
 #file = open("C:\Users\lucas\Downloads\cosexprp_pi32_1p5e8_indirect_cosexppi.txt", "r")
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/tplyarp_5pi6_0y_indirect_cosexppi_tclose2000_test1.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_4e6_center_constantpi_tclose1000_r=1au.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/Downloads/Data Files-20230406T214257Z-001/Data Files/lyaminrp_5pi6_0y_direct_cosexppi_tclose400_1.txt", delimiter=',')
 #file = np.loadtxt("/Users/ldyke/Downloads/drive-download-20221019T183112Z-001/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')
 
@@ -62,8 +62,8 @@ plt.show()"""
 
 fsize = 18
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv', vmin=0, vmax=0.06218571051524244)
-plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv')
-#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv', norm=matplotlib.colors.LogNorm(vmin=10**(-4), vmax=10**(0)))
+#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv')
+plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv', norm=matplotlib.colors.LogNorm(vmin=10**(-6), vmax=10**(-2)))
 plt.rcParams.update({'font.size': fsize})
 cb = plt.colorbar()
 #cb.set_label('Time at which orbit passes through 100 au (s)')

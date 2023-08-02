@@ -24,9 +24,9 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 4000000 # time to start backtracing
+finalt = -45000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
-initialt = -1*10**(12)
+initialt = -1*10**(10)
 tstep = 10000 # general time resolution
 tstepclose = 1000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
@@ -36,8 +36,8 @@ refdist = 100 # upwind reference distance for backtraced trajectories, in au
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 85
-ibexrad = 10
+theta = 115
+ibexrad = 1
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -87,8 +87,8 @@ zstart = ibexpos[2]
 #vystart = np.arange(-21000, 15000, 200)
 #vxstart = np.arange(-40000, -30000, 400)
 #vystart = np.arange(25000, 30000, 400)
-vxstart = np.arange(-25000, 25000, 250)
-vystart = np.arange(-25000, 25000, 250)
+vxstart = np.arange(-25000, 25000, 300)
+vystart = np.arange(-25000, 25000, 300)
 #vxstart = np.arange(5000, 10000, 25)
 #vystart = np.arange(5000, 10000, 25)
 vzstart = 0
@@ -126,6 +126,36 @@ def LyaRP2(t,v_r):
     tdependence = 5.6*10**11 - np.e/(np.e + 1/np.e)*2.4*10**11 + 2.4*10**11/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
     #return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
     return 2.4543*10**-9*(1 + 4.5694*10**-4*tdependence)*lyafunction
+
+# constants for following function
+A_K = 6.523*(1 + 0.619)
+m_K = 5.143*(1 -0.081)
+del_K = 38.008*(1+0.104)
+K = 2.165*(1-0.301)
+A_R = 580.37*(1+0.28)
+dm = -0.344*(1-0.828)
+del_R = 32.349*(1-0.049)
+b_bkg = 0.026*(1+0.184)
+a_bkg = 0.411**(-4) *(1-1.333*0.0007)
+#print(a_bkg)
+r_E = 0.6
+r2 = 1
+def LyaRP3(t,v_r):
+    #Author: E. Samoylov, H. Mueller LISM Group
+    #Date: 04.18.2023
+    #Purpose: To confirm the graph that EQ14 produces in
+    #         Kowalska-Leszczynska's 2018 paper
+    #         Evolution of the Solar Lyα Line Profile during the Solar Cycle
+    #https://iopscience.iop.org/article/10.3847/1538-4357/aa9f2a/pdf
+    F_R = A_R / (del_R * np.sqrt(2 * np.pi)) *np.exp(-(np.square((v_r/1000) - (m_K - dm))) / (2*(del_R ** 2)))
+    F_bkg = np.add(a_bkg*(v_r/1000)*0.000001,b_bkg)
+    F_K = A_K * np.power(1 + np.square((v_r/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
+
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+    #(F_K-F_R+F_bkg)/((r_E/r)**2)
+    return tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
+
 
 def LyaminRP(t,v_r):
     lyafunction = 1.25*np.exp(-(v_r-55000)**2/(2*25000**2)) + 1.25*np.exp(-(v_r+55000)**2/(2*25000**2)) + .55*np.exp(-v_r**2/(2*25000**2))
@@ -249,7 +279,7 @@ if mode==3:
             #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
             #else:
             #   continue
-            backtraj[:,:] = odeint(dr_dt, init, t, args=(rp6,))
+            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
@@ -295,13 +325,13 @@ if mode==3:
 
 # single trajectory plotting code
 if mode==2:
-    indxic = -20000
-    indyic = 16000
+    indxic = 15000
+    indyic = 14000
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
     #singletraj = odeint(dr_dt, init, t, mxstep=750, args=(rp6,))
-    singletraj = odeint(Lya_dr_dt, init, t, args=(LyaRP,))
+    singletraj = odeint(dr_dt, init, t, args=(rp6,))
     print("Trajectory Calculated")
     #print(singletraj)
     trackrp = np.zeros(t.size)
@@ -317,7 +347,8 @@ if mode==2:
     # calculating the magnitude of v_r at each point in time
     v_rtrack = singletraj[:,3]*nrvecxk[:] + singletraj[:,4]*nrvecyk[:] + singletraj[:,5]*nrveczk[:]
     for k in tqdm(range(t.size)):
-        trackrp[k] = LyaRP(t[k],v_rtrack[k]) # calculating the value of the radiation pressure at each time point
+        #trackrp[k] = LyaRP(t[k],v_rtrack[k]) # calculating the value of the radiation pressure at each time point
+        trackrp[k] = rp6(t[k])
         """rmag = np.sqrt((sunpos[0]-singletraj[k,0])**2 + (sunpos[1]-singletraj[k,1])**2 + (sunpos[2]-singletraj[k,2])**2)
         rtrack[k] = rmag
         vmag = np.sqrt(singletraj[k,3]**2 + singletraj[k,4]**2 + singletraj[k,5]**2)
@@ -414,8 +445,8 @@ if mode==2:
     # for fluctuating force
     # plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=((.75-.243/np.e)-.1), vmax=((.75+.243*np.e)+.1), zorder=2)
     # for non-fluctuating force
-    #plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=((.75-.243/np.e)), vmax=((.75+.243*np.e)), zorder=2)
-    plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=min(rprange), zorder=2)
+    plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=((.75-.243/np.e)), vmax=((.75+.243*np.e)), zorder=2)
+    #plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=min(rprange), zorder=2)
     cb = plt.colorbar()
     plt.scatter(ibexpos[0]/au, ibexpos[1]/au, c='springgreen', zorder=3)
     plt.scatter(zer, zer, c='orange', zorder=3)
@@ -424,8 +455,8 @@ if mode==2:
     cb.ax.tick_params(labelsize=fosize)
     plt.xlabel("x (au)", fontsize=fosize)
     plt.ylabel("y (au)", fontsize=fosize)
-    plt.xlim([-2,2])
-    plt.ylim([-3,1])
+    plt.xlim([-20,20])
+    plt.ylim([-20,20])
     
     plt.xticks(fontsize=fosize)
     plt.yticks(fontsize=fosize)
@@ -468,10 +499,10 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_17pi36_4e6_center_cosexppi_tclose1000_r=10au.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi4_t0_center_cosexppi_tclose1000_r=1au_coarse.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
-    for i in range(farvx.size):
-        file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
+    #for i in range(farvx.size):
+        #file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
 
     # plotting a scatterplot of vx and vy at the target point, colored by the phase space density
@@ -515,3 +546,91 @@ if mode==3:
     plt.title('Target at (.707 au, .707 au)')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
     plt.show()"""
+
+
+    # section of code to calculate which trajectories could be observed by spacecraft - considers velocity shifts and viewing angle
+    vahw = 12 # half width of the total viewing angle width of the explorer probe in 2D
+    vahwr = vahw*np.pi/180 # same width expressed in radians
+    vsc = 30000 # velocity of spacecraft in m/s
+    vxshifted = np.array([])
+    vyshifted = np.array([])
+    vxunshifted = np.array([])
+    vyunshifted = np.array([])
+    trackvangle = np.array([])
+    maxwcolorus = np.array([])
+    vsqshifted = np.array([])
+    thetarad = theta*np.pi/180 # expressing the value of theta in radians
+    # calculating the shift of the particle velocities into the spacecraft frame
+    vxshift = farvx - vsc*np.cos(thetarad - np.pi/2)
+    vyshift = farvy - vsc*np.sin(thetarad - np.pi/2)
+    vshifttotal = np.sqrt(vxshift**2 + vyshift**2)
+    vsquaredtotal = vxshift**2 + vyshift**2 # calculating total energies (v^2) associated with each trajectory in spacecraft frame
+    vangle = np.arccos(vxshift/vshifttotal) # calculating the new angle in which the velocity vector points for each trajectory
+    for i in range(farvx.size):
+        if vyshift[i] < 0:
+            vangle[i] = 2*np.pi - vangle[i]
+        if (thetarad + np.pi/2 - vahwr) < vangle[i] and (thetarad + np.pi/2 + vahwr) > vangle[i]:
+            # appending values to the list of observable velocity shifted trajectories
+            vxshifted = np.append(vxshifted, vxshift[i])
+            vyshifted = np.append(vyshifted, vyshift[i])
+            vxunshifted = np.append(vxunshifted, farvx[i])
+            vyunshifted = np.append(vyunshifted, farvy[i])
+            trackvangle = np.append(trackvangle, vangle[i])
+            maxwcolorus = np.append(maxwcolorus, maxwcolor[i])
+            vsqshifted = np.append(vsqshifted, vsquaredtotal[i])
+
+    
+    # plotting this set of trajectories
+    f2 = plt.figure()
+    f2.set_figwidth(10)
+    f2.set_figheight(6)
+    plt.scatter(vxunshifted[:]/1000, vyunshifted[:]/1000, c=maxwcolorus[:], marker='o', cmap='hsv')
+    plt.rcParams.update({'font.size': fsize})
+    cb = plt.colorbar()
+    cb.set_label('Normalized Phase Space Density')
+    #plt.xlim([-25, 25])
+    #plt.ylim([-25, 25])
+    plt.xticks(fontsize=fsize)
+    plt.yticks(fontsize=fsize)
+    plt.xlabel("$v_x$ at Target in km/s", fontsize=fsize)
+    plt.ylabel("$v_y$ at Target in km/s", fontsize=fsize)
+    plt.show()
+
+    Eset1 = np.array([])
+    psdset1 = np.array([])
+    Eset2 = np.array([])
+    psdset2 = np.array([])
+    Eset3 = np.array([])
+    psdset3 = np.array([])
+    Eset4 = np.array([])
+    psdset4 = np.array([])
+    totalke = .5 * (1.6736*10**(-27)) * vsqshifted * 6.242*10**(18)
+
+    for i in range(vxshifted.size):
+        if (thetarad + np.pi/2 - vahwr) <= trackvangle[i] < (thetarad + np.pi/2 - vahwr + np.pi/30):
+            Eset1 = np.append(Eset1, totalke[i])
+            psdset1 = np.append(psdset1, maxwcolorus[i])
+        elif (thetarad + np.pi/2 - vahwr + np.pi/30) <= trackvangle[i] < (thetarad + np.pi/2 - vahwr + 2*np.pi/30):
+            Eset2 = np.append(Eset2, totalke[i])
+            psdset2 = np.append(psdset2, maxwcolorus[i])
+        elif (thetarad + np.pi/2 - vahwr + 2*np.pi/30) <= trackvangle[i] < (thetarad + np.pi/2 - vahwr + 3*np.pi/30):
+            Eset3 = np.append(Eset3, totalke[i])
+            psdset3 = np.append(psdset3, maxwcolorus[i])
+        elif (thetarad + np.pi/2 - vahwr + 3*np.pi/30) <= trackvangle[i] <= (thetarad + np.pi/2 - vahwr + 4*np.pi/30):
+            Eset4 = np.append(Eset4, totalke[i])
+            psdset4 = np.append(psdset4, maxwcolorus[i])
+
+    #plotting counts of energies for each observable trajectory
+    fig = plt.figure()
+    fig.set_figwidth(8)
+    fig.set_figheight(5)
+
+    plt.hist(Eset1, bins=100, weights=psdset1, alpha=0.5, label="-12$^{\circ}$ to -6$^{\circ}$") # weighted by attenuated normalized phase space density
+    plt.hist(Eset2, bins=100, weights=psdset2, alpha=0.5, label="-6$^{\circ}$ to 0$^{\circ}$")
+    plt.hist(Eset3, bins=100, weights=psdset3, alpha=0.5, label="0$^{\circ}$ to 6$^{\circ}$")
+    plt.hist(Eset4, bins=100, weights=psdset4, alpha=0.5, label="6$^{\circ}$ to 12$^{\circ}$")
+    plt.legend(loc='upper right')
+    plt.xlabel("Particle Energy at Target Point in eV")
+    plt.ylabel("Counts")
+    #plt.title("Energy Distribution for Trajectories Reaching (-1 au, 0 au, 0 au) at t = 0 years")
+    plt.show()

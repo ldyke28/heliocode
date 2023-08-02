@@ -182,7 +182,7 @@ for m in range(nprocs-1):
                         # Main code in try block
                         # If an ODEintWarning is raised, point will be set aside for testing later on
                         # calculating trajectories for each initial condition in phase space given
-                        backtraj = odeint(Lya_dr_dt, init, t, args=(LyaRP2,))
+                        backtraj = odeint(Lya_dr_dt, init, t, args=(LyaRP,))
                         if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                             # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                             sunlosscount[0] += 1
