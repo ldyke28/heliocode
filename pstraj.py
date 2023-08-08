@@ -549,7 +549,7 @@ if mode==3:
 
 
     # section of code to calculate which trajectories could be observed by spacecraft - considers velocity shifts and viewing angle
-    vahw = 12 # half width of the total viewing angle width of the explorer probe in 2D
+    vahw = 3.5 # half width of the total viewing angle width of the explorer probe in 2D
     vahwr = vahw*np.pi/180 # same width expressed in radians
     vsc = 30000 # velocity of spacecraft in m/s
     vxshifted = np.array([])
@@ -606,7 +606,7 @@ if mode==3:
     psdset4 = np.array([])
     totalke = .5 * (1.6736*10**(-27)) * vsqshifted * 6.242*10**(18)
 
-    for i in range(vxshifted.size):
+    """for i in range(vxshifted.size):
         if (thetarad + np.pi/2 - vahwr) <= trackvangle[i] < (thetarad + np.pi/2 - vahwr + np.pi/30):
             Eset1 = np.append(Eset1, totalke[i])
             psdset1 = np.append(psdset1, maxwcolorus[i])
@@ -618,18 +618,19 @@ if mode==3:
             psdset3 = np.append(psdset3, maxwcolorus[i])
         elif (thetarad + np.pi/2 - vahwr + 3*np.pi/30) <= trackvangle[i] <= (thetarad + np.pi/2 - vahwr + 4*np.pi/30):
             Eset4 = np.append(Eset4, totalke[i])
-            psdset4 = np.append(psdset4, maxwcolorus[i])
+            psdset4 = np.append(psdset4, maxwcolorus[i])"""
 
     #plotting counts of energies for each observable trajectory
     fig = plt.figure()
     fig.set_figwidth(8)
     fig.set_figheight(5)
 
-    plt.hist(Eset1, bins=100, weights=psdset1, alpha=0.5, label="-12$^{\circ}$ to -6$^{\circ}$") # weighted by attenuated normalized phase space density
+    """plt.hist(Eset1, bins=100, weights=psdset1, alpha=0.5, label="-12$^{\circ}$ to -6$^{\circ}$") # weighted by attenuated normalized phase space density
     plt.hist(Eset2, bins=100, weights=psdset2, alpha=0.5, label="-6$^{\circ}$ to 0$^{\circ}$")
     plt.hist(Eset3, bins=100, weights=psdset3, alpha=0.5, label="0$^{\circ}$ to 6$^{\circ}$")
     plt.hist(Eset4, bins=100, weights=psdset4, alpha=0.5, label="6$^{\circ}$ to 12$^{\circ}$")
-    plt.legend(loc='upper right')
+    plt.legend(loc='upper right')"""
+    plt.hist(totalke, bins=100, weights=maxwcolorus)
     plt.xlabel("Particle Energy at Target Point in eV")
     plt.ylabel("Counts")
     #plt.title("Energy Distribution for Trajectories Reaching (-1 au, 0 au, 0 au) at t = 0 years")
