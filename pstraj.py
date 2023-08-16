@@ -24,7 +24,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = -45000000 # time to start backtracing
+finalt = 50000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -1*10**(10)
 tstep = 10000 # general time resolution
@@ -36,7 +36,7 @@ refdist = 100 # upwind reference distance for backtraced trajectories, in au
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 115
+theta = 130
 ibexrad = 1
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -87,8 +87,8 @@ zstart = ibexpos[2]
 #vystart = np.arange(-21000, 15000, 200)
 #vxstart = np.arange(-40000, -30000, 400)
 #vystart = np.arange(25000, 30000, 400)
-vxstart = np.arange(-25000, 25000, 300)
-vystart = np.arange(-25000, 25000, 300)
+vxstart = np.arange(-25000, 25000, 200)
+vystart = np.arange(-25000, 25000, 200)
 #vxstart = np.arange(5000, 10000, 25)
 #vystart = np.arange(5000, 10000, 25)
 vzstart = 0
@@ -279,7 +279,7 @@ if mode==3:
             #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
             #else:
             #   continue
-            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP,))
+            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP3,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
@@ -499,10 +499,10 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_pi4_t0_center_cosexppi_tclose1000_r=1au_coarse.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyarp_13pi18_5e7_center_cosexppi_tclose1000_r=1au.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
-    #for i in range(farvx.size):
-        #file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
+    for i in range(farvx.size):
+        file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
 
     # plotting a scatterplot of vx and vy at the target point, colored by the phase space density
@@ -596,14 +596,14 @@ if mode==3:
     plt.ylabel("$v_y$ at Target in km/s", fontsize=fsize)
     plt.show()
 
-    Eset1 = np.array([])
+    """Eset1 = np.array([])
     psdset1 = np.array([])
     Eset2 = np.array([])
     psdset2 = np.array([])
     Eset3 = np.array([])
     psdset3 = np.array([])
     Eset4 = np.array([])
-    psdset4 = np.array([])
+    psdset4 = np.array([])"""
     totalke = .5 * (1.6736*10**(-27)) * vsqshifted * 6.242*10**(18)
 
     """for i in range(vxshifted.size):
@@ -625,13 +625,21 @@ if mode==3:
     fig.set_figwidth(8)
     fig.set_figheight(5)
 
+<<<<<<< Updated upstream
     """plt.hist(Eset1, bins=100, weights=psdset1, alpha=0.5, label="-12$^{\circ}$ to -6$^{\circ}$") # weighted by attenuated normalized phase space density
     plt.hist(Eset2, bins=100, weights=psdset2, alpha=0.5, label="-6$^{\circ}$ to 0$^{\circ}$")
     plt.hist(Eset3, bins=100, weights=psdset3, alpha=0.5, label="0$^{\circ}$ to 6$^{\circ}$")
     plt.hist(Eset4, bins=100, weights=psdset4, alpha=0.5, label="6$^{\circ}$ to 12$^{\circ}$")
     plt.legend(loc='upper right')"""
     plt.hist(totalke, bins=100, weights=maxwcolorus)
+=======
+    plt.hist(totalke, bins=100, weights=maxwcolorus) # weighted by attenuated normalized phase space density
+    #plt.hist(Eset2, bins=100, weights=psdset2, alpha=0.5, label="-6$^{\circ}$ to 0$^{\circ}$")
+    #plt.hist(Eset3, bins=100, weights=psdset3, alpha=0.5, label="0$^{\circ}$ to 6$^{\circ}$")
+    #plt.hist(Eset4, bins=100, weights=psdset4, alpha=0.5, label="6$^{\circ}$ to 12$^{\circ}$")
+   # plt.legend(loc='upper right')
+>>>>>>> Stashed changes
     plt.xlabel("Particle Energy at Target Point in eV")
-    plt.ylabel("Counts")
+    plt.ylabel("Weighted Counts")
     #plt.title("Energy Distribution for Trajectories Reaching (-1 au, 0 au, 0 au) at t = 0 years")
     plt.show()
