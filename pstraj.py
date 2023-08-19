@@ -24,7 +24,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 50000000 # time to start backtracing
+finalt = 65000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -1*10**(10)
 tstep = 10000 # general time resolution
@@ -36,7 +36,7 @@ refdist = 100 # upwind reference distance for backtraced trajectories, in au
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 130
+theta = 120
 ibexrad = 1
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -499,7 +499,7 @@ if mode==1:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyarp_13pi18_5e7_center_cosexppi_tclose1000_r=1au.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyarp_2pi3_6p5e7_center_cosexppi_tclose1000_r=1au.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
@@ -596,50 +596,33 @@ if mode==3:
     plt.ylabel("$v_y$ at Target in km/s", fontsize=fsize)
     plt.show()
 
-    """Eset1 = np.array([])
-    psdset1 = np.array([])
-    Eset2 = np.array([])
-    psdset2 = np.array([])
-    Eset3 = np.array([])
-    psdset3 = np.array([])
-    Eset4 = np.array([])
-    psdset4 = np.array([])"""
     totalke = .5 * (1.6736*10**(-27)) * vsqshifted * 6.242*10**(18)
-
-    """for i in range(vxshifted.size):
-        if (thetarad + np.pi/2 - vahwr) <= trackvangle[i] < (thetarad + np.pi/2 - vahwr + np.pi/30):
-            Eset1 = np.append(Eset1, totalke[i])
-            psdset1 = np.append(psdset1, maxwcolorus[i])
-        elif (thetarad + np.pi/2 - vahwr + np.pi/30) <= trackvangle[i] < (thetarad + np.pi/2 - vahwr + 2*np.pi/30):
-            Eset2 = np.append(Eset2, totalke[i])
-            psdset2 = np.append(psdset2, maxwcolorus[i])
-        elif (thetarad + np.pi/2 - vahwr + 2*np.pi/30) <= trackvangle[i] < (thetarad + np.pi/2 - vahwr + 3*np.pi/30):
-            Eset3 = np.append(Eset3, totalke[i])
-            psdset3 = np.append(psdset3, maxwcolorus[i])
-        elif (thetarad + np.pi/2 - vahwr + 3*np.pi/30) <= trackvangle[i] <= (thetarad + np.pi/2 - vahwr + 4*np.pi/30):
-            Eset4 = np.append(Eset4, totalke[i])
-            psdset4 = np.append(psdset4, maxwcolorus[i])"""
 
     #plotting counts of energies for each observable trajectory
     fig = plt.figure()
     fig.set_figwidth(8)
     fig.set_figheight(5)
 
-<<<<<<< Updated upstream
-    """plt.hist(Eset1, bins=100, weights=psdset1, alpha=0.5, label="-12$^{\circ}$ to -6$^{\circ}$") # weighted by attenuated normalized phase space density
-    plt.hist(Eset2, bins=100, weights=psdset2, alpha=0.5, label="-6$^{\circ}$ to 0$^{\circ}$")
-    plt.hist(Eset3, bins=100, weights=psdset3, alpha=0.5, label="0$^{\circ}$ to 6$^{\circ}$")
-    plt.hist(Eset4, bins=100, weights=psdset4, alpha=0.5, label="6$^{\circ}$ to 12$^{\circ}$")
-    plt.legend(loc='upper right')"""
     plt.hist(totalke, bins=100, weights=maxwcolorus)
-=======
-    plt.hist(totalke, bins=100, weights=maxwcolorus) # weighted by attenuated normalized phase space density
-    #plt.hist(Eset2, bins=100, weights=psdset2, alpha=0.5, label="-6$^{\circ}$ to 0$^{\circ}$")
-    #plt.hist(Eset3, bins=100, weights=psdset3, alpha=0.5, label="0$^{\circ}$ to 6$^{\circ}$")
-    #plt.hist(Eset4, bins=100, weights=psdset4, alpha=0.5, label="6$^{\circ}$ to 12$^{\circ}$")
-   # plt.legend(loc='upper right')
->>>>>>> Stashed changes
     plt.xlabel("Particle Energy at Target Point in eV")
     plt.ylabel("Weighted Counts")
-    #plt.title("Energy Distribution for Trajectories Reaching (-1 au, 0 au, 0 au) at t = 0 years")
     plt.show()
+
+    erangehigh = 10
+    erangelow = 1
+    keselection = np.array([])
+    maxwcolorselect = np.array([])
+    vangleselect = np.array([])
+    for i in range(totalke.size):
+        if erangelow < totalke[i] < erangehigh:
+            keselection = np.append(keselection, totalke[i])
+            maxwcolorselect = np.append(maxwcolorselect, maxwcolorus[i])
+            vangleselect = np.append(vangleselect, trackvangle[i])
+
+    plt.scatter(-np.cos(vangleselect), -np.sin(vangleselect), c=maxwcolorselect, marker='o', cmap='plasma')
+    plt.xlim([-1.1,1.1])
+    plt.ylim([-1.1,1.1])
+    plt.show()
+
+
+    
