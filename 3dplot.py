@@ -173,3 +173,8 @@ ax3d2.set_xlim([-1.1, 1.1])
 ax3d2.set_ylim([-1.1, 1.1])
 ax3d2.set_zlim([-1.1, 1.1])
 plt.show()
+
+outputfile = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/test.txt", 'w')
+for i in range(vangleselectxy.size):
+    outputfile.write(str(vangleselectxy[i]/1000) + ',' + str(vangleselectz[i]/1000) + ',' + str(maxwcolorselect[i]) + '\n')
+outputfile.close()
