@@ -49,8 +49,8 @@ if ThreeD == True:
     #ax3d.set_xlim([-25, 25])
     #ax3d.set_ylim([-25, 25])
     #ax3d.set_zlim([-25, 25])
-    ax3d.set_title("Phase space population at target (t = 0 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s \
-        \n Target at (1 au, 0 au, 0 au), Time Resolution Close to Target = 1500 s")
+    #ax3d.set_title("Phase space population at target (t = 0 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s \
+    #    \n Target at (1 au, 0 au, 0 au), Time Resolution Close to Target = 1500 s")
     plt.show()
 else:
     fig = plt.figure()
@@ -61,8 +61,8 @@ else:
     cb = fig.colorbar(scatterplot)
     plt.xlabel("$v_x$ at Target Point (km/s)")
     plt.ylabel("$v_y$ at Target Point (km/s)")
-    plt.title("Phase space population at target (t = 0 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s \
-        \n Target at (1 au, 0 au), Time Resolution Close to Target = 1500 s")
+    #plt.title("Phase space population at target (t = 0 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s \
+    #    \n Target at (1 au, 0 au), Time Resolution Close to Target = 1500 s")
     plt.show()
 
 
@@ -72,10 +72,10 @@ vahwxy = 3.5 # half width of the total viewing angle width of the explorer probe
 vahwxyr = vahwxy*np.pi/180 # same width expressed in radians
 vahwz = 3.5
 vahwzr = vahwz*np.pi/180 # half width of total viewing angle above/below x-y plane in radians
-zcenter = 0
+zcenter = 0 # the z-angle in which the viewing device is pointed
 zcenterr = zcenter*np.pi/180
-vsc = 30 # velocity of spacecraft in km/s
-vxshifted = np.array([])
+vsc = 30 # velocity of spacecraft in km/s - here the input files have velocities given in km/s
+vxshifted = np.array([]) # initializing arrays to store trajectory info
 vyshifted = np.array([])
 vzshifted = np.array([])
 vxunshifted = np.array([])
@@ -97,6 +97,7 @@ vanglez = np.arcsin(vzshift/vshifttotal) # same with the polar angle
 for i in tqdm(range(vx.size)):
     i = vx.size - (i + 1)
     if vyshift[i] < 0:
+        # accounting for angles below the x axis, which will have a cosine equal to the ones mirrored across the x axis
         vanglexy[i] = 2*np.pi - vanglexy[i]
     if (thetarad + np.pi/2 - vahwxyr) < vanglexy[i] and (thetarad + np.pi/2 + vahwxyr) > vanglexy[i] \
     and zcenterr - vahwzr < vanglez[i] and zcenterr + vahwzr > vanglez[i]:
@@ -112,8 +113,6 @@ for i in tqdm(range(vx.size)):
         maxwcolorus = np.append(maxwcolorus, f[i])
         vsqshifted = np.append(vsqshifted, vsquaredtotal[i])
 
-#print(vanglexy)
-#print(vanglez)
 
 print("Done sorting")
 # plotting this set of trajectories
@@ -123,6 +122,7 @@ fig3d = plt.figure()
 fig3d.set_figwidth(10)
 fig3d.set_figheight(7)
 ax3d = plt.axes(projection='3d')
+# 3D plot of the trajectories that are allowed after this filtering
 scatterplot = ax3d.scatter3D(vxunshifted[:], vyunshifted[:], vzunshifted[:], c=maxwcolorus[:], cmap='plasma', s=.1)
 plt.rcParams.update({'font.size': fsize})
 cb = fig3d.colorbar(scatterplot)
@@ -140,17 +140,19 @@ ax3d.set_ylim([-25, 25])
 ax3d.set_zlim([-25, 25])
 plt.show()
 
+# calculating the total kinetic energy of each trajectory at the target point in eV
 totalke = .5 * (1.6736*10**(-27)) * vsqshifted*1000 * 6.242*10**(18)
 
 fig = plt.figure()
 fig.set_figwidth(8)
 fig.set_figheight(5)
-
+# plotting a histogram of the energies of these allowed trajectories
 plt.hist(totalke, bins=100, weights=maxwcolorus) # weighted by attenuated normalized phase space density
 plt.xlabel("Particle Energy at Target Point in eV")
 plt.ylabel("Weighted Counts")
 plt.show()
 
+# establishing boundaries for acceptable energies of particles in eV so we can probe specific energy regions
 erangehigh = 100
 erangelow = 0
 keselection = np.array([])
@@ -159,11 +161,14 @@ vangleselectxy = np.array([])
 vangleselectz = np.array([])
 for i in range(totalke.size):
     if erangelow < totalke[i] < erangehigh:
+        # preserving trajectories in the appropriate energy region
         keselection = np.append(keselection, totalke[i])
         maxwcolorselect = np.append(maxwcolorselect, maxwcolorus[i])
         vangleselectxy = np.append(vangleselectxy, trackvanglexy[i])
         vangleselectz = np.append(vangleselectz, trackvanglez[i])
 
+# plotting trajectories in said energy range as a set of points on the unit sphere according to where
+# the spacecraft sees they come from
 fig3d2 = plt.figure()
 fig3d2.set_figwidth(10)
 fig3d2.set_figheight(7)
@@ -174,7 +179,9 @@ ax3d2.set_ylim([-1.1, 1.1])
 ax3d2.set_zlim([-1.1, 1.1])
 plt.show()
 
+# saving the relevant trajectory angles, energies, and normalized PSD's to be able to put them together later on
+# preserving all within viewing angle, so sorting by energy can be done later
 outputfile = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/test.txt", 'w')
-for i in range(vangleselectxy.size):
-    outputfile.write(str(vangleselectxy[i]/1000) + ',' + str(vangleselectz[i]/1000) + ',' + str(maxwcolorselect[i]) + '\n')
+for i in range(trackvanglexy.size):
+    outputfile.write(str(trackvanglexy[i]) + ',' + str(trackvanglez[i]) + ',' + str(totalke[i]) + ',' + str(maxwcolorus[i]) + '\n')
 outputfile.close()

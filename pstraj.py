@@ -552,7 +552,7 @@ if mode==3:
     vahw = 3.5 # half width of the total viewing angle width of the explorer probe in 2D
     vahwr = vahw*np.pi/180 # same width expressed in radians
     vsc = 30000 # velocity of spacecraft in m/s
-    vxshifted = np.array([])
+    vxshifted = np.array([]) # initializing arrays to store values
     vyshifted = np.array([])
     vxunshifted = np.array([])
     vyunshifted = np.array([])
@@ -568,6 +568,7 @@ if mode==3:
     vangle = np.arccos(vxshift/vshifttotal) # calculating the new angle in which the velocity vector points for each trajectory
     for i in range(farvx.size):
         if vyshift[i] < 0:
+            # accounting for angles below the x axis, which will have a cosine equal to the ones mirrored across the x axis
             vangle[i] = 2*np.pi - vangle[i]
         if (thetarad + np.pi/2 - vahwr) < vangle[i] and (thetarad + np.pi/2 + vahwr) > vangle[i]:
             # appending values to the list of observable velocity shifted trajectories
@@ -596,29 +597,33 @@ if mode==3:
     plt.ylabel("$v_y$ at Target in km/s", fontsize=fsize)
     plt.show()
 
+    # calculating the actual kinetic energy of each trajectory at the target point in eV
     totalke = .5 * (1.6736*10**(-27)) * vsqshifted * 6.242*10**(18)
 
-    #plotting counts of energies for each observable trajectory
+    # plotting counts of energies for each observable trajectory
     fig = plt.figure()
     fig.set_figwidth(8)
     fig.set_figheight(5)
-
+    # counts are weighted by value of the normalized phase space density
     plt.hist(totalke, bins=100, weights=maxwcolorus)
     plt.xlabel("Particle Energy at Target Point in eV")
     plt.ylabel("Weighted Counts")
     plt.show()
 
-    erangehigh = 10
+
+    erangehigh = 10 # establishing boundaries for acceptable energies of particles in eV so we can probe specific energy regions
     erangelow = 1
     keselection = np.array([])
     maxwcolorselect = np.array([])
     vangleselect = np.array([])
     for i in range(totalke.size):
         if erangelow < totalke[i] < erangehigh:
+            # preserving trajectories in the appropriate energy region
             keselection = np.append(keselection, totalke[i])
             maxwcolorselect = np.append(maxwcolorselect, maxwcolorus[i])
             vangleselect = np.append(vangleselect, trackvangle[i])
-
+    # plotting trajectories in said energy range as a set of points on the unit circle according to where
+    # the spacecraft sees they come from
     plt.scatter(-np.cos(vangleselect), -np.sin(vangleselect), c=maxwcolorselect, marker='o', cmap='plasma')
     plt.xlim([-1.1,1.1])
     plt.ylim([-1.1,1.1])
