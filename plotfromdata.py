@@ -9,7 +9,8 @@ f = np.array([])
 filenum = 1
 
 #file = open("C:\Users\lucas\Downloads\cosexprp_pi32_1p5e8_indirect_cosexppi.txt", "r")
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_4e6_center_constantpi_tclose1000_r=1au.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper Data/Redone Plots/cosexprp_17pi36_7p17y_direct_cosexppi_tclose400.txt", delimiter=',')
+#file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper Data/cosexpminrp_17pi36_t0_indirect_cosexppi_tclose200_r=1au.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/Downloads/Data Files-20230406T214257Z-001/Data Files/lyaminrp_5pi6_0y_direct_cosexppi_tclose400_1.txt", delimiter=',')
 #file = np.loadtxt("/Users/ldyke/Downloads/drive-download-20221019T183112Z-001/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')
 
@@ -45,32 +46,20 @@ fig = plt.figure()
 fig.set_figwidth(10)
 fig.set_figheight(6)
 
-"""plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma')
-#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma', vmin=0, vmax=.6)
-#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='plasma', norm=matplotlib.colors.LogNorm(vmin=10**(-100), vmax=1))
-cb = plt.colorbar()
-cb.set_label('PDF(r,v,t)')
-plt.xlim([-25,25])
-plt.ylim([-25,25])
-plt.xticks(fontsize=16)
-plt.yticks(fontsize=16)
-plt.xlabel("$v_x$ at Target in km/s", fontsize=16)
-plt.ylabel("$v_y$ at Target in km/s", fontsize=16)
-plt.suptitle('Phase space population at target (t = 0 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
-plt.title('Target at (-.866 au, .5 au), Time Resolution Close to Target = 1000 s')
-plt.show()"""
-
 fsize = 18
-#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv', vmin=0, vmax=0.06218571051524244)
-#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv')
-plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='hsv', norm=matplotlib.colors.LogNorm(vmin=10**(-6), vmax=10**(-2)))
+#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', vmin=0, vmax=0.06218571051524244)
+#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', vmin=0, vmax=0.0020312330211150137)
+plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow')
+#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-8), vmax=10**(-4)))
 plt.rcParams.update({'font.size': fsize})
 cb = plt.colorbar()
 #cb.set_label('Time at which orbit passes through 100 au (s)')
 #cb.set_label('Travel Time from 100 au to Point of Interest (s)')
 cb.set_label('Normalized Phase Space Density')
-#plt.xlim([-25, 25])
-#plt.ylim([-25, 25])
+#plt.xlim([-60, 5])
+#plt.ylim([-40, 50])
+#plt.xlim([0, 25])
+#plt.ylim([5, 60])
 plt.xticks(fontsize=fsize)
 plt.yticks(fontsize=fsize)
 plt.xlabel("$v_x$ at Target in km/s", fontsize=fsize)
@@ -95,4 +84,88 @@ plt.xlabel("vx at Target in km/s")
 plt.ylabel("vy at Target in km/s")
 plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
 plt.title('Target at (-.707 au, .707 au)')
+plt.show()"""
+
+
+"""
+# section of code to calculate which trajectories could be observed by spacecraft - considers velocity shifts and viewing angle
+theta = 120
+vahw = 3.5 # half width of the total viewing angle width of the explorer probe in 2D
+vahwr = vahw*np.pi/180 # same width expressed in radians
+vsc = 30000 # velocity of spacecraft in m/s
+vxshifted = np.array([]) # initializing arrays to store values
+vyshifted = np.array([])
+vxunshifted = np.array([])
+vyunshifted = np.array([])
+trackvangle = np.array([])
+maxwcolorus = np.array([])
+vsqshifted = np.array([])
+thetarad = theta*np.pi/180 # expressing the value of theta in radians
+# calculating the shift of the particle velocities into the spacecraft frame
+vxshift = vx - vsc*np.cos(thetarad - np.pi/2)
+vyshift = vy - vsc*np.sin(thetarad - np.pi/2)
+vshifttotal = np.sqrt(vxshift**2 + vyshift**2)
+vsquaredtotal = vxshift**2 + vyshift**2 # calculating total energies (v^2) associated with each trajectory in spacecraft frame
+vangle = np.arccos(vxshift/vshifttotal) # calculating the new angle in which the velocity vector points for each trajectory
+for i in range(vx.size):
+    if vyshift[i] < 0:
+        # accounting for angles below the x axis, which will have a cosine equal to the ones mirrored across the x axis
+        vangle[i] = 2*np.pi - vangle[i]
+    if (thetarad + np.pi/2 - vahwr) < vangle[i] and (thetarad + np.pi/2 + vahwr) > vangle[i]:
+        # appending values to the list of observable velocity shifted trajectories
+        vxshifted = np.append(vxshifted, vxshift[i])
+        vyshifted = np.append(vyshifted, vyshift[i])
+        vxunshifted = np.append(vxunshifted, vx[i])
+        vyunshifted = np.append(vyunshifted, vy[i])
+        trackvangle = np.append(trackvangle, vangle[i])
+        maxwcolorus = np.append(maxwcolorus, f[i])
+        vsqshifted = np.append(vsqshifted, vsquaredtotal[i])
+
+
+# plotting this set of trajectories
+f2 = plt.figure()
+f2.set_figwidth(10)
+f2.set_figheight(6)
+plt.scatter(vxunshifted[:]/1000, vyunshifted[:]/1000, c=maxwcolorus[:], marker='o', cmap='rainbow')
+plt.rcParams.update({'font.size': fsize})
+cb = plt.colorbar()
+cb.set_label('Normalized Phase Space Density')
+#plt.xlim([-25, 25])
+#plt.ylim([-25, 25])
+plt.xticks(fontsize=fsize)
+plt.yticks(fontsize=fsize)
+plt.xlabel("$v_x$ at Target in km/s", fontsize=fsize)
+plt.ylabel("$v_y$ at Target in km/s", fontsize=fsize)
+plt.show()
+
+# calculating the actual kinetic energy of each trajectory at the target point in eV
+totalke = .5 * (1.6736*10**(-27)) * vsqshifted * 6.242*10**(18)
+
+# plotting counts of energies for each observable trajectory
+fig = plt.figure()
+fig.set_figwidth(8)
+fig.set_figheight(5)
+# counts are weighted by value of the normalized phase space density
+plt.hist(totalke, bins=100, weights=maxwcolorus)
+plt.xlabel("Particle Energy at Target Point in eV")
+plt.ylabel("Weighted Counts")
+plt.show()
+
+
+erangehigh = 10 # establishing boundaries for acceptable energies of particles in eV so we can probe specific energy regions
+erangelow = 1
+keselection = np.array([])
+maxwcolorselect = np.array([])
+vangleselect = np.array([])
+for i in range(totalke.size):
+    if erangelow < totalke[i] < erangehigh:
+        # preserving trajectories in the appropriate energy region
+        keselection = np.append(keselection, totalke[i])
+        maxwcolorselect = np.append(maxwcolorselect, maxwcolorus[i])
+        vangleselect = np.append(vangleselect, trackvangle[i])
+# plotting trajectories in said energy range as a set of points on the unit circle according to where
+# the spacecraft sees they come from
+plt.scatter(-np.cos(vangleselect), -np.sin(vangleselect), c=maxwcolorselect, marker='o', cmap='plasma')
+plt.xlim([-1.1,1.1])
+plt.ylim([-1.1,1.1])
 plt.show()"""

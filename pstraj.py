@@ -24,11 +24,11 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 65000000 # time to start backtracing
+finalt = 0000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -1*10**(10)
 tstep = 10000 # general time resolution
-tstepclose = 1000 # time resolution for close regime
+tstepclose = 400 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 100 # upwind reference distance for backtraced trajectories, in au
@@ -36,7 +36,7 @@ refdist = 100 # upwind reference distance for backtraced trajectories, in au
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 120
+theta = 85
 ibexrad = 1
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -83,12 +83,12 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-#vxstart = np.arange(-47000, -10000, 200)
-#vystart = np.arange(-21000, 15000, 200)
-#vxstart = np.arange(-40000, -30000, 400)
-#vystart = np.arange(25000, 30000, 400)
-vxstart = np.arange(-25000, 25000, 200)
-vystart = np.arange(-25000, 25000, 200)
+vxstart = np.arange(-62000, 0000, 300)
+vystart = np.arange(-40000, 25000, 350)
+#vxstart = np.arange(0000, 27000, 200)
+#vystart = np.arange(5000, 61000, 250)
+#vxstart = np.arange(-25000, 25000, 300)
+#vystart = np.arange(-25000, 25000, 300)
 #vxstart = np.arange(5000, 10000, 25)
 #vystart = np.arange(5000, 10000, 25)
 vzstart = 0
@@ -264,74 +264,15 @@ if mode==1:
                         print('-------------------------')
 
 
-# code for tracking phase space at distance of x = 100 au away
-if mode==3:
-    farvx = np.array([])
-    farvy = np.array([])
-    fart = np.array([])
-    maxwcolor = np.array([])
-    backtraj = np.zeros((t.size, 6))
-    for i in tqdm(range(vxstart.size)): # displays progress bars for both loops to measure progress
-        for j in tqdm(range(vystart.size)):
-            init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
-            # calculating trajectories for each initial condition in phase space given
-            #if np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2) > 20:
-            #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
-            #else:
-            #   continue
-            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP3,))
-            if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
-                # tells the code to not consider the trajectory if it at any point intersects the width of the sun
-                continue
-            if all(backtraj[:,0]-sunpos[0] < refdist*au):
-                # forgoes the following checks if the trajectory never passes through the plane at the reference distance upwind
-                continue
-            for k in range(t.size - tclose.size):
-                if backtraj[k+tclose.size,0] >= refdist*au and backtraj[k-1+tclose.size,0] <= refdist*au:
-                    # adjusting the indexing to avoid checking in the close regime
-                    kn = k+tclose.size
-                    # printing phase space information as the trajectory passes through the plane at the reference distance upwind
-                    #print(backtraj[kn-1,:])
-                    #print(t[kn-1])
-                    # radius in paper given to be 14 km/s
-                    # only saving initial conditions corresponding to points that lie within this Maxwellian at reference distance
-                    #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
-                    if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 27000:
-                        omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
-                        # function for the photoionization rate at each point in time
-                        PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
-                        #PIrate2 = 1.21163*10**(-7) # time average of above
-                        r1 = 1*au # reference radius
-                        currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
-                        # calculating the component of the radial unit vector in each direction at each point in time
-                        nrvecx = (-sunpos[0]+backtraj[0:kn+1,0])/currentrad
-                        nrvecy = (-sunpos[1]+backtraj[0:kn+1,1])/currentrad
-                        nrvecz = (-sunpos[2]+backtraj[0:kn+1,2])/currentrad
-                        # calculating the magnitude of v_r at each point in time
-                        currentvr = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
-                        # integrand for the photoionization losses
-                        btintegrand = PIrate2/currentvr*(r1/currentrad)**2
-                        # calculation of attenuation factor
-                        attfact = scipy.integrate.simps(btintegrand, currentrad)
-                        farvx = np.append(farvx, [backtraj[0,3]])
-                        farvy = np.append(farvy, [backtraj[0,4]])
-                        fart = np.append(fart, [startt - t[kn-1]])
-                        # calculating value of phase space density based on the value at the crossing of x = 100 au
-                        maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
-                        #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
-                        break
-                    break
-
-
 # single trajectory plotting code
 if mode==2:
-    indxic = 15000
-    indyic = 14000
+    indxic = -40000
+    indyic = -20000
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
     #singletraj = odeint(dr_dt, init, t, mxstep=750, args=(rp6,))
-    singletraj = odeint(dr_dt, init, t, args=(rp6,))
+    singletraj = odeint(dr_dt, init, t, args=(rp2,))
     print("Trajectory Calculated")
     #print(singletraj)
     trackrp = np.zeros(t.size)
@@ -348,7 +289,7 @@ if mode==2:
     v_rtrack = singletraj[:,3]*nrvecxk[:] + singletraj[:,4]*nrvecyk[:] + singletraj[:,5]*nrveczk[:]
     for k in tqdm(range(t.size)):
         #trackrp[k] = LyaRP(t[k],v_rtrack[k]) # calculating the value of the radiation pressure at each time point
-        trackrp[k] = rp6(t[k])
+        trackrp[k] = rp2(t[k])
         """rmag = np.sqrt((sunpos[0]-singletraj[k,0])**2 + (sunpos[1]-singletraj[k,1])**2 + (sunpos[2]-singletraj[k,2])**2)
         rtrack[k] = rmag
         vmag = np.sqrt(singletraj[k,3]**2 + singletraj[k,4]**2 + singletraj[k,5]**2)
@@ -408,7 +349,91 @@ if mode==2:
             psd = 0
             #print(perihelion)
 
+# code for tracking phase space at distance of x = 100 au away
+if mode==3:
+    farvx = np.array([])
+    farvy = np.array([])
+    fart = np.array([])
+    maxwcolor = np.array([])
+    vrmax = np.array([])
+    vrmin = np.array([])
+    backtraj = np.zeros((t.size, 6))
+    for i in tqdm(range(vxstart.size)): # displays progress bars for both loops to measure progress
+        for j in tqdm(range(vystart.size)):
+            init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
+            # calculating trajectories for each initial condition in phase space given
+            #if np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2) > 20:
+            #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
+            #else:
+            #   continue
+            backtraj[:,:] = odeint(dr_dt, init, t, args=(rp2,))
+            if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
+                # tells the code to not consider the trajectory if it at any point intersects the width of the sun
+                continue
+            if all(backtraj[:,0]-sunpos[0] < refdist*au):
+                # forgoes the following checks if the trajectory never passes through the plane at the reference distance upwind
+                continue
+            for k in range(t.size - tclose.size):
+                if backtraj[k+tclose.size,0] >= refdist*au and backtraj[k-1+tclose.size,0] <= refdist*au:
+                    # adjusting the indexing to avoid checking in the close regime
+                    kn = k+tclose.size
+                    # printing phase space information as the trajectory passes through the plane at the reference distance upwind
+                    #print(backtraj[kn-1,:])
+                    #print(t[kn-1])
+                    # radius in paper given to be 14 km/s
+                    # only saving initial conditions corresponding to points that lie within this Maxwellian at reference distance
+                    #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
+                    if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 27000:
+                        omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
+                        # function for the photoionization rate at each point in time
+                        PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
+                        #PIrate2 = 1.21163*10**(-7) # time average of above
+                        r1 = 1*au # reference radius
+                        currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
+                        # calculating the component of the radial unit vector in each direction at each point in time
+                        nrvecx = (-sunpos[0]+backtraj[0:kn+1,0])/currentrad
+                        nrvecy = (-sunpos[1]+backtraj[0:kn+1,1])/currentrad
+                        nrvecz = (-sunpos[2]+backtraj[0:kn+1,2])/currentrad
+                        # calculating the magnitude of v_r at each point in time
+                        currentvr = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
+                        vrmax = np.append(vrmax, max(currentvr))
+                        vrmin = np.append(vrmin, min(currentvr))
+                        # integrand for the photoionization losses
+                        btintegrand = PIrate2/currentvr*(r1/currentrad)**2
+                        # calculation of attenuation factor
+                        attfact = scipy.integrate.simps(btintegrand, currentrad)
+                        farvx = np.append(farvx, [backtraj[0,3]])
+                        farvy = np.append(farvy, [backtraj[0,4]])
+                        fart = np.append(fart, [startt - t[kn-1]])
+                        # calculating value of phase space density based on the value at the crossing of x = 100 au
+                        maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
+                        #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
+                        break
+                    break
+
 print('Finished')
+
+if mode==1:
+    attribs = np.vstack((storefinalvx, storefinalvy, storet))
+    print(attribs.size)
+    attribs = attribs[:, attribs[2,:].argsort()]
+    vxtot = 0
+    vytot = 0
+    ttot = 0
+    count = 0
+    for i in range (storet.size):
+        print(i, '|', attribs[0,i], '|', attribs[1,i], '|', attribs[2,i])
+        if storefinalvy[i]<0:
+            vxtot = vxtot + storefinalvx[i]
+            vytot = vytot + storefinalvy[i]
+            ttot = ttot + storet[i]
+            count = count + 1
+
+    vxavg = vxtot/count
+    vyavg = vytot/count
+    tavg = ttot/count
+    print('~~~~~~~~~~~~~~~~~~~~~')
+    print(vxavg, '||', vyavg, '||', tavg)
 
 if mode==2:
     zer = [0]
@@ -455,14 +480,14 @@ if mode==2:
     cb.ax.tick_params(labelsize=fosize)
     plt.xlabel("x (au)", fontsize=fosize)
     plt.ylabel("y (au)", fontsize=fosize)
-    plt.xlim([-20,20])
-    plt.ylim([-20,20])
+    plt.xlim([-2,5])
+    plt.ylim([-2,2])
     
     plt.xticks(fontsize=fosize)
     plt.yticks(fontsize=fosize)
-    plt.title("Individual Orbit at time t$\\approx$" + str(round(finalt/(oneyear), 3)) + " years, Target at (" + str(round(ibexpos[0]/au, 4)) + " au, " + str(round(ibexpos[1]/au, 4)) + " au, " + str(round(ibexpos[2]/au, 4)) + " au) \
-        \n At target point v = (" + str(indxic/1000) + " km/s, " + str(indyic/1000) + " km/s, " + str(indzic/1000) + " km/s), Value of distribution function = " + str(psd) + " \
-        \n Perihelion at $\\sim$ " + str(round(perihelion/au, 5)) + " au, Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years", fontsize=10)
+    #plt.title("Individual Orbit at time t$\\approx$" + str(round(finalt/(oneyear), 3)) + " years, Target at (" + str(round(ibexpos[0]/au, 4)) + " au, " + str(round(ibexpos[1]/au, 4)) + " au, " + str(round(ibexpos[2]/au, 4)) + " au) \
+    #    \n At target point v = (" + str(indxic/1000) + " km/s, " + str(indyic/1000) + " km/s, " + str(indzic/1000) + " km/s), Value of distribution function = " + str(psd) + " \
+    #   \n Perihelion at $\\sim$ " + str(round(perihelion/au, 5)) + " au, Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years", fontsize=10)
     plt.show()
 
     """f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
@@ -475,31 +500,9 @@ if mode==2:
     plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
     plt.show()"""
 
-if mode==1:
-    attribs = np.vstack((storefinalvx, storefinalvy, storet))
-    print(attribs.size)
-    attribs = attribs[:, attribs[2,:].argsort()]
-    vxtot = 0
-    vytot = 0
-    ttot = 0
-    count = 0
-    for i in range (storet.size):
-        print(i, '|', attribs[0,i], '|', attribs[1,i], '|', attribs[2,i])
-        if storefinalvy[i]<0:
-            vxtot = vxtot + storefinalvx[i]
-            vytot = vytot + storefinalvy[i]
-            ttot = ttot + storet[i]
-            count = count + 1
-
-    vxavg = vxtot/count
-    vyavg = vytot/count
-    tavg = ttot/count
-    print('~~~~~~~~~~~~~~~~~~~~~')
-    print(vxavg, '||', vyavg, '||', tavg)
-
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyarp_2pi3_6p5e7_center_cosexppi_tclose1000_r=1au.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexpminrp_17pi36_t0_direct_cosexppi_tclose400_r=1au.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
@@ -510,7 +513,7 @@ if mode==3:
     f.set_figwidth(10)
     f.set_figheight(6)
     fsize = 18
-    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='hsv')
+    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='rainbow')
     plt.rcParams.update({'font.size': fsize})
     cb = plt.colorbar()
     #cb.set_label('Time at which orbit passes through 100 au (s)')
@@ -585,7 +588,7 @@ if mode==3:
     f2 = plt.figure()
     f2.set_figwidth(10)
     f2.set_figheight(6)
-    plt.scatter(vxunshifted[:]/1000, vyunshifted[:]/1000, c=maxwcolorus[:], marker='o', cmap='hsv')
+    plt.scatter(vxunshifted[:]/1000, vyunshifted[:]/1000, c=maxwcolorus[:], marker='o', cmap='rainbow')
     plt.rcParams.update({'font.size': fsize})
     cb = plt.colorbar()
     cb.set_label('Normalized Phase Space Density')
@@ -629,5 +632,14 @@ if mode==3:
     plt.ylim([-1.1,1.1])
     plt.show()
 
-
+    overallvrmax = max(vrmax)
+    overallvrmin = min(vrmin)
+    meanvrmax = np.mean(vrmax)
+    meanvrmin = np.mean(vrmin)
+    #print(vrmax)
+    #print(vrmin)
+    print("The maximum radial velocity out of all trajectories at all points in time is " + str(overallvrmax) + " m/s")
+    print("The minimum radial velocity out of all trajectories at all points in time is " + str(overallvrmin) + " m/s")
+    print("The mean of maximum radial velocities for all trajectories is: " + str(meanvrmax) + " m/s")
+    print("The mean of minimum radial velocities for all trajectories is: " + str(meanvrmin) + " m/s")
     
