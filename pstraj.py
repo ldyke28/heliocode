@@ -28,7 +28,7 @@ finalt = 0000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -1*10**(10)
 tstep = 10000 # general time resolution
-tstepclose = 400 # time resolution for close regime
+tstepclose = 1000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 100 # upwind reference distance for backtraced trajectories, in au
@@ -36,7 +36,7 @@ refdist = 100 # upwind reference distance for backtraced trajectories, in au
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 85
+theta = 115
 ibexrad = 1
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -83,14 +83,14 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-vxstart = np.arange(-62000, 0000, 300)
-vystart = np.arange(-40000, 25000, 350)
+#vxstart = np.arange(-62000, 0000, 300)
+#vystart = np.arange(-40000, 25000, 350)
 #vxstart = np.arange(0000, 27000, 200)
 #vystart = np.arange(5000, 61000, 250)
 #vxstart = np.arange(-25000, 25000, 300)
 #vystart = np.arange(-25000, 25000, 300)
-#vxstart = np.arange(5000, 10000, 25)
-#vystart = np.arange(5000, 10000, 25)
+vxstart = np.arange(-62000, 32000, 300)
+vystart = np.arange(-40000, 62000, 300)
 vzstart = 0
 
 if mode==3:
@@ -111,7 +111,7 @@ def radPressure(t):
     return 0
 
 def LyaRP(t,v_r):
-    lyafunction = 1.25*np.exp(-(v_r-55000)**2/(2*25000**2)) + 1.25*np.exp(-(v_r+55000)**2/(2*25000**2)) + .55*np.exp(-v_r**2/(2*25000**2))
+    lyafunction = 1.25*np.exp(-(v_r/1000-55)**2/(2*25**2)) + 1.25*np.exp(-(v_r/1000+55)**2/(2*25**2)) + .55*np.exp(-(v_r/1000)**2/(2*25**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
     return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
 
@@ -366,7 +366,7 @@ if mode==3:
             #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
             #else:
             #   continue
-            backtraj[:,:] = odeint(dr_dt, init, t, args=(rp2,))
+            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
@@ -384,6 +384,8 @@ if mode==3:
                     # only saving initial conditions corresponding to points that lie within this Maxwellian at reference distance
                     #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
                     if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 27000:
+                        # INSERT CHARGE EXCHANGE - 1/r^2 force with constant value (look for average value)
+                        
                         omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
                         # function for the photoionization rate at each point in time
                         PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
@@ -502,7 +504,7 @@ if mode==2:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexpminrp_17pi36_t0_direct_cosexppi_tclose400_r=1au.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/lyarp_23pi36_t0_whole_cosexppi_tclose1000_r=1au_ex.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
@@ -627,7 +629,7 @@ if mode==3:
             vangleselect = np.append(vangleselect, trackvangle[i])
     # plotting trajectories in said energy range as a set of points on the unit circle according to where
     # the spacecraft sees they come from
-    plt.scatter(-np.cos(vangleselect), -np.sin(vangleselect), c=maxwcolorselect, marker='o', cmap='plasma')
+    plt.scatter(-np.cos(vangleselect), -np.sin(vangleselect), c=maxwcolorselect, marker='o', cmap='rainbow')
     plt.xlim([-1.1,1.1])
     plt.ylim([-1.1,1.1])
     plt.show()
