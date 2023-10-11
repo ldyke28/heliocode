@@ -385,7 +385,9 @@ if mode==3:
                     #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
                     if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 27000:
                         # INSERT CHARGE EXCHANGE - 1/r^2 force with constant value (look for average value)
-                        
+                        # approximate time-averaged charge exchange photoionization rate from Sokol et al. 2019
+                        cxirate = 5*10**(-7)
+                        # omega*t for each time point in the trajectory
                         omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
                         # function for the photoionization rate at each point in time
                         PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
@@ -401,9 +403,10 @@ if mode==3:
                         vrmax = np.append(vrmax, max(currentvr))
                         vrmin = np.append(vrmin, min(currentvr))
                         # integrand for the photoionization losses
-                        btintegrand = PIrate2/currentvr*(r1/currentrad)**2
+                        btintegrand = PIrate2/currentvr*(r1/currentrad)**2 + cxirate*(r1/currentrad)**2
                         # calculation of attenuation factor
                         attfact = scipy.integrate.simps(btintegrand, currentrad)
+                        # retaining variables corresponding to vx, vy, t at the target point
                         farvx = np.append(farvx, [backtraj[0,3]])
                         farvy = np.append(farvy, [backtraj[0,4]])
                         fart = np.append(fart, [startt - t[kn-1]])
