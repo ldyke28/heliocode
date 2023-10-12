@@ -28,7 +28,7 @@ finalt = 0000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -1*10**(10)
 tstep = 10000 # general time resolution
-tstepclose = 1000 # time resolution for close regime
+tstepclose = 400 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 100 # upwind reference distance for backtraced trajectories, in au
@@ -83,14 +83,14 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-#vxstart = np.arange(-62000, 0000, 300)
-#vystart = np.arange(-40000, 25000, 350)
+vxstart = np.arange(-62000, 5000, 400)
+vystart = np.arange(-40000, 15000, 350)
 #vxstart = np.arange(0000, 27000, 200)
 #vystart = np.arange(5000, 61000, 250)
 #vxstart = np.arange(-25000, 25000, 300)
 #vystart = np.arange(-25000, 25000, 300)
-vxstart = np.arange(-62000, 32000, 300)
-vystart = np.arange(-40000, 62000, 300)
+#vxstart = np.arange(-62000, 32000, 300)
+#vystart = np.arange(-40000, 62000, 300)
 vzstart = 0
 
 if mode==3:
@@ -402,8 +402,8 @@ if mode==3:
                         currentvr = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
                         vrmax = np.append(vrmax, max(currentvr))
                         vrmin = np.append(vrmin, min(currentvr))
-                        # integrand for the photoionization losses
-                        btintegrand = PIrate2/currentvr*(r1/currentrad)**2 + cxirate*(r1/currentrad)**2
+                        # integrand for the photoionization and charge exchange ionization losses
+                        btintegrand = PIrate2/currentvr*(r1/currentrad)**2 + cxirate/currentvr*(r1/currentrad)**2
                         # calculation of attenuation factor
                         attfact = scipy.integrate.simps(btintegrand, currentrad)
                         # retaining variables corresponding to vx, vy, t at the target point
@@ -507,7 +507,7 @@ if mode==2:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/lyarp_23pi36_t0_whole_cosexppi_tclose1000_r=1au_ex.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/lyarp_23pi36_t0_direct_cxi+cepi_tclose400_r=1au_ex.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
