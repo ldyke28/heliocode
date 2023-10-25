@@ -28,7 +28,7 @@ finalt = 0000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -1*10**(10)
 tstep = 10000 # general time resolution
-tstepclose = 400 # time resolution for close regime
+tstepclose = 1000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 100 # upwind reference distance for backtraced trajectories, in au
@@ -36,7 +36,7 @@ refdist = 100 # upwind reference distance for backtraced trajectories, in au
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 115
+theta = 120
 ibexrad = 1
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -83,14 +83,14 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # In order of how I use them - direct, indirect, center, extra one for zoomed testing
-vxstart = np.arange(-62000, 5000, 400)
-vystart = np.arange(-40000, 15000, 350)
+#vxstart = np.arange(-62000, 5000, 400)
+#vystart = np.arange(-40000, 15000, 350)
 #vxstart = np.arange(0000, 27000, 200)
 #vystart = np.arange(5000, 61000, 250)
 #vxstart = np.arange(-25000, 25000, 300)
 #vystart = np.arange(-25000, 25000, 300)
-#vxstart = np.arange(-62000, 32000, 300)
-#vystart = np.arange(-40000, 62000, 300)
+vxstart = np.arange(-65000, 30000, 300)
+vystart = np.arange(-45000, 70000, 300)
 vzstart = 0
 
 if mode==3:
@@ -111,9 +111,12 @@ def radPressure(t):
     return 0
 
 def LyaRP(t,v_r):
+    # a double (triple) Gaussian function to mimic the Lyman-alpha profile
     lyafunction = 1.25*np.exp(-(v_r/1000-55)**2/(2*25**2)) + 1.25*np.exp(-(v_r/1000+55)**2/(2*25**2)) + .55*np.exp(-(v_r/1000)**2/(2*25**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
-    return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
+    # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
+    scalefactor = 1.616
+    return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
 
 def LyaRP2(t,v_r):
     # My Ly-a line profile function
@@ -153,8 +156,10 @@ def LyaRP3(t,v_r):
 
     omegat = 2*np.pi/(3.47*10**(8))*t
     tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+    # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
+    scalefactor = .9089
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
-    return tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
+    return scalefactor*tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
 
 
 def LyaminRP(t,v_r):
@@ -366,7 +371,7 @@ if mode==3:
             #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
             #else:
             #   continue
-            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP,))
+            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP3,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
@@ -507,7 +512,7 @@ if mode==2:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/lyarp_23pi36_t0_direct_cxi+cepi_tclose400_r=1au_ex.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyarpadj_2pi3_t0_whole_cxi+cepi_tclose1000_r=1au.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')

@@ -3,9 +3,12 @@ import matplotlib.pyplot as plt
 import matplotlib
 
 def LyaRP(t,v_r):
-    lyafunction = 1.25*np.exp(-(v_r/1000-55)**2/(2*(25**2))) + 1.25*np.exp(-(v_r/1000+55)**2/(2*(25**2))) + .55*np.exp(-(v_r/1000)**2/(2*(25**2)))
+    # a double (triple) Gaussian function to mimic the Lyman-alpha profile
+    lyafunction = 1.25*np.exp(-(v_r/1000-55)**2/(2*25**2)) + 1.25*np.exp(-(v_r/1000+55)**2/(2*25**2)) + .55*np.exp(-(v_r/1000)**2/(2*25**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
-    return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
+    # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
+    scalefactor = 1.616
+    return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
 
 def LyaRP2(t,v_r):
     # My Ly-a line profile function
@@ -45,12 +48,14 @@ def LyaRP3(t,v_r):
 
     omegat = 2*np.pi/(3.47*10**(8))*t
     tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+    # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
+    scalefactor = .9089
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
-    return tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
+    return scalefactor*tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
 
 
 t = 0
-inputvr = np.arange(-100000, 100000, 10)
+inputvr = np.arange(-120000, 120000, 10)
 profile1 = np.zeros(inputvr.size)
 profile2 = np.zeros(inputvr.size)
 profile3 = np.zeros(inputvr.size)
@@ -63,9 +68,10 @@ fsize = 18
 fig, ax = plt.subplots()
 fig.set_figwidth(9)
 fig.set_figheight(6)
-ax.plot(inputvr/1000, profile3)
+ax.plot(inputvr/1000, profile2)
 plt.xticks(fontsize=fsize)
 plt.yticks(fontsize=fsize)
+plt.ylim(bottom=0)
 plt.grid()
 ax.set_xlabel("Radial Velocity Component $v_r$ (km/s)", fontsize=fsize)
 ax.set_ylabel("Value of $\mu (t)$", fontsize=fsize)
