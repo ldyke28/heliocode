@@ -8,7 +8,9 @@ def LyaRP(t,v_r):
     omegat = 2*np.pi/(3.47*10**(8))*t
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
     scalefactor = 1.616
-    return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
+    # added value to ensure scaling is correct at both solar minimum and solar maximum
+    addfactor = ((1.3244/1.616) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor)*lyafunction
 
 def LyaRP2(t,v_r):
     # My Ly-a line profile function
@@ -18,6 +20,7 @@ def LyaRP2(t,v_r):
     np.e**(.040396*(v_r/1000) - 3.5135*10**-4*(v_r/1000)**2) + .47817* \
     np.e**(-.046841*(v_r/1000) - 3.3373*10**-4*(v_r/1000)**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
+    # time dependent portion of the radiation pressure force function
     tdependence = 5.6*10**11 - np.e/(np.e + 1/np.e)*2.4*10**11 + 2.4*10**11/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
     #return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
     return 2.4543*10**-9*(1 + 4.5694*10**-4*tdependence)*lyafunction
@@ -47,7 +50,10 @@ def LyaRP3(t,v_r):
     F_K = A_K * np.power(1 + np.square((v_r/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
 
     omegat = 2*np.pi/(3.47*10**(8))*t
-    tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+    # added value to ensure scaling is correct at both solar minimum and solar maximum
+    addfactor = ((.973/.9089) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    # time dependent portion of the radiation pressure force function
+    tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
     scalefactor = .9089
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
@@ -82,9 +88,9 @@ fsize = 18
 fig, ax = plt.subplots()
 fig.set_figwidth(9)
 fig.set_figheight(6)
-ax.plot(inputvr/1000, profile2)
-ax.plot(inputvr/1000, profile2t2)
-ax.plot(inputvr/1000, profile2t3)
+ax.plot(inputvr/1000, profile3)
+ax.plot(inputvr/1000, profile3t2)
+ax.plot(inputvr/1000, profile3t3)
 plt.xticks(fontsize=fsize)
 plt.yticks(fontsize=fsize)
 plt.ylim(bottom=0)
