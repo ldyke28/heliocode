@@ -9,7 +9,7 @@ f = np.array([])
 filenum = 1
 
 #file = open("C:\Users\lucas\Downloads\cosexprp_pi32_1p5e8_indirect_cosexppi.txt", "r")
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper 1/Paper Data/Redone Plots/cosexprp_17pi36_3p824y_indirect_cosexppi_tclose50.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyarpminmaxadj_2pi3_t0_whole_cxi+cepi_tclose1000_r=1au.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper Data/cosexpminrp_17pi36_t0_indirect_cosexppi_tclose200_r=1au.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/Downloads/Data Files-20230406T214257Z-001/Data Files/lyaminrp_5pi6_0y_direct_cosexppi_tclose400_1.txt", delimiter=',')
 #file = np.loadtxt("/Users/ldyke/Downloads/drive-download-20221019T183112Z-001/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')
@@ -48,8 +48,8 @@ fig.set_figheight(6)
 
 fsize = 18
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', vmin=0, vmax=0.5221685831603383)
-plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', vmin=0, vmax=0.0020312330211150137)
-#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow')
+#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', vmin=0, vmax=0.0020312330211150137)
+plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow')
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-8), vmax=10**(-4)))
 plt.rcParams.update({'font.size': fsize})
 cb = plt.colorbar()
@@ -58,8 +58,8 @@ cb = plt.colorbar()
 cb.set_label('Normalized Phase Space Density')
 #plt.xlim([-60, 5])
 #plt.ylim([-40, 50])
-plt.xlim([0, 25])
-plt.ylim([5, 60])
+#plt.xlim([0, 25])
+#plt.ylim([5, 60])
 plt.xticks(fontsize=fsize)
 plt.yticks(fontsize=fsize)
 plt.xlabel("$v_x$ at Target in km/s", fontsize=fsize)
@@ -87,8 +87,10 @@ plt.title('Target at (-.707 au, .707 au)')
 plt.show()"""
 
 
-"""
+
 # section of code to calculate which trajectories could be observed by spacecraft - considers velocity shifts and viewing angle
+vx = vx*1000
+vy = vy*1000
 theta = 120
 vahw = 3.5 # half width of the total viewing angle width of the explorer probe in 2D
 vahwr = vahw*np.pi/180 # same width expressed in radians
@@ -153,7 +155,7 @@ plt.show()
 
 
 erangehigh = 10 # establishing boundaries for acceptable energies of particles in eV so we can probe specific energy regions
-erangelow = 1
+erangelow = 0
 keselection = np.array([])
 maxwcolorselect = np.array([])
 vangleselect = np.array([])
@@ -165,7 +167,7 @@ for i in range(totalke.size):
         vangleselect = np.append(vangleselect, trackvangle[i])
 # plotting trajectories in said energy range as a set of points on the unit circle according to where
 # the spacecraft sees they come from
-plt.scatter(-np.cos(vangleselect), -np.sin(vangleselect), c=maxwcolorselect, marker='o', cmap='plasma')
+plt.scatter(-np.cos(vangleselect), -np.sin(vangleselect), c=maxwcolorselect, marker='o', cmap='rainbow', s=3, alpha=.5)
 plt.xlim([-1.1,1.1])
 plt.ylim([-1.1,1.1])
-plt.show()"""
+plt.show()

@@ -55,20 +55,36 @@ def LyaRP3(t,v_r):
 
 
 t = 0
+t2 = 3.47*10**8 / 4
+t3 = 3.47*10**8 / 2
 inputvr = np.arange(-120000, 120000, 10)
 profile1 = np.zeros(inputvr.size)
+profile1t2 = np.zeros(inputvr.size)
+profile1t3 = np.zeros(inputvr.size)
 profile2 = np.zeros(inputvr.size)
+profile2t2 = np.zeros(inputvr.size)
+profile2t3 = np.zeros(inputvr.size)
 profile3 = np.zeros(inputvr.size)
+profile3t2 = np.zeros(inputvr.size)
+profile3t3 = np.zeros(inputvr.size)
 for i in range(inputvr.size):
     profile1[i] = LyaRP(t,inputvr[i])
+    profile1t2[i] = LyaRP(t2,inputvr[i])
+    profile1t3[i] = LyaRP(t3,inputvr[i])
     profile2[i] = LyaRP2(t,inputvr[i])
+    profile2t2[i] = LyaRP2(t2,inputvr[i])
+    profile2t3[i] = LyaRP2(t3,inputvr[i])
     profile3[i] = LyaRP3(t,inputvr[i])
+    profile3t2[i] = LyaRP3(t2,inputvr[i])
+    profile3t3[i] = LyaRP3(t3,inputvr[i])
 
 fsize = 18
 fig, ax = plt.subplots()
 fig.set_figwidth(9)
 fig.set_figheight(6)
 ax.plot(inputvr/1000, profile2)
+ax.plot(inputvr/1000, profile2t2)
+ax.plot(inputvr/1000, profile2t3)
 plt.xticks(fontsize=fsize)
 plt.yticks(fontsize=fsize)
 plt.ylim(bottom=0)

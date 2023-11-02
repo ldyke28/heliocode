@@ -6,7 +6,7 @@ from tqdm import tqdm
 ThreeD = True
 # Loading in the file to be unpacked
 #file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/pi_t0.txt", delimiter=',')
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/5pi6_-4p5e7_lya_test.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/5pi6_-4p5e7_lya_test_2.txt", delimiter=',')
 #file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/GitHub/heliocode/supplementaldata1.txt", delimiter=',')
 
 #file = file[np.any(file > 1, axis=1)]
@@ -34,9 +34,9 @@ if ThreeD == True:
     fig3d.set_figwidth(10)
     fig3d.set_figheight(7)
     ax3d = plt.axes(projection='3d')
-    #scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='plasma', s=.02, vmin=(.75-.243/np.e), vmax=(.75+.243*np.e))
-    #scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='plasma', s=.001, alpha=.15)
-    scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='plasma', s=.1)
+    #scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='rainbow', s=.02, vmin=(.75-.243/np.e), vmax=(.75+.243*np.e))
+    #scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='rainbow', s=.001, alpha=.15)
+    scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='rainbow', s=.1)
     cb = fig3d.colorbar(scatterplot)
     ax3d.set_xlabel("$v_x$ at Target Point (km/s)")
     ax3d.set_ylabel("$v_y$ at Target Point (km/s)")
@@ -57,7 +57,7 @@ else:
     fig.set_figwidth(10)
     fig.set_figheight(7)
     ax = plt.axes(projection='3d')
-    scatterplot = plt.scatter(vx[:], vy[:], c=f[:], cmap='plasma')
+    scatterplot = plt.scatter(vx[:], vy[:], c=f[:], cmap='rainbow')
     cb = fig.colorbar(scatterplot)
     plt.xlabel("$v_x$ at Target Point (km/s)")
     plt.ylabel("$v_y$ at Target Point (km/s)")
@@ -123,7 +123,7 @@ fig3d.set_figwidth(10)
 fig3d.set_figheight(7)
 ax3d = plt.axes(projection='3d')
 # 3D plot of the trajectories that are allowed after this filtering
-scatterplot = ax3d.scatter3D(vxunshifted[:], vyunshifted[:], vzunshifted[:], c=maxwcolorus[:], cmap='plasma', s=.1)
+scatterplot = ax3d.scatter3D(vxunshifted[:], vyunshifted[:], vzunshifted[:], c=maxwcolorus[:], cmap='rainbow', s=.1)
 plt.rcParams.update({'font.size': fsize})
 cb = fig3d.colorbar(scatterplot)
 cb.set_label('Normalized Phase Space Density')

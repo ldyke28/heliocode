@@ -115,7 +115,9 @@ def LyaRP(t,v_r):
     lyafunction = 1.25*np.exp(-(v_r/1000-55)**2/(2*25**2)) + 1.25*np.exp(-(v_r/1000+55)**2/(2*25**2)) + .55*np.exp(-(v_r/1000)**2/(2*25**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
-    scalefactor = 1.616
+    scalefactor = 1.3244
+    # added value to ensure scaling is correct at both solar minimum and solar maximum
+    addfactor = ((1.3244/1.616) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
 
 def LyaRP2(t,v_r):
@@ -126,6 +128,7 @@ def LyaRP2(t,v_r):
     np.e**(.040396*(v_r/1000) - 3.5135*10**-4*(v_r/1000)**2) + .47817* \
     np.e**(-.046841*(v_r/1000) - 3.3373*10**-4*(v_r/1000)**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
+    # time dependent portion of the radiation pressure force function
     tdependence = 5.6*10**11 - np.e/(np.e + 1/np.e)*2.4*10**11 + 2.4*10**11/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
     #return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
     return 2.4543*10**-9*(1 + 4.5694*10**-4*tdependence)*lyafunction
@@ -155,9 +158,12 @@ def LyaRP3(t,v_r):
     F_K = A_K * np.power(1 + np.square((v_r/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
 
     omegat = 2*np.pi/(3.47*10**(8))*t
-    tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+    # added value to ensure scaling is correct at both solar minimum and solar maximum
+    addfactor = ((.973/.9089) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    # time dependent portion of the radiation pressure force function
+    tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) #+ addfactor
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
-    scalefactor = .9089
+    scalefactor = .973
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
     return scalefactor*tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
 
@@ -167,22 +173,41 @@ def LyaminRP(t,v_r):
     return (.75 - .243)*lyafunction
 
 # extra radiation pressure functions for overlayed plots
-def rp2(t):
-    return ((.75-.243/np.e))
-
-def rp3(t):
-    return (np.sin(2*np.pi*(t/347000000)))**2
-
-def rp4(t):
-    return .5 + (np.sin(2*np.pi*(t/347000000)))**2
-
-def rp5(t):
-    return .5 + (np.sin(np.pi*(t/347000000)))**2
-
-def rp6(t):
+def cosexprp(t):
     # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
     omegat = 2*np.pi/(3.47*10**(8))*t
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+
+def cosexpabs(t,x,y,z,vr):
+    # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    r = np.sqrt(x**2 + y**2 + z**2)
+    # calculating the latitudinal (polar) angle in 3D space
+    if z >= 0:
+        latangle = np.pi/2 - np.cos(z/r)
+    else:
+        latangle = np.pi/2 + np.cos(np.abs(z)/r)
+    # calculating the longitudinal (azimuthal) angle in 3D space 
+    if y > 0:
+        longangle = np.tan(y/x)
+    elif y == 0 and x > 0:
+        longangle = 0
+    elif y == 0 and x < 0:
+        longangle = np.pi
+    elif y < 0:
+        longangle = 2*np.pi - np.tan(y/x)
+    
+    # calculating parameters from IKL et al. 2022 paper: https://ui.adsabs.harvard.edu/abs/2022ApJ...926...27K/abstract
+    if r < 1:
+        amp = 0
+    else:
+        amp = (r-1)/99
+    mds = np.sign(x)*25
+    disper = 10
+    fittype = 2
+    absval = amp*np.exp(-.5 * ((vr/1000 - mds)/disper)**fittype)
+    return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*(1 - absval)
+
 
 def rpnoise(t):
     # a different form of the radiation pressure with fluctuations
@@ -512,7 +537,7 @@ if mode==2:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyarpadj_2pi3_t0_whole_cxi+cepi_tclose1000_r=1au.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyarpmaxadj_2pi3_t0_whole_cxi+cepi_tclose1000_r=1au.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')

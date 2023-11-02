@@ -73,22 +73,40 @@ def radPressure(t):
     return 0
 
 # extra radiation pressure functions for overlayed plots
-def rp2(t):
-    return .7
-
-def rp3(t):
-    return (np.sin(2*np.pi*(t/347000000)))**2
-
-def rp4(t):
-    return .5 + (np.sin(2*np.pi*(t/347000000)))**2
-
-def rp5(t):
-    return .5 + (np.sin(np.pi*(t/347000000)))**2
-
-def rp6(t):
+def cosexprp(t):
     # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
     omegat = 2*np.pi/(3.47*10**(8))*t
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+
+def cosexpabs(t,x,y,z,vr):
+    # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    r = np.sqrt(x**2 + y**2 + z**2)
+    # calculating the latitudinal (polar) angle in 3D space
+    if z >= 0:
+        latangle = np.pi/2 - np.cos(z/r)
+    else:
+        latangle = np.pi/2 + np.cos(np.abs(z)/r)
+    # calculating the longitudinal (azimuthal) angle in 3D space 
+    if y > 0:
+        longangle = np.tan(y/x)
+    elif y == 0 and x > 0:
+        longangle = 0
+    elif y == 0 and x < 0:
+        longangle = np.pi
+    elif y < 0:
+        longangle = 2*np.pi - np.tan(y/x)
+    
+    # calculating parameters from IKL et al. 2022 paper: https://ui.adsabs.harvard.edu/abs/2022ApJ...926...27K/abstract
+    if r < 1:
+        amp = 0
+    else:
+        amp = (r-1)/99
+    mds = np.sign(x)*25
+    disper = 10
+    fittype = 2
+    absval = amp*np.exp(-.5 * ((vr/1000 - mds)/disper)**fittype)
+    return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*(1 - absval)
 
 def dr_dt(x,t,rp):
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
@@ -102,10 +120,17 @@ def dr_dt(x,t,rp):
     dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-rp(t))
     return [dx0, dx1, dx2, dx3, dx4, dx5]
 
+
 def LyaRP(t,v_r):
-    lyafunction = 1.25*np.exp(-(v_r-55000)**2/(2*25000**2)) + 1.25*np.exp(-(v_r+55000)**2/(2*25000**2)) + .55*np.exp(-v_r**2/(2*25000**2))
+    # a double (triple) Gaussian function to mimic the Lyman-alpha profile
+    lyafunction = 1.25*np.exp(-(v_r/1000-55)**2/(2*25**2)) + 1.25*np.exp(-(v_r/1000+55)**2/(2*25**2)) + .55*np.exp(-(v_r/1000)**2/(2*25**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
-    return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
+    # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
+    scalefactor = 1.3244
+    # added value to ensure scaling is correct at both solar minimum and solar maximum
+    addfactor = ((1.3244/1.616) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
+
 
 def LyaRP2(t,v_r):
     # My Ly-a line profile function
@@ -115,9 +140,44 @@ def LyaRP2(t,v_r):
     np.e**(.040396*(v_r/1000) - 3.5135*10**-4*(v_r/1000)**2) + .47817* \
     np.e**(-.046841*(v_r/1000) - 3.3373*10**-4*(v_r/1000)**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
+    # time dependent portion of the radiation pressure force function
     tdependence = 5.6*10**11 - np.e/(np.e + 1/np.e)*2.4*10**11 + 2.4*10**11/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
     #return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
     return 2.4543*10**-9*(1 + 4.5694*10**-4*tdependence)*lyafunction
+
+# constants for following function
+A_K = 6.523*(1 + 0.619)
+m_K = 5.143*(1 -0.081)
+del_K = 38.008*(1+0.104)
+K = 2.165*(1-0.301)
+A_R = 580.37*(1+0.28)
+dm = -0.344*(1-0.828)
+del_R = 32.349*(1-0.049)
+b_bkg = 0.026*(1+0.184)
+a_bkg = 0.411**(-4) *(1-1.333*0.0007)
+#print(a_bkg)
+r_E = 0.6
+r2 = 1
+def LyaRP3(t,v_r):
+    #Author: E. Samoylov, H. Mueller LISM Group
+    #Date: 04.18.2023
+    #Purpose: To confirm the graph that EQ14 produces in
+    #         Kowalska-Leszczynska's 2018 paper
+    #         Evolution of the Solar Lyα Line Profile during the Solar Cycle
+    #https://iopscience.iop.org/article/10.3847/1538-4357/aa9f2a/pdf
+    F_R = A_R / (del_R * np.sqrt(2 * np.pi)) *np.exp(-(np.square((v_r/1000) - (m_K - dm))) / (2*(del_R ** 2)))
+    F_bkg = np.add(a_bkg*(v_r/1000)*0.000001,b_bkg)
+    F_K = A_K * np.power(1 + np.square((v_r/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
+
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    # added value to ensure scaling is correct at both solar minimum and solar maximum
+    addfactor = ((.973/.9089) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    # time dependent portion of the radiation pressure force function
+    tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) #+ addfactor
+    # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
+    scalefactor = .973
+    #(F_K-F_R+F_bkg)/((r_E/r)**2)
+    return scalefactor*tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
 
 def Lya_dr_dt(x,t,rp):
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
