@@ -36,7 +36,7 @@ refdist = 100 # upwind reference distance for backtraced trajectories, in au
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 120
+theta = 45
 ibexrad = 1
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -89,8 +89,8 @@ zstart = ibexpos[2]
 #vystart = np.arange(5000, 61000, 250)
 #vxstart = np.arange(-25000, 25000, 300)
 #vystart = np.arange(-25000, 25000, 300)
-vxstart = np.arange(-65000, 30000, 300)
-vystart = np.arange(-45000, 70000, 300)
+vxstart = np.arange(-60000, 40000, 300)
+vystart = np.arange(-35000, 50000, 300)
 vzstart = 0
 
 if mode==3:
@@ -115,10 +115,13 @@ def LyaRP(t,v_r):
     lyafunction = 1.25*np.exp(-(v_r/1000-55)**2/(2*25**2)) + 1.25*np.exp(-(v_r/1000+55)**2/(2*25**2)) + .55*np.exp(-(v_r/1000)**2/(2*25**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
-    scalefactor = 1.3244
+    scalefactor = 1.8956
     # added value to ensure scaling is correct at both solar minimum and solar maximum
-    addfactor = ((1.3244/1.616) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
-    return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
+    # matches total irradiance out to +-120 km/s
+    #addfactor = ((1.3244/1.616) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    # matches total irradiance out to +-370 km/s
+    addfactor = ((1.55363/1.8956) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor)*lyafunction
 
 def LyaRP2(t,v_r):
     # My Ly-a line profile function
@@ -159,11 +162,14 @@ def LyaRP3(t,v_r):
 
     omegat = 2*np.pi/(3.47*10**(8))*t
     # added value to ensure scaling is correct at both solar minimum and solar maximum
-    addfactor = ((.973/.9089) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    # matches total irradiance out to +-120 km/s
+    #addfactor = ((.973/.9089) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    # matches total irradiance out to +-370 km/s
+    addfactor = ((.97423/.91) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     # time dependent portion of the radiation pressure force function
-    tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) #+ addfactor
+    tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
-    scalefactor = .973
+    scalefactor = .91
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
     return scalefactor*tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
 
@@ -198,12 +204,12 @@ def cosexpabs(t,x,y,z,vr):
         longangle = 2*np.pi - np.tan(y/x)
     
     # calculating parameters from IKL et al. 2022 paper: https://ui.adsabs.harvard.edu/abs/2022ApJ...926...27K/abstract
-    if r < 1:
+    if r < au:
         amp = 0
     else:
-        amp = (r-1)/99
+        amp = (r/au-1)/99
     mds = np.sign(x)*25
-    disper = 10
+    disper = 1
     fittype = 2
     absval = amp*np.exp(-.5 * ((vr/1000 - mds)/disper)**fittype)
     return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*(1 - absval)
@@ -251,9 +257,29 @@ def Lya_dr_dt(x,t,rp):
     dx0 = x[3]
     dx1 = x[4]
     dx2 = x[5]
-    dx3 = (msolar*G/(r**3))*(sunpos[0]-x[0])*(1-rp(t,v_r))
-    dx4 = (msolar*G/(r**3))*(sunpos[1]-x[1])*(1-rp(t,v_r))
-    dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-rp(t,v_r))
+    radp = rp(t,v_r)
+    dx3 = (msolar*G/(r**3))*(sunpos[0]-x[0])*(1-radp)
+    dx4 = (msolar*G/(r**3))*(sunpos[1]-x[1])*(1-radp)
+    dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-radp)
+    return [dx0, dx1, dx2, dx3, dx4, dx5]
+
+def Abs_dr_dt(x,t,rp):
+    # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
+    # dx0-2 = vx, vy, and vz, dx3-5 = ax, ay, and az
+    r = np.sqrt((sunpos[0]-x[0])**2 + (sunpos[1]-x[1])**2 + (sunpos[2]-x[2])**2)
+    # calculating the component of the radial unit vector in each direction at each point in time
+    nrvecx = x[0]/r
+    nrvecy = x[1]/r
+    nrvecz = x[2]/r
+    # calculating the magnitude of v_r at each point in time
+    v_r = x[3]*nrvecx + x[4]*nrvecy + x[5]*nrvecz
+    dx0 = x[3]
+    dx1 = x[4]
+    dx2 = x[5]
+    radp = rp(t,x[0],x[1],x[2],v_r)
+    dx3 = (msolar*G/(r**3))*(sunpos[0]-x[0])*(1-radp)
+    dx4 = (msolar*G/(r**3))*(sunpos[1]-x[1])*(1-radp)
+    dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-radp)
     return [dx0, dx1, dx2, dx3, dx4, dx5]
 
 
@@ -537,7 +563,7 @@ if mode==2:
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyarpmaxadj_2pi3_t0_whole_cxi+cepi_tclose1000_r=1au.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyarp370minmax_pi4_t0_whole_cxi+cepi_tclose1000_r=1au.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
@@ -662,7 +688,7 @@ if mode==3:
             vangleselect = np.append(vangleselect, trackvangle[i])
     # plotting trajectories in said energy range as a set of points on the unit circle according to where
     # the spacecraft sees they come from
-    plt.scatter(-np.cos(vangleselect), -np.sin(vangleselect), c=maxwcolorselect, marker='o', cmap='rainbow')
+    plt.scatter(-np.cos(vangleselect), -np.sin(vangleselect), c=maxwcolorselect, marker='o', cmap='rainbow', s=3, alpha=.5)
     plt.xlim([-1.1,1.1])
     plt.ylim([-1.1,1.1])
     plt.show()

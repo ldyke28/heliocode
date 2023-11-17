@@ -66,7 +66,7 @@ else:
     plt.show()
 
 
-theta = 180
+theta = 150
 # section of code to calculate which trajectories could be observed by spacecraft - considers velocity shifts and viewing angle
 vahwxy = 3.5 # half width of the total viewing angle width of the explorer probe in the x-y plane
 vahwxyr = vahwxy*np.pi/180 # same width expressed in radians
@@ -131,7 +131,7 @@ ax3d.set_xlabel("$v_x$ at Target Point (km/s)", fontsize=fsize)
 ax3d.set_ylabel("$v_y$ at Target Point (km/s)", fontsize=fsize)
 ax3d.set_zlabel("$v_z$ at Target Point (km/s)", fontsize=fsize)
 # Can set initial viewing angles for the data
-#ax3d.view_init(90,270)
+ax3d.view_init(90,270)
 #ax3d.view_init(0,270)
 #ax3d.view_init(0,180)
 # Can restrict the limits of the plot
@@ -141,7 +141,7 @@ ax3d.set_zlim([-25, 25])
 plt.show()
 
 # calculating the total kinetic energy of each trajectory at the target point in eV
-totalke = .5 * (1.6736*10**(-27)) * vsqshifted*1000 * 6.242*10**(18)
+totalke = .5 * (1.6736*10**(-27)) * vsqshifted*(1000)**2 * 6.242*10**(18)
 
 fig = plt.figure()
 fig.set_figwidth(8)
