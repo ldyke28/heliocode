@@ -42,11 +42,14 @@ ticks = [-11, -8.25, -5.5, -2.75, 0, 2.75, 5.5, 8.25, 11]
 fsize = 18
 
 fig, ax = plt.subplots()
-fig.set_figwidth(10)
-fig.set_figheight(7.5)
+fig.set_figwidth(12)
+fig.set_figheight(6)
 #ax.plot(t/oneyear, rp)
-ax.scatter(t/oneyear, rp, c=rp, cmap='coolwarm', s=.1, vmin=((.75-.243/np.e)), vmax=((.75+.243*np.e)), zorder=2)
+#ax.scatter(t/oneyear, rp, c=rp, cmap='coolwarm', s=.1, vmin=((.75-.243/np.e)), vmax=((.75+.243*np.e)), zorder=2)
+ax.scatter(t/oneyear, rp, s=.1, zorder=2)
 plt.xticks(ticks, fontsize=fsize)
+plt.yticks([(.75-.243/np.e), (.75+.243*np.e)], ['Minimum', 'Maximum'])
+ax.tick_params(labelsize=14)
 plt.grid()
 ax.set_xlabel("Time (in years)", fontsize=fsize)
 ax.set_ylabel("Value of μ(t)", fontsize=fsize)

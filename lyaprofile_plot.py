@@ -7,12 +7,12 @@ def LyaRP(t,v_r):
     lyafunction = 1.25*np.exp(-(v_r/1000-55)**2/(2*25**2)) + 1.25*np.exp(-(v_r/1000+55)**2/(2*25**2)) + .55*np.exp(-(v_r/1000)**2/(2*25**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
-    scalefactor = 1.8956
+    scalefactor = 1.616
     # added value to ensure scaling is correct at both solar minimum and solar maximum
     # matches total irradiance out to +-120 km/s
-    #addfactor = ((1.3244/1.616) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    addfactor = ((1.3244/1.616) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     # matches total irradiance out to +-370 km/s
-    addfactor = ((1.55363/1.8956) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    #addfactor = ((1.55363/1.8956) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor)*lyafunction
 
 def LyaRP2(t,v_r):
@@ -55,13 +55,13 @@ def LyaRP3(t,v_r):
     omegat = 2*np.pi/(3.47*10**(8))*t
     # added value to ensure scaling is correct at both solar minimum and solar maximum
     # matches total irradiance out to +-120 km/s
-    #addfactor = ((.973/.9089) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    addfactor = ((.973/.9089) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     # matches total irradiance out to +-370 km/s
-    addfactor = ((.97423/.91) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    #addfactor = ((.97423/.91) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     # time dependent portion of the radiation pressure force function
     tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
-    scalefactor = .91
+    scalefactor = .9089
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
     return scalefactor*tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
 
@@ -69,7 +69,7 @@ def LyaRP3(t,v_r):
 t = 0
 t2 = 3.47*10**8 / 4
 t3 = 3.47*10**8 / 2
-inputvr = np.arange(-370000, 370000, 10)
+inputvr = np.arange(-120000, 120000, 10)
 profile1 = np.zeros(inputvr.size)
 profile1t2 = np.zeros(inputvr.size)
 profile1t3 = np.zeros(inputvr.size)
@@ -94,9 +94,9 @@ fsize = 18
 fig, ax = plt.subplots()
 fig.set_figwidth(9)
 fig.set_figheight(6)
-ax.plot(inputvr/1000, profile2)
+ax.plot(inputvr/1000, profile3)
 #ax.plot(inputvr/1000, profile3t2)
-ax.plot(inputvr/1000, profile2t3)
+ax.plot(inputvr/1000, profile3t3)
 plt.xticks(fontsize=fsize)
 plt.yticks(fontsize=fsize)
 plt.ylim(bottom=0)
