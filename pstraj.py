@@ -36,7 +36,7 @@ refdist = 100 # upwind reference distance for backtraced trajectories, in au
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 45
+theta = 120
 ibexrad = 1
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -82,15 +82,12 @@ ystart = ibexpos[1]
 zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
-# In order of how I use them - direct, indirect, center, extra one for zoomed testing
-#vxstart = np.arange(-62000, 5000, 400)
-#vystart = np.arange(-40000, 15000, 350)
-#vxstart = np.arange(0000, 27000, 200)
-#vystart = np.arange(5000, 61000, 250)
+vxstart = np.arange(2000, 10000, 50)
+vystart = np.arange(2000, 10000, 50)
 #vxstart = np.arange(-25000, 25000, 300)
 #vystart = np.arange(-25000, 25000, 300)
-vxstart = np.arange(-60000, 40000, 300)
-vystart = np.arange(-35000, 50000, 300)
+#vxstart = np.arange(-60000, 40000, 300)
+#vystart = np.arange(-35000, 50000, 300)
 vzstart = 0
 
 if mode==3:
@@ -115,6 +112,7 @@ def LyaRP(t,v_r):
     lyafunction = 1.25*np.exp(-(v_r/1000-55)**2/(2*25**2)) + 1.25*np.exp(-(v_r/1000+55)**2/(2*25**2)) + .55*np.exp(-(v_r/1000)**2/(2*25**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
+    # scalefactor should match dividor in first term of addfactor
     scalefactor = 1.8956
     # added value to ensure scaling is correct at both solar minimum and solar maximum
     # matches total irradiance out to +-120 km/s
@@ -169,6 +167,7 @@ def LyaRP3(t,v_r):
     # time dependent portion of the radiation pressure force function
     tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
+    # scalefactor should match dividor in first term of addfactor
     scalefactor = .91
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
     return scalefactor*tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
@@ -319,16 +318,55 @@ if mode==1:
                         storet = np.append(storet, t[k+tscale-1])
                         print('-------------------------')
 
+if mode==1:
+    attribs = np.vstack((storefinalvx, storefinalvy, storet))
+    print(attribs.size)
+    attribs = attribs[:, attribs[2,:].argsort()]
+    vxtot = 0
+    vytot = 0
+    ttot = 0
+    count = 0
+    for i in range (storet.size):
+        print(i, '|', attribs[0,i], '|', attribs[1,i], '|', attribs[2,i])
+        if storefinalvy[i]<0:
+            vxtot = vxtot + storefinalvx[i]
+            vytot = vytot + storefinalvy[i]
+            ttot = ttot + storet[i]
+            count = count + 1
 
+    vxavg = vxtot/count
+    vyavg = vytot/count
+    tavg = ttot/count
+    print('~~~~~~~~~~~~~~~~~~~~~')
+    print(vxavg, '||', vyavg, '||', tavg)
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
 # single trajectory plotting code
 if mode==2:
-    indxic = -40000
-    indyic = -20000
+    indxic = 100
+    indyic = -16900
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
     #singletraj = odeint(dr_dt, init, t, mxstep=750, args=(rp6,))
-    singletraj = odeint(dr_dt, init, t, args=(rp2,))
+    singletraj = odeint(Lya_dr_dt, init, t, args=(LyaRP3,))
     print("Trajectory Calculated")
     #print(singletraj)
     trackrp = np.zeros(t.size)
@@ -344,8 +382,8 @@ if mode==2:
     # calculating the magnitude of v_r at each point in time
     v_rtrack = singletraj[:,3]*nrvecxk[:] + singletraj[:,4]*nrvecyk[:] + singletraj[:,5]*nrveczk[:]
     for k in tqdm(range(t.size)):
-        #trackrp[k] = LyaRP(t[k],v_rtrack[k]) # calculating the value of the radiation pressure at each time point
-        trackrp[k] = rp2(t[k])
+        trackrp[k] = LyaRP3(t[k],v_rtrack[k]) # calculating the value of the radiation pressure at each time point
+        #trackrp[k] = rp2(t[k])
         """rmag = np.sqrt((sunpos[0]-singletraj[k,0])**2 + (sunpos[1]-singletraj[k,1])**2 + (sunpos[2]-singletraj[k,2])**2)
         rtrack[k] = rmag
         vmag = np.sqrt(singletraj[k,3]**2 + singletraj[k,4]**2 + singletraj[k,5]**2)
@@ -373,7 +411,8 @@ if mode==2:
             rprange = trackrp[:k]
             perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
             
-
+            # approximate time-averaged charge exchange photoionization rate from Sokol et al. 2019
+            cxirate = 5*10**(-7)
             omt = 2*np.pi/(3.47*10**(8))*t[0:k+1]
             # function for the photoionization rate at each point in time
             PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
@@ -386,7 +425,7 @@ if mode==2:
             # calculating the magnitude of v_r at each point in time
             currentvr = singletraj[0:k+1,3]*nrvecx[0:k+1] + singletraj[0:k+1,4]*nrvecy[0:k+1] + singletraj[0:k+1,5]*nrvecz[0:k+1]
             # integrand for the photoionization losses
-            btintegrand = PIrate2/currentvr*(r1/currentrad)**2
+            btintegrand = PIrate2/currentvr*(r1/currentrad)**2 + cxirate/currentvr*(r1/currentrad)**2
             # calculation of attenuation factor
             attfact = scipy.integrate.simps(btintegrand, currentrad)
             psd = np.exp(-np.abs(attfact))*np.exp(-((singletraj[k-1,3]+26000)**2 + singletraj[k-1,4]**2 + singletraj[k-1,5]**2)/(5327)**2)
@@ -405,6 +444,90 @@ if mode==2:
             psd = 0
             #print(perihelion)
 
+if mode==2:
+    zer = [0]
+    fosize = 10
+    """fig3d = plt.figure()
+    fig3d.set_figwidth(7)
+    fig3d.set_figheight(7)
+    ax3d = plt.axes(projection='3d')
+    # plotting the trajectory as a series of scatter plot points colored by radiation pressure
+    scatterplot = ax3d.scatter3D(singletraj[:,0]/au, singletraj[:,1]/au, singletraj[:,2]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=(.75-.243/np.e), vmax=(.75+.243*np.e))
+    cb = fig3d.colorbar(scatterplot)
+    cb.set_label('Value of mu')
+    #ax3d.plot3D(trajs[:,0,1], trajs[:,1,1], trajs[:,2,1], 'gold', linestyle='--')
+    #ax3d.plot3D(trajs[:,0,2], trajs[:,1,2], trajs[:,2,2], 'forestgreen', linestyle=':')
+    #ax3d.plot3D(trajs[:,0,3], trajs[:,1,3], trajs[:,2,3], 'firebrick', linestyle='-.')
+    ax3d.scatter3D(zer,zer,zer,c='orange')
+    ax3d.scatter3D([ibexpos[0]/au],[ibexpos[1]/au],[ibexpos[2]/au], c='springgreen')
+    ax3d.set_xlabel("x (au)")
+    ax3d.set_ylabel("y (au)")
+    ax3d.set_zlabel("z (au)")
+    ax3d.set_xlim3d(left = -1.5, right = 1)
+    ax3d.set_ylim3d(bottom = -1, top = 1)
+    ax3d.set_zlim3d(bottom = -1, top = 1)
+    ax3d.view_init(90,270)
+    ax3d.set_title("Individual Orbit at time t$\\approx$" + str(round(finalt/(oneyear), 3)) + " years \n Target at (" + str(round(ibexpos[0]/au, 4)) + " au, " + str(round(ibexpos[1]/au, 4)) + " au, " + str(round(ibexpos[2]/au, 4)) + " au) \
+        \n At target point v = (" + str(indxic/1000) + " km/s, " + str(indyic/1000) + " km/s, " + str(indzic/1000) + " km/s) \
+        \n Value of distribution function = " + str(psd) + "\
+        \n Perihelion at $\\sim$ " + str(round(perihelion/au, 5)) + " au \
+        \n Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years",fontsize=12)"""
+    fig = plt.figure()
+    fig.set_figwidth(9)
+    fig.set_figheight(6)
+    
+    # for fluctuating force
+    # plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=((.75-.243/np.e)-.1), vmax=((.75+.243*np.e)+.1), zorder=2)
+    # for non-fluctuating force
+    #plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=((.75-.243/np.e)), vmax=((.75+.243*np.e)), zorder=2)
+    plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=0, vmax=2, zorder=2)
+    #plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=min(rprange), zorder=2)
+    cb = plt.colorbar()
+    plt.scatter(ibexpos[0]/au, ibexpos[1]/au, c='springgreen', zorder=3)
+    plt.scatter(zer, zer, c='orange', zorder=3)
+    plt.grid(zorder=0)
+    cb.set_label("Value of $\mu$", fontsize=fosize)
+    cb.ax.tick_params(labelsize=fosize)
+    plt.xlabel("x (au)", fontsize=fosize)
+    plt.ylabel("y (au)", fontsize=fosize)
+    plt.xlim([-2,5])
+    plt.ylim([-2,2])
+    
+    plt.xticks(fontsize=fosize)
+    plt.yticks(fontsize=fosize)
+    plt.title("Individual Orbit at time t$\\approx$" + str(round(finalt/(oneyear), 3)) + " years, Target at (" + str(round(ibexpos[0]/au, 4)) + " au, " + str(round(ibexpos[1]/au, 4)) + " au, " + str(round(ibexpos[2]/au, 4)) + " au) \
+        \n At target point v = (" + str(indxic/1000) + " km/s, " + str(indyic/1000) + " km/s, " + str(indzic/1000) + " km/s), Value of distribution function = " + str(psd) + " \
+       \n Perihelion at $\\sim$ " + str(round(perihelion/au, 5)) + " au, Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years", fontsize=10)
+    plt.show()
+
+    """f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
+    l1, = ax1.plot(t,Etrack, color='r')
+    l2, = ax2.plot(t,Ltrack, color='b')
+    l3, = ax3.plot(t,rtrack, color='y')
+    ax1.legend((l1, l2, l3), ('Adjusted Specific Energy', 'Magnitude of Angular Momentum', 'Radius'), loc='upper left')
+    f.subplots_adjust(hspace=.0)
+    f.set_size_inches(8,4)
+    plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
+    plt.show()"""
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
 # code for tracking phase space at distance of x = 100 au away
 if mode==3:
     farvx = np.array([])
@@ -422,7 +545,7 @@ if mode==3:
             #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
             #else:
             #   continue
-            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP3,))
+            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP2,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
@@ -474,96 +597,9 @@ if mode==3:
 
 print('Finished')
 
-if mode==1:
-    attribs = np.vstack((storefinalvx, storefinalvy, storet))
-    print(attribs.size)
-    attribs = attribs[:, attribs[2,:].argsort()]
-    vxtot = 0
-    vytot = 0
-    ttot = 0
-    count = 0
-    for i in range (storet.size):
-        print(i, '|', attribs[0,i], '|', attribs[1,i], '|', attribs[2,i])
-        if storefinalvy[i]<0:
-            vxtot = vxtot + storefinalvx[i]
-            vytot = vytot + storefinalvy[i]
-            ttot = ttot + storet[i]
-            count = count + 1
-
-    vxavg = vxtot/count
-    vyavg = vytot/count
-    tavg = ttot/count
-    print('~~~~~~~~~~~~~~~~~~~~~')
-    print(vxavg, '||', vyavg, '||', tavg)
-
-if mode==2:
-    zer = [0]
-    fosize = 10
-    """fig3d = plt.figure()
-    fig3d.set_figwidth(7)
-    fig3d.set_figheight(7)
-    ax3d = plt.axes(projection='3d')
-    # plotting the trajectory as a series of scatter plot points colored by radiation pressure
-    scatterplot = ax3d.scatter3D(singletraj[:,0]/au, singletraj[:,1]/au, singletraj[:,2]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=(.75-.243/np.e), vmax=(.75+.243*np.e))
-    cb = fig3d.colorbar(scatterplot)
-    cb.set_label('Value of mu')
-    #ax3d.plot3D(trajs[:,0,1], trajs[:,1,1], trajs[:,2,1], 'gold', linestyle='--')
-    #ax3d.plot3D(trajs[:,0,2], trajs[:,1,2], trajs[:,2,2], 'forestgreen', linestyle=':')
-    #ax3d.plot3D(trajs[:,0,3], trajs[:,1,3], trajs[:,2,3], 'firebrick', linestyle='-.')
-    ax3d.scatter3D(zer,zer,zer,c='orange')
-    ax3d.scatter3D([ibexpos[0]/au],[ibexpos[1]/au],[ibexpos[2]/au], c='springgreen')
-    ax3d.set_xlabel("x (au)")
-    ax3d.set_ylabel("y (au)")
-    ax3d.set_zlabel("z (au)")
-    ax3d.set_xlim3d(left = -1.5, right = 1)
-    ax3d.set_ylim3d(bottom = -1, top = 1)
-    ax3d.set_zlim3d(bottom = -1, top = 1)
-    ax3d.view_init(90,270)
-    ax3d.set_title("Individual Orbit at time t$\\approx$" + str(round(finalt/(oneyear), 3)) + " years \n Target at (" + str(round(ibexpos[0]/au, 4)) + " au, " + str(round(ibexpos[1]/au, 4)) + " au, " + str(round(ibexpos[2]/au, 4)) + " au) \
-        \n At target point v = (" + str(indxic/1000) + " km/s, " + str(indyic/1000) + " km/s, " + str(indzic/1000) + " km/s) \
-        \n Value of distribution function = " + str(psd) + "\
-        \n Perihelion at $\\sim$ " + str(round(perihelion/au, 5)) + " au \
-        \n Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years",fontsize=12)"""
-    fig = plt.figure()
-    fig.set_figwidth(9)
-    fig.set_figheight(6)
-    
-    # for fluctuating force
-    # plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=((.75-.243/np.e)-.1), vmax=((.75+.243*np.e)+.1), zorder=2)
-    # for non-fluctuating force
-    plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=((.75-.243/np.e)), vmax=((.75+.243*np.e)), zorder=2)
-    #plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=min(rprange), zorder=2)
-    cb = plt.colorbar()
-    plt.scatter(ibexpos[0]/au, ibexpos[1]/au, c='springgreen', zorder=3)
-    plt.scatter(zer, zer, c='orange', zorder=3)
-    plt.grid(zorder=0)
-    cb.set_label("Value of $\mu$", fontsize=fosize)
-    cb.ax.tick_params(labelsize=fosize)
-    plt.xlabel("x (au)", fontsize=fosize)
-    plt.ylabel("y (au)", fontsize=fosize)
-    plt.xlim([-2,5])
-    plt.ylim([-2,2])
-    
-    plt.xticks(fontsize=fosize)
-    plt.yticks(fontsize=fosize)
-    #plt.title("Individual Orbit at time t$\\approx$" + str(round(finalt/(oneyear), 3)) + " years, Target at (" + str(round(ibexpos[0]/au, 4)) + " au, " + str(round(ibexpos[1]/au, 4)) + " au, " + str(round(ibexpos[2]/au, 4)) + " au) \
-    #    \n At target point v = (" + str(indxic/1000) + " km/s, " + str(indyic/1000) + " km/s, " + str(indzic/1000) + " km/s), Value of distribution function = " + str(psd) + " \
-    #   \n Perihelion at $\\sim$ " + str(round(perihelion/au, 5)) + " au, Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years", fontsize=10)
-    plt.show()
-
-    """f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
-    l1, = ax1.plot(t,Etrack, color='r')
-    l2, = ax2.plot(t,Ltrack, color='b')
-    l3, = ax3.plot(t,rtrack, color='y')
-    ax1.legend((l1, l2, l3), ('Adjusted Specific Energy', 'Magnitude of Angular Momentum', 'Radius'), loc='upper left')
-    f.subplots_adjust(hspace=.0)
-    f.set_size_inches(8,4)
-    plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
-    plt.show()"""
-
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyarp370minmax_pi4_t0_whole_cxi+cepi_tclose1000_r=1au.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/tplyarp_2pi3_t0_zoom2_cxi+cepi_tclose1000_r=1au.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
