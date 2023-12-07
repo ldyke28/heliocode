@@ -2,17 +2,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
+oneyear = 3.15545454545*10**7
+
 def LyaRP(t,v_r):
     # a double (triple) Gaussian function to mimic the Lyman-alpha profile
     lyafunction = 1.25*np.exp(-(v_r/1000-55)**2/(2*25**2)) + 1.25*np.exp(-(v_r/1000+55)**2/(2*25**2)) + .55*np.exp(-(v_r/1000)**2/(2*25**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
-    scalefactor = 1.616
+    # scalefactor should match dividor in first term of addfactor
+    scalefactor = 1.8956
     # added value to ensure scaling is correct at both solar minimum and solar maximum
     # matches total irradiance out to +-120 km/s
-    addfactor = ((1.3244/1.616) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    #addfactor = ((1.3244/1.616) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     # matches total irradiance out to +-370 km/s
-    #addfactor = ((1.55363/1.8956) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    addfactor = ((1.55363/1.8956) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor)*lyafunction
 
 def LyaRP2(t,v_r):
@@ -55,24 +58,32 @@ def LyaRP3(t,v_r):
     omegat = 2*np.pi/(3.47*10**(8))*t
     # added value to ensure scaling is correct at both solar minimum and solar maximum
     # matches total irradiance out to +-120 km/s
-    addfactor = ((.973/.9089) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    #addfactor = ((.973/.9089) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     # matches total irradiance out to +-370 km/s
-    #addfactor = ((.97423/.91) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    addfactor = ((.97423/.91) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     # time dependent portion of the radiation pressure force function
     tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
-    scalefactor = .9089
+    # scalefactor should match divisor in first term of addfactor
+    scalefactor = .91
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
     return scalefactor*tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
 
 
 t = 0
-t2 = 3.47*10**8 / 4
-t3 = 3.47*10**8 / 2
-inputvr = np.arange(-120000, 120000, 10)
+t2 = oneyear*1.1
+t3 = oneyear*2.2
+t4 = oneyear*3.3
+t5 = oneyear*4.4
+t6 = oneyear*5.5
+
+inputvr = np.arange(-370000, 370000, 10)
 profile1 = np.zeros(inputvr.size)
 profile1t2 = np.zeros(inputvr.size)
 profile1t3 = np.zeros(inputvr.size)
+profile1t4 = np.zeros(inputvr.size)
+profile1t5 = np.zeros(inputvr.size)
+profile1t6 = np.zeros(inputvr.size)
 profile2 = np.zeros(inputvr.size)
 profile2t2 = np.zeros(inputvr.size)
 profile2t3 = np.zeros(inputvr.size)
@@ -80,9 +91,12 @@ profile3 = np.zeros(inputvr.size)
 profile3t2 = np.zeros(inputvr.size)
 profile3t3 = np.zeros(inputvr.size)
 for i in range(inputvr.size):
-    profile1[i] = LyaRP(t,inputvr[i])
-    profile1t2[i] = LyaRP(t2,inputvr[i])
-    profile1t3[i] = LyaRP(t3,inputvr[i])
+    profile1[i] = LyaRP3(t,inputvr[i])
+    profile1t2[i] = LyaRP3(t2,inputvr[i])
+    profile1t3[i] = LyaRP3(t3,inputvr[i])
+    profile1t4[i] = LyaRP3(t4,inputvr[i])
+    profile1t5[i] = LyaRP3(t5,inputvr[i])
+    profile1t6[i] = LyaRP3(t6,inputvr[i])
     profile2[i] = LyaRP2(t,inputvr[i])
     profile2t2[i] = LyaRP2(t2,inputvr[i])
     profile2t3[i] = LyaRP2(t3,inputvr[i])
@@ -94,9 +108,12 @@ fsize = 18
 fig, ax = plt.subplots()
 fig.set_figwidth(9)
 fig.set_figheight(6)
-ax.plot(inputvr/1000, profile3)
-#ax.plot(inputvr/1000, profile3t2)
-ax.plot(inputvr/1000, profile3t3)
+ax.plot(inputvr/1000, profile1)
+ax.plot(inputvr/1000, profile1t2)
+ax.plot(inputvr/1000, profile1t3)
+ax.plot(inputvr/1000, profile1t4)
+ax.plot(inputvr/1000, profile1t5)
+ax.plot(inputvr/1000, profile1t6)
 plt.xticks(fontsize=fsize)
 plt.yticks(fontsize=fsize)
 plt.ylim(bottom=0)
