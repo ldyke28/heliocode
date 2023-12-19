@@ -10,7 +10,7 @@ def LyaRP(t,v_r):
     omegat = 2*np.pi/(3.47*10**(8))*t
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
     # scalefactor should match dividor in first term of addfactor
-    scalefactor = 1.8956
+    scalefactor = 1.616
     # added value to ensure scaling is correct at both solar minimum and solar maximum
     # matches total irradiance out to +-120 km/s
     #addfactor = ((1.3244/1.616) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
@@ -91,12 +91,12 @@ profile3 = np.zeros(inputvr.size)
 profile3t2 = np.zeros(inputvr.size)
 profile3t3 = np.zeros(inputvr.size)
 for i in range(inputvr.size):
-    profile1[i] = LyaRP3(t,inputvr[i])
-    profile1t2[i] = LyaRP3(t2,inputvr[i])
-    profile1t3[i] = LyaRP3(t3,inputvr[i])
-    profile1t4[i] = LyaRP3(t4,inputvr[i])
-    profile1t5[i] = LyaRP3(t5,inputvr[i])
-    profile1t6[i] = LyaRP3(t6,inputvr[i])
+    profile1[i] = LyaRP2(t,inputvr[i])
+    profile1t2[i] = LyaRP2(t2,inputvr[i])
+    profile1t3[i] = LyaRP2(t3,inputvr[i])
+    profile1t4[i] = LyaRP2(t4,inputvr[i])
+    profile1t5[i] = LyaRP2(t5,inputvr[i])
+    profile1t6[i] = LyaRP2(t6,inputvr[i])
     profile2[i] = LyaRP2(t,inputvr[i])
     profile2t2[i] = LyaRP2(t2,inputvr[i])
     profile2t3[i] = LyaRP2(t3,inputvr[i])
@@ -108,12 +108,13 @@ fsize = 18
 fig, ax = plt.subplots()
 fig.set_figwidth(9)
 fig.set_figheight(6)
-ax.plot(inputvr/1000, profile1)
-ax.plot(inputvr/1000, profile1t2)
-ax.plot(inputvr/1000, profile1t3)
-ax.plot(inputvr/1000, profile1t4)
-ax.plot(inputvr/1000, profile1t5)
-ax.plot(inputvr/1000, profile1t6)
+ax.plot(inputvr/1000, profile1, label="t = 0 yrs")
+ax.plot(inputvr/1000, profile1t2, label="t = 1.1 yrs")
+ax.plot(inputvr/1000, profile1t3, label="t = 2.2 yrs")
+ax.plot(inputvr/1000, profile1t4, label="t = 3.3 yrs")
+ax.plot(inputvr/1000, profile1t5, label="t = 4.4 yrs")
+ax.plot(inputvr/1000, profile1t6, label="t = 5.5 yrs")
+#ax.legend()
 plt.xticks(fontsize=fsize)
 plt.yticks(fontsize=fsize)
 plt.ylim(bottom=0)

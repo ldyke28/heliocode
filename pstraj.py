@@ -35,6 +35,8 @@ refdist = 100 # upwind reference distance for backtraced trajectories, in au
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
+# https://ibex.princeton.edu/sites/g/files/toruqf1596/files/moebius_et_al_2012.pdf
+# above gives angle of ecliptic relative to ISM flow
 sunpos = np.array([0,0,0])
 theta = 120
 ibexrad = 1
@@ -132,7 +134,7 @@ def LyaRP(t,v_r):
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
     # scalefactor should match dividor in first term of addfactor
     scalefactor = 1.8956
-    # added value to ensure scaling is correct at both solar minimum and solar maximum
+    # added value to ensure scaling is throughout solar cycle
     # matches total irradiance out to +-120 km/s
     #addfactor = ((1.3244/1.616) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     # matches total irradiance out to +-370 km/s
@@ -166,7 +168,7 @@ a_bkg = 0.411**(-4) *(1-1.333*0.0007)
 r_E = 0.6
 r2 = 1
 def LyaRP3(t,v_r):
-    #Author: E. Samoylov, H. Mueller LISM Group
+    #Author: E. Samoylov, H. Mueller LISM Group (Adapted by L. Dyke for this code)
     #Date: 04.18.2023
     #Purpose: To confirm the graph that EQ14 produces in
     #         Kowalska-Leszczynska's 2018 paper
@@ -177,7 +179,7 @@ def LyaRP3(t,v_r):
     F_K = A_K * np.power(1 + np.square((v_r/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
 
     omegat = 2*np.pi/(3.47*10**(8))*t
-    # added value to ensure scaling is correct at both solar minimum and solar maximum
+    # added value to ensure scaling is correct throughout solar cycle
     # matches total irradiance out to +-120 km/s
     #addfactor = ((.973/.9089) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     # matches total irradiance out to +-370 km/s
@@ -210,7 +212,8 @@ def cosexpabs(t,x,y,z,vr):
         latangle = np.pi/2 - np.cos(z/r)
     else:
         latangle = np.pi/2 + np.cos(np.abs(z)/r)
-    # calculating the longitudinal (azimuthal) angle in 3D space 
+    # calculating the longitudinal (azimuthal) angle in 3D space
+    # NOTE FIX
     if y > 0:
         longangle = np.tan(y/x)
     elif y == 0 and x > 0:
@@ -598,7 +601,7 @@ if mode==3:
                     # radius in paper given to be 14 km/s
                     # only saving initial conditions corresponding to points that lie within this Maxwellian at reference distance
                     #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
-                    if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 27000:
+                    if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 26795:
                         # INSERT CHARGE EXCHANGE - 1/r^2 force with constant value (look for average value)
                         # approximate time-averaged charge exchange photoionization rate from Sokol et al. 2019
                         cxirate = 5*10**(-7)
