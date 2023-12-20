@@ -53,6 +53,11 @@ tmid = finalt - 500000000 # time at which we switch from high resolution to low 
 tclose = np.arange(finalt, tmid, -tstepclose) # high resolution time array (close regime)
 tfar = np.arange(tmid, initialt, -tstepfar) # low resolution time array (far regime)
 t = np.concatenate((tclose, tfar))
+
+# Set of "initial" conditions (conditions at target point) for the particle velocity
+indxic = 10000
+indyic = 2000
+indzic = 00
 #
 #
 #
@@ -179,10 +184,6 @@ def Lya_dr_dt(x,t,rp):
 #
 #
 # Main code
-# Set of "initial" conditions (conditions at target point) of 
-indxic = 10000
-indyic = 2000
-indzic = 00
 init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
 print("Calculating trajectory...")
 singletraj = odeint(Lya_dr_dt, init, t, args=(TandBRP,))
@@ -299,6 +300,46 @@ for k in tqdm(range(t.size)): # tqdm gives you a progress bar on this part of th
         perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
         ttime = 0
         psd = 0
+        heliolat = heliolat[:k] # clipping arrays to relevant range
+        heliolong = heliolong[:k]
+        inlongrange = (heliolong < maxlong) & (heliolong > minlong) # boolean array that equals True when in the right longitude range
+        if maxlong < minlong:
+            # considering case where the x-axis is in the longitudinal range
+            inlongrange = ((heliolong > minlong) & (heliolong < 2*np.pi)) | ((heliolong < maxlong) & (heliolong > 0)) 
+        timeinlong = np.array([]) # array to store lengths of time when the particle is in that range
+        # applying the boolean mask to the time points to get the times where the trajectory is in the relevant range
+        nonzerot = t*inlongrange
+        ini = 0 # saving the index corresponding to the first time point to consider
+        for i in tqdm(range(nonzerot.size-2)):
+            # calculating time step between each array member
+            cond1 = abs(nonzerot[i+2] - nonzerot[i+1])
+            cond2 = abs(nonzerot[i+1] - nonzerot[i])
+            if cond1 != cond2:
+                # checks if there is an abnormal time step to split up different times of trajectory passing through region of interest
+                if abs(cond1-cond2) != abs(tstepclose-tstepfar):
+                    # double checks the difference isn't just a result of the regimes switching
+                    timeinlong = np.append(timeinlong, abs(nonzerot[i+1]-nonzerot[ini]))
+                    ini = i+2
+            if i == nonzerot.size-3:
+                #ensures end of array is considered
+                timeinlong = np.append(timeinlong, abs(nonzerot[i+2]-nonzerot[ini]))
+        timeinlong = timeinlong[np.where(timeinlong!=0)]
+        #repeat the process for the heliolatitude
+        inlatrange = (heliolat < maxlat) & (heliolat > minlat)
+        nonzerotlat = t*inlatrange
+        timeinlat = np.array([])
+        ini2 = 0
+        for i in tqdm(range(nonzerotlat.size-2)):
+            cond1 = abs(nonzerotlat[i+2] - nonzerotlat[i+1])
+            cond2 = abs(nonzerotlat[i+1] - nonzerotlat[i])
+            if cond1 != cond2:
+                if abs(cond1-cond2) != abs(tstepclose-tstepfar):
+                    timeinlat = np.append(timeinlat, abs(nonzerotlat[i+1]-nonzerotlat[ini2]))
+                    ini2 = i+2
+            if i == nonzerotlat.size-3:
+                timeinlat = np.append(timeinlat, abs(nonzerotlat[i+2]-nonzerotlat[ini2]))
+        timeinlat = timeinlat[np.where(timeinlat!=0)]
+        
 
 print("Total time(s) spent in the given range of longitudes: " + str(timeinlong/oneyear) + " years")
 print("Total time(s) spent in the given range of latitudes: " + str(timeinlat/oneyear) + " years")
