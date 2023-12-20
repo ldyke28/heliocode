@@ -6,7 +6,7 @@ import scipy
 from tqdm import tqdm
 
 #
-#
+# Setting common parameter values
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
 msolar = 1.98847*10**30 # mass of the sun in kg
@@ -19,6 +19,7 @@ oneyear = 3.15545454545*10**7
 # INITIAL CONDITIONS
 finalt = 0 # time to start backtracing
 initialt = -1*10**(10) # time to backtrace to
+# two time resolutions to assist with ionization calculations
 tstepclose = 500 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 refdist = 100 # upwind reference distance for backtraced trajectories, in au
@@ -356,13 +357,13 @@ fig3d.set_figwidth(7)
 fig3d.set_figheight(7)
 ax3d = plt.axes(projection='3d')
 # plotting the trajectory as a series of scatter plot points colored by radiation pressure
+# limits the color bar between vmin and vmax
 scatterplot = ax3d.scatter3D(singletraj[:,0]/au, singletraj[:,1]/au, singletraj[:,2]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=(.75-.243/np.e), vmax=(.75+.243*np.e))
 cb = fig3d.colorbar(scatterplot)
 cb.set_label('Value of mu')
-#ax3d.plot3D(trajs[:,0,1], trajs[:,1,1], trajs[:,2,1], 'gold', linestyle='--')
-#ax3d.plot3D(trajs[:,0,2], trajs[:,1,2], trajs[:,2,2], 'forestgreen', linestyle=':')
-#ax3d.plot3D(trajs[:,0,3], trajs[:,1,3], trajs[:,2,3], 'firebrick', linestyle='-.')
+# plotting the location of the Sun as an orange dot
 ax3d.scatter3D(zer,zer,zer,c='orange')
+# plotting the location of the target point as a green dot
 ax3d.scatter3D([ibexpos[0]/au],[ibexpos[1]/au],[ibexpos[2]/au], c='springgreen')
 ax3d.set_xlabel("x (au)")
 ax3d.set_ylabel("y (au)")
