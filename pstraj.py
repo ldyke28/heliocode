@@ -24,7 +24,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = -1.5*oneyear # time to start backtracing
+finalt = 0*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -1*10**(10)
 tstep = 10000 # general time resolution
@@ -154,26 +154,29 @@ def LyaRP2(t,v_r):
     #return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
     return 2.4543*10**-9*(1 + 4.5694*10**-4*tdependence)*lyafunction
 
-# constants for following function
-A_K = 6.523*(1 + 0.619)
-m_K = 5.143*(1 -0.081)
-del_K = 38.008*(1+0.104)
-K = 2.165*(1-0.301)
-A_R = 580.37*(1+0.28)
-dm = -0.344*(1-0.828)
-del_R = 32.349*(1-0.049)
-b_bkg = 0.026*(1+0.184)
-a_bkg = 0.411**(-4) *(1-1.333*0.0007)
-#print(a_bkg)
-r_E = 0.6
-r2 = 1
+
 def LyaRP3(t,v_r):
+    # constants for following function
+    A_K = 6.523*(1 + 0.619)
+    m_K = 5.143*(1 -0.081)
+    del_K = 38.008*(1+0.104)
+    K = 2.165*(1-0.301)
+    A_R = 580.37*(1+0.28)
+    dm = -0.344*(1-0.828)
+    del_R = 32.349*(1-0.049)
+    b_bkg = 0.026*(1+0.184)
+    a_bkg = 0.411**(-4) *(1-1.333*0.0007)
+    #print(a_bkg)
+    r_E = 0.6
+    r2 = 1
     #Author: E. Samoylov, H. Mueller LISM Group (Adapted by L. Dyke for this code)
     #Date: 04.18.2023
     #Purpose: To confirm the graph that EQ14 produces in
     #         Kowalska-Leszczynska's 2018 paper
     #         Evolution of the Solar Lyα Line Profile during the Solar Cycle
     #https://iopscience.iop.org/article/10.3847/1538-4357/aa9f2a/pdf
+
+    # note the above parameters are taken from Kowalska-Leszczynska et al. 2020
     F_R = A_R / (del_R * np.sqrt(2 * np.pi)) *np.exp(-(np.square((v_r/1000) - (m_K - dm))) / (2*(del_R ** 2)))
     F_bkg = np.add(a_bkg*(v_r/1000)*0.000001,b_bkg)
     F_K = A_K * np.power(1 + np.square((v_r/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
@@ -193,6 +196,44 @@ def LyaRP3(t,v_r):
     return scalefactor*tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
 
 
+def LyaRP4(t,v_r):
+    #Author: E. Samoylov, H. Mueller LISM Group (Adapted by L. Dyke for this code)
+    #https://iopscience.iop.org/article/10.3847/1538-4357/aa9f2a/pdf
+    # Revised version of the function from IKL et al. 2018 - time dependence introduced through parameters
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    # added value to ensure scaling is correct throughout solar cycle
+    # matches total irradiance out to +-120 km/s
+    #addfactor = ((.973/.9089) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    # matches total irradiance out to +-370 km/s
+    #addfactor = ((.97423/.91) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    # time dependent portion of the radiation pressure force function
+    #tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor
+    tdependence = .95 + .5/(np.e**2 + 1) + .5/(np.e + 1/np.e)*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+    # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
+    # scalefactor should match divisor in first term of addfactor
+    scalefactor = .555
+    
+    # parameters of function
+    A_K = 6.523*(1 + 0.619*tdependence)
+    m_K = 5.143*(1 - 1.081*tdependence)
+    del_K = 38.008*(1 + 0.104*tdependence)
+    K = 2.165*(1 - 0.301*tdependence)
+    A_R = 580.37*(1 + 0.28*tdependence)
+    dm = -0.344*(1 - 0.828*tdependence)
+    del_R = 32.349*(1 - 0.049*tdependence)
+    b_bkg = 0.035*(1 + 0.184*tdependence)
+    a_bkg = 0.411**(-4) *(1 - 1.333*tdependence)
+    #print(a_bkg)
+    r_E = 0.6
+    r2 = 1
+    F_R = A_R / (del_R * np.sqrt(2 * np.pi)) *np.exp(-(np.square((v_r/1000) - (m_K + dm))) / (2*(del_R ** 2)))
+    F_bkg = np.add(a_bkg*(v_r/1000)*0.000001,b_bkg)
+    F_K = A_K * np.power(1 + np.square((v_r/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
+
+    #(F_K-F_R+F_bkg)/((r_E/r)**2)
+    return scalefactor*(F_K-F_R+F_bkg)/(r_E/(r2**2))
+
+
 def LyaminRP(t,v_r):
     lyafunction = 1.25*np.exp(-(v_r-55000)**2/(2*25000**2)) + 1.25*np.exp(-(v_r+55000)**2/(2*25000**2)) + .55*np.exp(-v_r**2/(2*25000**2))
     return (.75 - .243)*lyafunction
@@ -207,15 +248,21 @@ def cosexpabs(t,x,y,z,vr):
     # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
     omegat = 2*np.pi/(3.47*10**(8))*t
     r = np.sqrt(x**2 + y**2 + z**2)
+    rxy = np.sqrt(x**2 + y**2)
     # calculating the latitudinal (polar) angle in 3D space
     if z >= 0:
-        latangle = np.pi/2 - np.cos(z/r)
+        latangle = np.pi/2 - np.arcsin(z/r)
     else:
-        latangle = np.pi/2 + np.cos(np.abs(z)/r)
+        latangle = np.pi/2 + np.arcsin(np.abs(z)/r)
     # calculating the longitudinal (azimuthal) angle in 3D space
     # NOTE FIX
-    if y > 0:
-        longangle = np.tan(y/x)
+    if y >= 0:
+        longangle = np.arccos(x/rxy)
+    else:
+        longangle = 2*np.pi - np.arccos(x/rxy)
+    
+    if y >= 0:
+        longangle = np.arctan(y/x)
     elif y == 0 and x > 0:
         longangle = 0
     elif y == 0 and x < 0:
@@ -638,7 +685,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyarp_2pi3_-1.5yrs_whole_cxi+cepi_tclose500_r=1au.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kow2lyarp_2pi3_t0_whole_cxi+cepi_tclose500_r=1au.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')

@@ -95,20 +95,21 @@ def LyaRP2(t,v_r):
     tdependence = 5.6*10**11 - np.e/(np.e + 1/np.e)*2.4*10**11 + 2.4*10**11/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
     return 2.4543*10**-9*(1 + 4.5694*10**-4*tdependence)*lyafunction
 
-# constants for following function
-A_K = 6.523*(1 + 0.619)
-m_K = 5.143*(1 -0.081)
-del_K = 38.008*(1+0.104)
-K = 2.165*(1-0.301)
-A_R = 580.37*(1+0.28)
-dm = -0.344*(1-0.828)
-del_R = 32.349*(1-0.049)
-b_bkg = 0.026*(1+0.184)
-a_bkg = 0.411**(-4) *(1-1.333*0.0007)
-#print(a_bkg)
-r_E = 0.6
-r2 = 1
+
 def LyaRP3(t,v_r):
+    # constants for the function
+    A_K = 6.523*(1 + 0.619)
+    m_K = 5.143*(1 -0.081)
+    del_K = 38.008*(1+0.104)
+    K = 2.165*(1-0.301)
+    A_R = 580.37*(1+0.28)
+    dm = -0.344*(1-0.828)
+    del_R = 32.349*(1-0.049)
+    b_bkg = 0.026*(1+0.184)
+    a_bkg = 0.411**(-4) *(1-1.333*0.0007)
+    #print(a_bkg)
+    r_E = 0.6
+    r2 = 1
     #Author: E. Samoylov, H. Mueller LISM Group (Adapted by L. Dyke for this code)
     #Date: 04.18.2023
     #Purpose: To confirm the graph that EQ14 produces in

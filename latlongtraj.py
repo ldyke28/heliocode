@@ -190,6 +190,8 @@ singletraj = odeint(Lya_dr_dt, init, t, args=(TandBRP,))
 print("Trajectory Calculated")
 trackrp = np.zeros(t.size) # array for tracking values of radiation pressure throughout trajectory
 rtrack = np.sqrt((sunpos[0]-singletraj[:,0])**2 + (sunpos[1]-singletraj[:,1])**2 + (sunpos[2]-singletraj[:,2])**2)
+# calculating the projection of the position vector into the x-y plane
+rxytrack = np.sqrt((sunpos[0]-singletraj[:,0])**2 + (sunpos[1]-singletraj[:,1])**2)
 # calculating the component of the radial unit vector in each direction at each point in time
 nrvecxk = singletraj[:,0]/rtrack
 nrvecyk = singletraj[:,1]/rtrack
@@ -202,7 +204,7 @@ belowxaxis = singletraj[:,1] < 0
 ymask = belowxaxis*2*np.pi
 longmask = -2*(belowxaxis-.5) # -1 if below x axis in xy plane, 1 if above
 # if y < 0, longitude = 2pi-arccos(x/r), otherwise longitude = arccos(x/r)
-heliolong = ymask + np.arccos((singletraj[:,0] - sunx)/rtrack[:])*longmask
+heliolong = ymask + np.arccos((singletraj[:,0] - sunx)/rxytrack[:])*longmask
 #print(min(heliolong))
 #print(max(heliolong))
 # same case with latitude
