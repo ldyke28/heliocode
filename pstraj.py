@@ -24,7 +24,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 0*oneyear # time to start backtracing
+finalt = -1*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -1*10**(10)
 tstep = 10000 # general time resolution
@@ -86,9 +86,9 @@ zstart = ibexpos[2]
 # Multiple sets of initial vx/vy conditions for convenience
 #vxstart = np.arange(-61000, 0000, 300)
 #vystart = np.arange(-41000, 5000, 200)
-#vxstart = np.arange(-25000, 25000, 300)
-#vystart = np.arange(-25000, 25000, 300)
-vxstart = np.arange(-60000, 40000, 300)
+#vxstart = np.arange(-25000, 25000, 500)
+#vystart = np.arange(-25000, 25000, 500)
+vxstart = np.arange(-60000, 30000, 300)
 vystart = np.arange(-35000, 50000, 300)
 vzstart = 0
 
@@ -255,28 +255,18 @@ def cosexpabs(t,x,y,z,vr):
     else:
         latangle = np.pi/2 + np.arcsin(np.abs(z)/r)
     # calculating the longitudinal (azimuthal) angle in 3D space
-    # NOTE FIX
     if y >= 0:
         longangle = np.arccos(x/rxy)
     else:
         longangle = 2*np.pi - np.arccos(x/rxy)
-    
-    if y >= 0:
-        longangle = np.arctan(y/x)
-    elif y == 0 and x > 0:
-        longangle = 0
-    elif y == 0 and x < 0:
-        longangle = np.pi
-    elif y < 0:
-        longangle = 2*np.pi - np.tan(y/x)
     
     # calculating parameters from IKL et al. 2022 paper: https://ui.adsabs.harvard.edu/abs/2022ApJ...926...27K/abstract
     if r < au:
         amp = 0
     else:
         amp = (r/au-1)/99
-    mds = np.sign(x)*25
-    disper = 1
+    mds = np.sign(x)*25 + np.sin(longangle)
+    disper = 100
     fittype = 2
     absval = amp*np.exp(-.5 * ((vr/1000 - mds)/disper)**fittype)
     return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*(1 - absval)
@@ -631,7 +621,7 @@ if mode==3:
             #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
             #else:
             #   continue
-            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP3,))
+            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP4,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
@@ -685,7 +675,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kow2lyarp_2pi3_t0_whole_cxi+cepi_tclose500_r=1au.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyarp2_2pi3_-1yrs_whole_cxi+cepi_tclose500_r=1au.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')

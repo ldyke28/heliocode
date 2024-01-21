@@ -134,6 +134,36 @@ def LyaRP3(t,v_r):
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
     return scalefactor*tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
 
+def LyaRP4(t,v_r):
+    #Author: E. Samoylov, H. Mueller LISM Group (Adapted by L. Dyke for this code)
+    #https://iopscience.iop.org/article/10.3847/1538-4357/aa9f2a/pdf
+    # Revised version of the function from IKL et al. 2018, IKL et al. 2020 - time dependence introduced through parameters
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    # no attempts to match total irradiance using this function yet - check back later
+    tdependence = .95 + .5/(np.e**2 + 1) + .5/(np.e + 1/np.e)*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+    # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
+    scalefactor = .555
+    
+    # parameters of function
+    A_K = 6.523*(1 + 0.619*tdependence)
+    m_K = 5.143*(1 - 1.081*tdependence)
+    del_K = 38.008*(1 + 0.104*tdependence)
+    K = 2.165*(1 - 0.301*tdependence)
+    A_R = 580.37*(1 + 0.28*tdependence)
+    dm = -0.344*(1 - 0.828*tdependence)
+    del_R = 32.349*(1 - 0.049*tdependence)
+    b_bkg = 0.035*(1 + 0.184*tdependence)
+    a_bkg = 0.411**(-4) *(1 - 1.333*tdependence)
+    #print(a_bkg)
+    r_E = 0.6
+    r2 = 1
+    F_R = A_R / (del_R * np.sqrt(2 * np.pi)) *np.exp(-(np.square((v_r/1000) - (m_K + dm))) / (2*(del_R ** 2)))
+    F_bkg = np.add(a_bkg*(v_r/1000)*0.000001,b_bkg)
+    F_K = A_K * np.power(1 + np.square((v_r/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
+
+    #(F_K-F_R+F_bkg)/((r_E/r)**2)
+    return scalefactor*(F_K-F_R+F_bkg)/(r_E/(r2**2))
+
 
 def Lya_dr_dt(x,t,rp):
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
