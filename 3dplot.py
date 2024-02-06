@@ -6,7 +6,7 @@ from tqdm import tqdm
 ThreeD = True
 # Loading in the file to be unpacked
 #file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/pi_t0.txt", delimiter=',')
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/5pi6_-4p5e7_lya_test_2.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/2pi3_t0_lya_direct.txt", delimiter=',')
 #file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/GitHub/heliocode/supplementaldata1.txt", delimiter=',')
 
 #file = file[np.any(file > 1, axis=1)]
@@ -42,7 +42,7 @@ if ThreeD == True:
     ax3d.set_ylabel("$v_y$ at Target Point (km/s)")
     ax3d.set_zlabel("$v_z$ at Target Point (km/s)")
     # Can set initial viewing angles for the data
-    #ax3d.view_init(90,270)
+    ax3d.view_init(90,270)
     #ax3d.view_init(0,270)
     #ax3d.view_init(0,180)
     # Can restrict the limits of the plot

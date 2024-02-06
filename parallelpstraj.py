@@ -145,39 +145,92 @@ def LyaRP2(t,v_r):
     #return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
     return 2.4543*10**-9*(1 + 4.5694*10**-4*tdependence)*lyafunction
 
-# constants for following function
-A_K = 6.523*(1 + 0.619)
-m_K = 5.143*(1 -0.081)
-del_K = 38.008*(1+0.104)
-K = 2.165*(1-0.301)
-A_R = 580.37*(1+0.28)
-dm = -0.344*(1-0.828)
-del_R = 32.349*(1-0.049)
-b_bkg = 0.026*(1+0.184)
-a_bkg = 0.411**(-4) *(1-1.333*0.0007)
-#print(a_bkg)
-r_E = 0.6
-r2 = 1
 def LyaRP3(t,v_r):
-    #Author: E. Samoylov, H. Mueller LISM Group
+    # constants for following function
+    A_K = 6.523*(1 + 0.619)
+    m_K = 5.143*(1 -0.081)
+    del_K = 38.008*(1+0.104)
+    K = 2.165*(1-0.301)
+    A_R = 580.37*(1+0.28)
+    dm = -0.344*(1-0.828)
+    del_R = 32.349*(1-0.049)
+    b_bkg = 0.026*(1+0.184)
+    a_bkg = 0.411**(-4) *(1-1.333*0.0007)
+    #print(a_bkg)
+    r_E = 0.6
+    r2 = 1
+    #Author: E. Samoylov, H. Mueller LISM Group (Adapted by L. Dyke for this code)
     #Date: 04.18.2023
     #Purpose: To confirm the graph that EQ14 produces in
     #         Kowalska-Leszczynska's 2018 paper
     #         Evolution of the Solar Lyα Line Profile during the Solar Cycle
     #https://iopscience.iop.org/article/10.3847/1538-4357/aa9f2a/pdf
+
+    # note the above parameters are taken from Kowalska-Leszczynska et al. 2020
     F_R = A_R / (del_R * np.sqrt(2 * np.pi)) *np.exp(-(np.square((v_r/1000) - (m_K - dm))) / (2*(del_R ** 2)))
     F_bkg = np.add(a_bkg*(v_r/1000)*0.000001,b_bkg)
     F_K = A_K * np.power(1 + np.square((v_r/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
 
     omegat = 2*np.pi/(3.47*10**(8))*t
-    # added value to ensure scaling is correct at both solar minimum and solar maximum
-    addfactor = ((.973/.9089) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    # added value to ensure scaling is correct throughout solar cycle
+    # matches total irradiance out to +-120 km/s
+    #addfactor = ((.973/.9089) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    # matches total irradiance out to +-370 km/s
+    addfactor = ((.97423/.91) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     # time dependent portion of the radiation pressure force function
-    tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) #+ addfactor
+    tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
-    scalefactor = .973
+    # scalefactor should match divisor in first term of addfactor
+    scalefactor = .91
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
     return scalefactor*tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
+
+
+def LyaRP4(t,x,y,z,v_r):
+    #Author: E. Samoylov, H. Mueller LISM Group (Adapted by L. Dyke for this code)
+    #https://iopscience.iop.org/article/10.3847/1538-4357/aa9f2a/pdf
+    # Revised version of the function from IKL et al. 2018 - time dependence introduced through parameters
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    # added value to ensure scaling is correct throughout solar cycle
+    # matches total irradiance out to +-120 km/s
+    #addfactor = ((.973/.9089) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    # matches total irradiance out to +-370 km/s
+    #addfactor = ((.97423/.91) - 1)*.85*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    # time dependent portion of the radiation pressure force function
+    #tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor
+    tdependence = .95 + .5/(np.e**2 + 1) + .5/(np.e + 1/np.e)*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+    # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
+    # scalefactor should match divisor in first term of addfactor
+    scalefactor = .555
+    
+    # parameters of function
+    A_K = 6.523*(1 + 0.619*tdependence)
+    m_K = 5.143*(1 - 1.081*tdependence)
+    del_K = 38.008*(1 + 0.104*tdependence)
+    K = 2.165*(1 - 0.301*tdependence)
+    A_R = 580.37*(1 + 0.28*tdependence)
+    dm = -0.344*(1 - 0.828*tdependence)
+    del_R = 32.349*(1 - 0.049*tdependence)
+    b_bkg = 0.035*(1 + 0.184*tdependence)
+    a_bkg = 0.411**(-4) *(1 - 1.333*tdependence)
+    #print(a_bkg)
+    r_E = 0.6
+    r2 = 1
+    F_R = A_R / (del_R * np.sqrt(2 * np.pi)) *np.exp(-(np.square((v_r/1000) - (m_K + dm))) / (2*(del_R ** 2)))
+    F_bkg = np.add(a_bkg*(v_r/1000)*0.000001,b_bkg)
+    F_K = A_K * np.power(1 + np.square((v_r/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
+
+    r = np.sqrt(x**2 + y**2 + z**2)
+    # calculating the latitudinal (polar) angle in 3D space
+    if z >= 0:
+        latangle = np.pi/2 - np.arcsin(z/r)
+    else:
+        latangle = np.pi/2 + np.arcsin(np.abs(z)/r)
+
+    alya = .8
+    #(F_K-F_R+F_bkg)/((r_E/r)**2)
+    return scalefactor*(F_K-F_R+F_bkg)/(r_E/(r2**2))*np.sqrt(alya*np.sin(latangle)**2 + np.cos(latangle)**2)
+
 
 def Lya_dr_dt(x,t,rp):
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
@@ -195,6 +248,26 @@ def Lya_dr_dt(x,t,rp):
     dx3 = (msolar*G/(r**3))*(sunpos[0]-x[0])*(1-rp(t,v_r))
     dx4 = (msolar*G/(r**3))*(sunpos[1]-x[1])*(1-rp(t,v_r))
     dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-rp(t,v_r))
+    return [dx0, dx1, dx2, dx3, dx4, dx5]
+
+
+def Var_dr_dt(x,t,rp):
+    # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
+    # dx0-2 = vx, vy, and vz, dx3-5 = ax, ay, and az
+    r = np.sqrt((sunpos[0]-x[0])**2 + (sunpos[1]-x[1])**2 + (sunpos[2]-x[2])**2)
+    # calculating the component of the radial unit vector in each direction at each point in time
+    nrvecx = x[0]/r
+    nrvecy = x[1]/r
+    nrvecz = x[2]/r
+    # calculating the magnitude of v_r at each point in time
+    v_r = x[3]*nrvecx + x[4]*nrvecy + x[5]*nrvecz
+    dx0 = x[3]
+    dx1 = x[4]
+    dx2 = x[5]
+    radp = rp(t,x[0],x[1],x[2],v_r)
+    dx3 = (msolar*G/(r**3))*(sunpos[0]-x[0])*(1-radp)
+    dx4 = (msolar*G/(r**3))*(sunpos[1]-x[1])*(1-radp)
+    dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-radp)
     return [dx0, dx1, dx2, dx3, dx4, dx5]
 
 # identify the total number of processes
@@ -235,6 +308,7 @@ for m in range(nprocs-1):
     if rank == m+1:
         vxstartn = vxstart[bounds[m]:(bounds[m+1]+1)]
         for i in range(vxstartn.size): # displays progress bars for both loops to measure progress
+            restartfile = open('restart%s' % rank, 'a')
             for j in range(vystart.size):
                 for l in range(vzstart.size):
                     init = [xstart, ystart, zstart, vxstartn[i], vystart[j], vzstart[l]]
@@ -242,7 +316,7 @@ for m in range(nprocs-1):
                         # Main code in try block
                         # If an ODEintWarning is raised, point will be set aside for testing later on
                         # calculating trajectories for each initial condition in phase space given
-                        backtraj = odeint(Lya_dr_dt, init, t, args=(LyaRP,))
+                        backtraj = odeint(Var_dr_dt, init, t, args=(LyaRP4,))
                         if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                             # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                             sunlosscount[0] += 1
@@ -260,6 +334,8 @@ for m in range(nprocs-1):
                                 #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
                                 if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 27000:
                                     omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
+                                    # function for the charge exchange ionization rate
+                                    cxirate = 5*10**(-7)
                                     # function for the photoionization rate at each point in time
                                     PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
                                     r1 = 1*au # reference radius
@@ -271,9 +347,12 @@ for m in range(nprocs-1):
                                     # calculating the magnitude of v_r at each point in time
                                     currentvr = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
                                     # integrand for the photoionization losses
-                                    btintegrand = PIrate2/currentvr*(r1/currentrad)**2
+                                    btintegrand = PIrate2/currentvr*(r1/currentrad)**2 + + cxirate/currentvr*(r1/currentrad)**2
                                     # calculation of heliographic latitude angle (polar angle)
-                                    latangle = np.arccos(np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2)/currentrad)
+                                    belowxy = backtraj[0:kn+1,2] < 0
+                                    zmask = 2*(belowxy-.5)
+                                    latangle = np.pi/2 + zmask*np.arcsin(np.abs(backtraj[0:kn+1,2] - sunpos[2])/currentrad[:])
+                                    
                                     # calculation of attenuation factor based on heliographic latitude angle
                                     btintegrand = btintegrand*(.85*(np.sin(latangle))**2 + (np.cos(latangle))**2)
 
@@ -285,7 +364,9 @@ for m in range(nprocs-1):
                                     data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
                                     data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,3] = startt - t[kn-1]
                                     # calculating value of phase space density based on the value at the crossing of x = 100 au
-                                    data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)
+                                    attenval = np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)
+                                    data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = attenval
+                                    restartfile.write(str(vxstartn[i]/1000) + ',' + str(vystart[j]/1000) + ',' + str(vzstart[l]/1000) + ',' + str(attenval) + '\n')
                                     break
                                 break
                     except Warning:
@@ -293,7 +374,7 @@ for m in range(nprocs-1):
                         #lostpoints = np.vstack([lostpoints, [vxstartn[i], vystart[j], vzstart[l]]])
                         lostpoints = np.append(lostpoints, [vxstartn[i], vystart[j], vzstart[l]])
                         #file2.write(str(vxstartn[i]) + ',' + str(vystart[j]) + ',' + str(vzstart[l]) + '\n')
-                        
+            restartfile.close()           
                     
         break
 
