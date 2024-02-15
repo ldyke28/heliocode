@@ -24,14 +24,14 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 0000000 # time to start backtracing
+finalt = 0*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -1*10**(10)
 tstep = 10000 # general time resolution
 tstepclose = 1000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
-refdist = 100 # upwind reference distance for backtraced trajectories, in au
+refdist = 110 # upwind reference distance for backtraced trajectories, in au
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
@@ -66,10 +66,12 @@ zstart = ibexpos[2]
 # Multiple sets of initial vx/vy conditions for convenience
 #vxstart = np.arange(2000, 10000, 50)
 #vystart = np.arange(2000, 10000, 50)
-vxstart = np.arange(-25000, 25000, 300)
-vystart = np.arange(-25000, 25000, 300)
+#vxstart = np.arange(-25000, 25000, 300)
+#vystart = np.arange(-25000, 25000, 300)
 #vxstart = np.arange(-60000, 40000, 300)
 #vystart = np.arange(-35000, 50000, 300)
+vxstart = np.arange(-50000, 10000, 300)
+vystart = np.arange(-25000, 25000, 300)
 vzstart = 0
 
 if mode==3:
@@ -177,6 +179,8 @@ interp5 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf5)
 interp6 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf6)
 interp7 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf7)
 interp8 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf8)
+
+
 
 #
 #
@@ -337,15 +341,29 @@ def cosexpabs(t,x,y,z,vr):
         longangle = np.arccos(x/rxy)
     else:
         longangle = 2*np.pi - np.arccos(x/rxy)
+    latangled = latangle*180/np.pi
+    longangled = longangle*180/np.pi
+
+    alpha = .07 # alpha for the skew gaussian distribution
     
     # calculating parameters from IKL et al. 2022 paper: https://ui.adsabs.harvard.edu/abs/2022ApJ...926...27K/abstract
     if r < au:
         amp = 0
     else:
-        amp = (r/au-1)/99
-    mds = np.sign(x)*25 + np.sin(longangle)
-    disper = 100
-    fittype = 2
+        amp = ((.59*(r/au - 12)/np.sqrt((r/au - 12)**2 + 200) + 0.38) + -0.4* \
+        np.e**(-(longangled - 90)**2/50**2 - (r - 31)**2/15**2)*(1 + \
+        scipy.special.erf(alpha*(r/au)/np.sqrt(2)))*(1 - np.e**(-(r/au)/4)))*1/.966
+    
+    mds = 20*np.sin(longangle)*np.cos((latangled-10)*np.pi/180)
+    disper = -.0006947*(r/au)**2 + .1745*(r/au) + 5.402 + \
+        1.2*np.e**(-(longangled - 275)**2/50**2 - ((r/au) - 80)**2/60**2) + \
+        3*np.e**(-(longangled - 90)**2/50**2 - ((r/au))**2/5**2) + \
+        1*np.e**(-(longangled - 100)**2/50**2 - ((r/au) - 25)**2/200**2) + \
+        .35*np.cos(((latangled + 15)*np.pi/180)*2)
+    if r >= 50*au:
+        fittype = 4
+    else:
+        fittype = 2
     absval = amp*np.exp(-.5 * ((vr/1000 - mds)/disper)**fittype)
     return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*(1 - absval)
 
@@ -366,6 +384,75 @@ def rpnoisefluc(t):
     omegaoverallfluct = omegat*20 # fluctuations of the noise itself
     flucmag = .1
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + flucmag*np.sin(omeganoiset)*np.cos(omegaoverallfluct)
+
+
+def lya_abs(t,x,y,z,vr):
+    # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    r = np.sqrt(x**2 + y**2 + z**2)
+    rxy = np.sqrt(x**2 + y**2)
+    # calculating the latitudinal (polar) angle in 3D space
+    if z >= 0:
+        latangle = np.pi/2 - np.arcsin(z/r)
+    else:
+        latangle = np.pi/2 + np.arcsin(np.abs(z)/r)
+    # calculating the longitudinal (azimuthal) angle in 3D space
+    if y >= 0:
+        longangle = np.arccos(x/rxy)
+    else:
+        longangle = 2*np.pi - np.arccos(x/rxy)
+    latangled = latangle*180/np.pi
+    longangled = longangle*180/np.pi
+
+    alpha = .07 # alpha for the skew gaussian distribution
+    
+    # calculating parameters from IKL et al. 2022 paper: https://ui.adsabs.harvard.edu/abs/2022ApJ...926...27K/abstract
+    if r < au:
+        amp = 0
+    else:
+        amp = ((.59*(r/au - 12)/np.sqrt((r/au - 12)**2 + 200) + 0.38) + -0.4* \
+        np.e**(-(longangled - 90)**2/50**2 - (r - 31)**2/15**2)*(1 + \
+        scipy.special.erf(alpha*(r/au)/np.sqrt(2)))*(1 - np.e**(-(r/au)/4)))*1/.966
+    
+    mds = 20*np.sin(longangle)*np.cos((latangled-10)*np.pi/180)
+    disper = -.0006947*(r/au)**2 + .1745*(r/au) + 5.402 + \
+        1.2*np.e**(-(longangled - 275)**2/50**2 - ((r/au) - 80)**2/60**2) + \
+        3*np.e**(-(longangled - 90)**2/50**2 - ((r/au))**2/5**2) + \
+        1*np.e**(-(longangled - 100)**2/50**2 - ((r/au) - 25)**2/200**2) + \
+        .35*np.cos(((latangled + 15)*np.pi/180)*2)
+    if r >= 50*au:
+        fittype = 4
+    else:
+        fittype = 2
+    absval = amp*np.exp(-.5 * ((vr/1000 - mds)/disper)**fittype)
+
+    # time dependent portion of the radiation pressure force function
+    #tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor
+    tdependence = .95 + .5/(np.e**2 + 1) + .5/(np.e + 1/np.e)*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+    # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
+    # scalefactor should match divisor in first term of addfactor
+    scalefactor = .555
+    
+    # parameters of function
+    A_K = 6.523*(1 + 0.619*tdependence)
+    m_K = 5.143*(1 - 1.081*tdependence)
+    del_K = 38.008*(1 + 0.104*tdependence)
+    K = 2.165*(1 - 0.301*tdependence)
+    A_R = 580.37*(1 + 0.28*tdependence)
+    dm = -0.344*(1 - 0.828*tdependence)
+    del_R = 32.349*(1 - 0.049*tdependence)
+    b_bkg = 0.035*(1 + 0.184*tdependence)
+    a_bkg = 0.411**(-4) *(1 - 1.333*tdependence)
+    #print(a_bkg)
+    r_E = 0.6
+    r2 = 1
+    F_R = A_R / (del_R * np.sqrt(2 * np.pi)) *np.exp(-(np.square((vr/1000) - (m_K + dm))) / (2*(del_R ** 2)))
+    F_bkg = np.add(a_bkg*(vr/1000)*0.000001,b_bkg)
+    F_K = A_K * np.power(1 + np.square((vr/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
+
+    #(F_K-F_R+F_bkg)/((r_E/r)**2)
+    return scalefactor*(F_K-F_R+F_bkg)/(r_E/(r2**2))*(1 - absval)
+
 
 def dr_dt(x,t,rp):
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
@@ -622,14 +709,14 @@ if mode==3:
             #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
             #else:
             #   continue
-            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP,))
-            if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
+            backtraj[:,:] = odeint(Abs_dr_dt, init, t, args=(lya_abs,))
+            btr = np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2)
+            if any(btr <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
-            if all(backtraj[:,0]-sunpos[0] < refdist*au):
+            if all(btr < refdist*au):
                 # forgoes the following checks if the trajectory never passes through the plane at the reference distance upwind
                 continue
-            btr = np.sqrt(backtraj[:,0]**2 + backtraj[:,1]**2 + backtraj[:,2]**2)
             for k in range(t.size - tclose.size):
                 if btr[k+tclose.size] >= refdist*au and btr[k-1+tclose.size] <= refdist*au:
                     # adjusting the indexing to avoid checking in the close regime
@@ -637,57 +724,60 @@ if mode==3:
                     # radius in paper given to be 14 km/s
                     # only saving initial conditions corresponding to points that lie within this Maxwellian at reference distance
                     #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
-                    if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 27000:
-                        # determining which distribution to use by calculating heliolongitude
-                        endradxy = np.sqrt((sunpos[0]-backtraj[kn+1,0])**2 + (sunpos[1]-backtraj[kn+1,1])**2)
-                        belowxaxis = backtraj[kn+1,1] < 0
-                        ymask = belowxaxis*2*np.pi
-                        longmask = -2*(belowxaxis-.5) # -1 if below x axis in xy plane, 1 if above
-                        # if y < 0, longitude = 2pi-arccos(x/r), otherwise longitude = arccos(x/r)
-                        endlongangle = ymask + np.arccos((backtraj[kn+1,0] - sunpos[0])/endradxy)*longmask
-                        endlongangle = endlongangle*180/np.pi
-                        # finding the initial value of the distribution function based on the interpolated distributions
-                        endvelcoords = [backtraj[kn+1,5]/1000,backtraj[kn+1,4]/1000,backtraj[kn+1,3]/1000]
-                        if endlongangle > 22.5 and endlongangle <=67.5:
-                            initpsd = interp2(endvelcoords)
-                        elif endlongangle > 67.5 and endlongangle <=112.5:
-                            initpsd = interp3(endvelcoords)
-                        elif endlongangle > 112.5 and endlongangle <=157.5:
-                            initpsd = interp4(endvelcoords)
-                        elif endlongangle > 157.5 and endlongangle <=202.5:
-                            initpsd = interp5(endvelcoords)
-                        elif endlongangle > 202.5 and endlongangle <=247.5:
-                            initpsd = interp6(endvelcoords)
-                        elif endlongangle > 247.5 and endlongangle <=292.5:
-                            initpsd = interp7(endvelcoords)
-                        elif endlongangle > 292.5 and endlongangle <=337.5:
-                            initpsd = interp8(endvelcoords)
-                        elif endlongangle > 337.5 or endlongangle <= 22.5:
-                            initpsd = interp1(endvelcoords)
+                    #if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 27000:
+                    # determining which distribution to use by calculating heliolongitude
+                    endradxy = np.sqrt((sunpos[0]-backtraj[kn+1,0])**2 + (sunpos[1]-backtraj[kn+1,1])**2)
+                    belowxaxis = backtraj[kn+1,1] < 0
+                    ymask = belowxaxis*2*np.pi
+                    longmask = -2*(belowxaxis-.5) # -1 if below x axis in xy plane, 1 if above
+                    # if y < 0, longitude = 2pi-arccos(x/r), otherwise longitude = arccos(x/r)
+                    endlongangle = ymask + np.arccos((backtraj[kn+1,0] - sunpos[0])/endradxy)*longmask
+                    endlongangle = endlongangle*180/np.pi
+                    # finding the initial value of the distribution function based on the interpolated distributions
+                    endvelcoords = [backtraj[kn+1,5]/1000,backtraj[kn+1,4]/1000,backtraj[kn+1,3]/1000]
+                    if endlongangle > 22.5 and endlongangle <=67.5:
+                        initpsd = interp2(endvelcoords)
+                    elif endlongangle > 67.5 and endlongangle <=112.5:
+                        initpsd = interp3(endvelcoords)
+                    elif endlongangle > 112.5 and endlongangle <=157.5:
+                        initpsd = interp4(endvelcoords)
+                    elif endlongangle > 157.5 and endlongangle <=202.5:
+                        initpsd = interp5(endvelcoords)
+                    elif endlongangle > 202.5 and endlongangle <=247.5:
+                        initpsd = interp6(endvelcoords)
+                    elif endlongangle > 247.5 and endlongangle <=292.5:
+                        initpsd = interp7(endvelcoords)
+                    elif endlongangle > 292.5 and endlongangle <=337.5:
+                        initpsd = interp8(endvelcoords)
+                    elif endlongangle > 337.5 or endlongangle <= 22.5:
+                        initpsd = interp1(endvelcoords)
 
 
 
-                        # approximate time-averaged charge exchange photoionization rate from Sokol et al. 2019
-                        cxirate = 5*10**(-7)
-                        # omega*t for each time point in the trajectory
-                        omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
-                        # function for the photoionization rate at each point in time
-                        PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
-                        #PIrate2 = 1.21163*10**(-7) # time average of above
-                        r1 = 1*au # reference radius
-                        currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
-                        # calculating the component of the radial unit vector in each direction at each point in time
-                        nrvecx = (-sunpos[0]+backtraj[0:kn+1,0])/currentrad
-                        nrvecy = (-sunpos[1]+backtraj[0:kn+1,1])/currentrad
-                        nrvecz = (-sunpos[2]+backtraj[0:kn+1,2])/currentrad
-                        # calculating the magnitude of v_r at each point in time
-                        currentvr = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
-                        vrmax = np.append(vrmax, max(currentvr))
-                        vrmin = np.append(vrmin, min(currentvr))
-                        # integrand for the photoionization and charge exchange ionization losses
-                        btintegrand = PIrate2/currentvr*(r1/currentrad)**2 + cxirate/currentvr*(r1/currentrad)**2
-                        # calculation of attenuation factor
-                        attfact = scipy.integrate.simps(btintegrand, currentrad)
+                    # approximate time-averaged charge exchange photoionization rate from Sokol et al. 2019
+                    cxirate = 5*10**(-7)
+                    # omega*t for each time point in the trajectory
+                    omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
+                    # function for the photoionization rate at each point in time
+                    PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
+                    #PIrate2 = 1.21163*10**(-7) # time average of above
+                    r1 = 1*au # reference radius
+                    currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
+                    # calculating the component of the radial unit vector in each direction at each point in time
+                    nrvecx = (-sunpos[0]+backtraj[0:kn+1,0])/currentrad
+                    nrvecy = (-sunpos[1]+backtraj[0:kn+1,1])/currentrad
+                    nrvecz = (-sunpos[2]+backtraj[0:kn+1,2])/currentrad
+                    # calculating the magnitude of v_r at each point in time
+                    currentvr = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
+                    vrmax = np.append(vrmax, max(currentvr))
+                    vrmin = np.append(vrmin, min(currentvr))
+                    # integrand for the photoionization and charge exchange ionization losses
+                    btintegrand = PIrate2/currentvr*(r1/currentrad)**2 + cxirate/currentvr*(r1/currentrad)**2
+                    # calculation of attenuation factor
+                    attfact = scipy.integrate.simps(btintegrand, currentrad)
+                    # calculating the value of the phase space density after attenuation
+                    psdval = np.exp(-np.abs(attfact))*initpsd
+                    if psdval > 10**(-10):
                         # retaining variables corresponding to vx, vy, t at the target point
                         farvx = np.append(farvx, [backtraj[0,3]])
                         farvy = np.append(farvy, [backtraj[0,4]])
@@ -695,14 +785,14 @@ if mode==3:
                         # calculating value of phase space density based on the value at the crossing of x = 100 au
                         maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*initpsd])
                         #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
-                        break
                     break
+                    #break
 
 print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/lyarp_2pi3_t0_center_cxi+cepi_tclose1000_r=1au_disttest.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_2pi3_t0_direct_cxi+cepi_tclose1000_r=1au.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')

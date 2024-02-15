@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+from tqdm import tqdm
 
 oneyear = 3.15545454545*10**7
 
@@ -118,8 +119,10 @@ t4 = oneyear*3.3
 t5 = oneyear*4.4
 t6 = oneyear*5.5
 
-inputvr = np.arange(-370000, 370000, 10)
-profile1 = np.zeros(inputvr.size)
+trange = np.arange(0, 11*oneyear, 11*oneyear/1000)
+
+inputvr = np.arange(-370000, 370000, 740000/1000)
+"""profile1 = np.zeros(inputvr.size)
 profile1t2 = np.zeros(inputvr.size)
 profile1t3 = np.zeros(inputvr.size)
 profile1t4 = np.zeros(inputvr.size)
@@ -143,9 +146,9 @@ for i in range(inputvr.size):
     profile2t3[i] = LyaRP2(t3,inputvr[i])
     profile3[i] = LyaRP3(t,inputvr[i])
     profile3t2[i] = LyaRP3(t2,inputvr[i])
-    profile3t3[i] = LyaRP3(t3,inputvr[i])
+    profile3t3[i] = LyaRP3(t3,inputvr[i])"""
 
-fsize = 18
+"""fsize = 18
 fig, ax = plt.subplots()
 fig.set_figwidth(9)
 fig.set_figheight(6)
@@ -163,4 +166,30 @@ plt.grid()
 ax.set_xlabel("Radial Velocity Component $v_r$ (km/s)", fontsize=fsize)
 ax.set_ylabel("Value of $\mu (t)$", fontsize=fsize)
 #plt.title("Photoionization Rate over Time", fontsize=fsize)
+plt.show()"""
+
+trange, inputvr = np.meshgrid(trange, inputvr)
+
+#totalprofile = np.zeros((trange.size,inputvr.size))
+#for i in tqdm(range(trange.size)):
+#    for j in tqdm(range(inputvr.size)):
+#        totalprofile[i][j] = LyaRP4(trange[i], inputvr[j])
+
+totalprofile = LyaRP4(trange, inputvr)
+
+fsize = 18
+fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+fig.set_figwidth(9)
+fig.set_figheight(6)
+surface = ax.plot_surface(trange/oneyear, inputvr/1000, totalprofile, cmap=plt.cm.coolwarm, linewidth=0)
+fig.colorbar(surface, shrink=0.5, aspect=5)
+#ax.legend()
+#plt.xticks(fontsize=fsize)
+#plt.yticks(fontsize=fsize)
+#plt.zticks(fontsize=fsize)
+plt.grid()
+ax.set_xlabel("Time (years)")
+ax.set_ylabel("Radial Velocity Component $v_r$ (km/s)")
+ax.set_zlabel("Value of $\mu (t)$")
 plt.show()
+
