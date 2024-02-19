@@ -6,7 +6,7 @@ from tqdm import tqdm
 ThreeD = True
 # Loading in the file to be unpacked
 #file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/pi_t0.txt", delimiter=',')
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/2pi3_t0_lya_direct.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/2pi3_t0_lya_direct_test.txt", delimiter=',')
 #file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/GitHub/heliocode/supplementaldata1.txt", delimiter=',')
 
 #file = file[np.any(file > 1, axis=1)]
@@ -36,7 +36,7 @@ if ThreeD == True:
     ax3d = plt.axes(projection='3d')
     #scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='rainbow', s=.02, vmin=(.75-.243/np.e), vmax=(.75+.243*np.e))
     #scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='rainbow', s=.001, alpha=.15)
-    scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='rainbow', s=.1)
+    scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='rainbow', s=.001)
     cb = fig3d.colorbar(scatterplot)
     ax3d.set_xlabel("$v_x$ at Target Point (km/s)")
     ax3d.set_ylabel("$v_y$ at Target Point (km/s)")
@@ -66,7 +66,7 @@ else:
     plt.show()
 
 
-theta = 150
+theta = 120
 # section of code to calculate which trajectories could be observed by spacecraft - considers velocity shifts and viewing angle
 vahwxy = 3.5 # half width of the total viewing angle width of the explorer probe in the x-y plane
 vahwxyr = vahwxy*np.pi/180 # same width expressed in radians
