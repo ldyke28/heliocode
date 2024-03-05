@@ -24,11 +24,11 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 1*oneyear # time to start backtracing
+finalt = 5.5*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -1*10**(10)
 tstep = 10000 # general time resolution
-tstepclose = 2000 # time resolution for close regime
+tstepclose = 50 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 100 # upwind reference distance for backtraced trajectories, in au
@@ -38,7 +38,7 @@ refdist = 100 # upwind reference distance for backtraced trajectories, in au
 # https://ibex.princeton.edu/sites/g/files/toruqf1596/files/moebius_et_al_2012.pdf
 # above gives angle of ecliptic relative to ISM flow
 sunpos = np.array([0,0,0])
-theta = 120
+theta = 135
 ibexrad = 1
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -84,12 +84,14 @@ ystart = ibexpos[1]
 zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
-#vxstart = np.arange(-61000, 0000, 300)
-#vystart = np.arange(-41000, 5000, 200)
-#vxstart = np.arange(-25000, 25000, 500)
-#vystart = np.arange(-25000, 25000, 500)
-vxstart = np.arange(-60000, 30000, 300)
-vystart = np.arange(-35000, 50000, 300)
+vxstart = np.arange(-43000, -25000, 100)
+vystart = np.arange(-6000, 16000, 100)
+#vxstart = np.arange(-25000, 25000, 300)
+#vystart = np.arange(-25000, 25000, 300)
+#vxstart = np.arange(-60000, 30000, 300)
+#vystart = np.arange(-35000, 50000, 300)
+#vxstart = np.arange(-10000, -5000, 30)
+#vystart = np.arange(-10000, -5000, 30)
 vzstart = 0
 
 if mode==3:
@@ -243,6 +245,9 @@ def cosexprp(t):
     # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
     omegat = 2*np.pi/(3.47*10**(8))*t
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+
+def cosexpmax(t):
+    return .75 + .243*np.e
 
 def cosexpabs(t,x,y,z,vr):
     # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
@@ -436,13 +441,13 @@ if mode==1:
 #
 # single trajectory plotting code
 if mode==2:
-    indxic = 100
-    indyic = -16900
+    indxic = 900
+    indyic = 720
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
     #singletraj = odeint(dr_dt, init, t, mxstep=750, args=(rp6,))
-    singletraj = odeint(Lya_dr_dt, init, t, args=(LyaRP3,))
+    singletraj = odeint(dr_dt, init, t, args=(cosexprp,))
     print("Trajectory Calculated")
     #print(singletraj)
     trackrp = np.zeros(t.size)
@@ -621,7 +626,7 @@ if mode==3:
             #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
             #else:
             #   continue
-            backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaRP4,))
+            backtraj[:,:] = odeint(dr_dt, init, t, args=(cosexpmax,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 continue
@@ -675,7 +680,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyarp2_2pi3_1yrs_whole_cxi+cepi_tclose2000_r=1au.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexpmax_3pi4_5p5yrs_centerzoom_cxi+cepi_tclose50_r=1au_ex.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')

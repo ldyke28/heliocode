@@ -24,11 +24,11 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 0*oneyear # time to start backtracing
+finalt = -5*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -1*10**(10)
 tstep = 10000 # general time resolution
-tstepclose = 1000 # time resolution for close regime
+tstepclose = 300 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 70 # upwind reference distance for backtraced trajectories, in au
@@ -36,7 +36,7 @@ refdist = 70 # upwind reference distance for backtraced trajectories, in au
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 85
+theta = 120
 ibexrad = 1
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -70,8 +70,8 @@ zstart = ibexpos[2]
 #vystart = np.arange(-25000, 25000, 300)
 #vxstart = np.arange(-60000, 40000, 300)
 #vystart = np.arange(-35000, 50000, 300)
-vxstart = np.arange(-50000, 0000, 300)
-vystart = np.arange(-25000, 25000, 300)
+vxstart = np.arange(-60000, -10000, 300)
+vystart = np.arange(-45000, 25000, 300)
 vzstart = 0
 
 if mode==3:
@@ -409,6 +409,9 @@ def lya_abs(t,x,y,z,vr):
         longangle = np.arccos(x/rxy)
     else:
         longangle = 2*np.pi - np.arccos(x/rxy)
+    longangle = longangle - np.pi
+    if longangle < 0:
+        longangle = 2*np.pi + longangle
     latangled = latangle*180/np.pi
     longangled = longangle*180/np.pi
 
@@ -567,14 +570,15 @@ if mode==2:
         vdotr = rvec[0]*singletraj[k,3] + rvec[1]*singletraj[k,4] + rvec[2]*singletraj[k,5]
         Evartrack[k] = Evartrack[k-1] + (t[k]-t[k-1])*rp6(t[k])*vdotr/(rmag**2)
         Etrack[k] = (vmag**2)/2 - G*msolar/rmag - G*msolar*Evartrack[k]"""
-        if np.sqrt((singletraj[k,0]-sunpos[0])**2 + (singletraj[k,1]-sunpos[1])**2 + (singletraj[k,2]-sunpos[2])**2) <= .00465*au:
+        strajrad = np.sqrt((singletraj[k,0]-sunpos[0])**2 + (singletraj[k,1]-sunpos[1])**2 + (singletraj[k,2]-sunpos[2])**2)
+        if strajrad <= .00465*au:
             # checking if the orbit is too close to the sun
             print("Orbit too close to sun")
             psd = 0
             perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
             ttime = 0
             break
-        if singletraj[k,0] >= refdist*au:
+        if strajrad >= refdist*au:
             print(singletraj[k-1,:])
             print(t[k-1])
             Etrack = Etrack[:k]
@@ -598,6 +602,14 @@ if mode==2:
             currentvr = singletraj[0:k+1,3]*nrvecx[0:k+1] + singletraj[0:k+1,4]*nrvecy[0:k+1] + singletraj[0:k+1,5]*nrvecz[0:k+1]
             # integrand for the photoionization losses
             btintegrand = PIrate2/currentvr*(r1/currentrad)**2 + cxirate/currentvr*(r1/currentrad)**2
+
+            # calculation of heliographic latitude angle (polar angle)
+            belowxy = singletraj[0:k+1,2] < 0
+            zmask = 2*(belowxy-.5)
+            latangle = np.pi/2 + zmask*np.arcsin(np.abs(singletraj[0:k+1,2] - sunpos[2])/currentrad[:])
+            
+            # calculation of attenuation factor based on heliographic latitude angle
+            btintegrand = btintegrand*(.85*(np.sin(latangle))**2 + (np.cos(latangle))**2)
             # calculation of attenuation factor
             attfact = scipy.integrate.simps(btintegrand, currentrad)
             psd = np.exp(-np.abs(attfact))*np.exp(-((singletraj[k-1,3]+26000)**2 + singletraj[k-1,4]**2 + singletraj[k-1,5]**2)/(5327)**2)
@@ -760,8 +772,6 @@ if mode==3:
                     elif endlongangle > 337.5 or endlongangle <= 22.5:
                         initpsd = interp1(endvelcoords)
 
-
-
                     # approximate time-averaged charge exchange photoionization rate from Sokol et al. 2019
                     cxirate = 5*10**(-7)
                     # omega*t for each time point in the trajectory
@@ -793,7 +803,7 @@ if mode==3:
                     attfact = scipy.integrate.simps(btintegrand, currentrad)
                     # calculating the value of the phase space density after attenuation
                     psdval = np.exp(-np.abs(attfact))*initpsd
-                    if psdval > 10**(-10):
+                    if psdval > 10**(-11):
                         # retaining variables corresponding to vx, vy, t at the target point
                         farvx = np.append(farvx, [backtraj[0,3]])
                         farvy = np.append(farvy, [backtraj[0,4]])
@@ -808,7 +818,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_17pi36_t0_direct_cxi+cepi_tclose1000_r=1au.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_2pi3_-5yr_direct_cxi+cepi_tclose300_r=1au_-11cut.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
@@ -819,7 +829,8 @@ if mode==3:
     f.set_figwidth(10)
     f.set_figheight(6)
     fsize = 18
-    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='rainbow')
+    #plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='rainbow')
+    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
     plt.rcParams.update({'font.size': fsize})
     cb = plt.colorbar()
     #cb.set_label('Time at which orbit passes through 100 au (s)')

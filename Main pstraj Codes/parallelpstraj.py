@@ -42,8 +42,9 @@ refdist = 300
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
 theta = float(file.readline().strip()) # azimuthal angle of the target point from the upwind axis
-ibexx = np.cos(theta*np.pi/180)
-ibexy = np.sin(theta*np.pi/180)
+ibexrad = 1
+ibexx = ibexrad*np.cos(theta*np.pi/180)
+ibexy = ibexrad*np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
 # implementation of target point that orbits around the sun
 #ibexpos = np.array([np.cos(np.pi*finalt/oneyear + phase)*au, np.sin(np.pi*finalt/oneyear + phase)*au, 0])
@@ -468,14 +469,14 @@ for m in range(nprocs-1):
 
                                 # calculation of attenuation factor
                                 attfact = scipy.integrate.simps(btintegrand, currentrad)
+                                # calculating value of phase space density based on the value at the crossing of x = 100 au
+                                attenval = np.exp(-np.abs(attfact))*initpsd
                                 
                                 data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,0] = vxstartn[i]
                                 data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,1] = vystart[j]
                                 data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
                                 data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,3] = startt - t[kn-1]
-                                # calculating value of phase space density based on the value at the crossing of x = 100 au
-                                attenval = np.exp(-np.abs(attfact))*initpsd
-                                data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = attenval
+                                data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = np.exp(-np.abs(attfact))*initpsd[0]
                                 restartfile.write(str(vxstartn[i]/1000) + ',' + str(vystart[j]/1000) + ',' + str(vzstart[l]/1000) + ',' + str(attenval) + '\n')
                                 break
                                 #break
