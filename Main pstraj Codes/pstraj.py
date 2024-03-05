@@ -264,15 +264,29 @@ def cosexpabs(t,x,y,z,vr):
         longangle = np.arccos(x/rxy)
     else:
         longangle = 2*np.pi - np.arccos(x/rxy)
+    latangled = latangle*180/np.pi
+    longangled = longangle*180/np.pi
+
+    alpha = .07 # alpha for the skew gaussian distribution
     
     # calculating parameters from IKL et al. 2022 paper: https://ui.adsabs.harvard.edu/abs/2022ApJ...926...27K/abstract
     if r < au:
         amp = 0
     else:
-        amp = (r/au-1)/99
-    mds = np.sign(x)*25 + np.sin(longangle)
-    disper = 100
-    fittype = 2
+        amp = ((.59*(r/au - 12)/np.sqrt((r/au - 12)**2 + 200) + 0.38) + -0.4* \
+        np.e**(-(longangled - 90)**2/50**2 - (r - 31)**2/15**2)*(1 + \
+        scipy.special.erf(alpha*(r/au)/np.sqrt(2)))*(1 - np.e**(-(r/au)/4)))*1/.966
+    
+    mds = 20*np.sin(longangle)*np.cos((latangled-10)*np.pi/180)
+    disper = -.0006947*(r/au)**2 + .1745*(r/au) + 5.402 + \
+        1.2*np.e**(-(longangled - 275)**2/50**2 - ((r/au) - 80)**2/60**2) + \
+        3*np.e**(-(longangled - 90)**2/50**2 - ((r/au))**2/5**2) + \
+        1*np.e**(-(longangled - 100)**2/50**2 - ((r/au) - 25)**2/200**2) + \
+        .35*np.cos(((latangled + 15)*np.pi/180)*2)
+    if r >= 50*au:
+        fittype = 4
+    else:
+        fittype = 2
     absval = amp*np.exp(-.5 * ((vr/1000 - mds)/disper)**fittype)
     return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*(1 - absval)
 
