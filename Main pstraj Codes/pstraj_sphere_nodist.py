@@ -102,114 +102,7 @@ if mode==3:
 #
 #
 #
-#datafilename1 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_001_H_RegAll.h5'
-#datafilename2 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_002_H_RegAll.h5'
-#datafilename3 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_003_H_RegAll.h5'
-#datafilename4 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_004_H_RegAll.h5'
-#datafilename5 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_005_H_RegAll.h5'
-#datafilename6 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_006_H_RegAll.h5'
-#datafilename7 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_007_H_RegAll.h5'
-#datafilename8 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_008_H_RegAll.h5'
 
-datafilename1 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_001_H_RegAll.h5'
-datafilename2 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_002_H_RegAll.h5'
-datafilename3 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_003_H_RegAll.h5'
-datafilename4 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_004_H_RegAll.h5'
-datafilename5 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_005_H_RegAll.h5'
-datafilename6 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_006_H_RegAll.h5'
-datafilename7 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_007_H_RegAll.h5'
-datafilename8 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_008_H_RegAll.h5'
-
-with h5py.File(datafilename1, "r") as f:
-    # Print all root level object names (aka keys) 
-    # these can be group or dataset names 
-    print("Keys: %s" % f.keys())
-    # get first object name/key; may or may NOT be a group
-    a_group_key = list(f.keys())[0]
-
-    # get the object type for a_group_key: usually group or dataset
-    print(type(f[a_group_key])) 
-
-    # If a_group_key is a group name, 
-    # this gets the object names in the group and returns as a list
-    data = list(f[a_group_key])
-
-    # If a_group_key is a dataset name, 
-    # this gets the dataset values and returns as a list
-    data = list(f[a_group_key])
-    # preferred methods to get dataset values:
-    ds_obj = f[a_group_key]      # returns as a h5py dataset object
-    ds_arr = f[a_group_key][()]  # returns as a numpy array
-
-    print(list(f.keys()))
-    dsvdf1 = f['VDF3D'] # returns h5py dataset object
-    arrvdf1 = f['VDF3D'][()] # returns np.array of values
-    #print(arrvdf[128,128,128])
-    xloc = f['vx_grid'][()]
-    yloc = f['vy_grid'][()]
-    zloc = f['vz_grid'][()]
-
-with h5py.File(datafilename2, "r") as f:
-    dsvdf2 = f['VDF3D'] # returns h5py dataset object
-    arrvdf2 = f['VDF3D'][()] # returns np.array of values
-
-with h5py.File(datafilename3, "r") as f:
-    dsvdf3 = f['VDF3D'] # returns h5py dataset object
-    arrvdf3 = f['VDF3D'][()] # returns np.array of values
-
-with h5py.File(datafilename4, "r") as f:
-    dsvdf4 = f['VDF3D'] # returns h5py dataset object
-    arrvdf4 = f['VDF3D'][()] # returns np.array of values
-
-with h5py.File(datafilename5, "r") as f:
-    dsvdf5 = f['VDF3D'] # returns h5py dataset object
-    arrvdf5 = f['VDF3D'][()] # returns np.array of values
-
-with h5py.File(datafilename6, "r") as f:
-    dsvdf6 = f['VDF3D'] # returns h5py dataset object
-    arrvdf6 = f['VDF3D'][()] # returns np.array of values
-
-with h5py.File(datafilename7, "r") as f:
-    dsvdf7 = f['VDF3D'] # returns h5py dataset object
-    arrvdf7 = f['VDF3D'][()] # returns np.array of values
-
-with h5py.File(datafilename8, "r") as f:
-    dsvdf8 = f['VDF3D'] # returns h5py dataset object
-    arrvdf8 = f['VDF3D'][()] # returns np.array of values
-
-zgrid, ygrid, xgrid = np.meshgrid(zloc, yloc, xloc, indexing='ij') # order will be z, y, x for this
-
-interp1 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf1)
-interp2 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf2)
-interp3 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf3)
-interp4 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf4)
-interp5 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf5)
-interp6 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf6)
-interp7 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf7)
-interp8 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf8)
-
-
-
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
 def radPressure(t):
     # dummy function to model radiation pressure
     # takes the time as input and returns the radiation pressure function at that time
@@ -748,32 +641,6 @@ if mode==3:
                     # only saving initial conditions corresponding to points that lie within this Maxwellian at reference distance
                     #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
                     #if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 27000:
-                    # determining which distribution to use by calculating heliolongitude
-                    endradxy = np.sqrt((sunpos[0]-backtraj[kn+1,0])**2 + (sunpos[1]-backtraj[kn+1,1])**2)
-                    belowxaxis = backtraj[kn+1,1] < 0
-                    ymask = belowxaxis*2*np.pi
-                    longmask = -2*(belowxaxis-.5) # -1 if below x axis in xy plane, 1 if above
-                    # if y < 0, longitude = 2pi-arccos(x/r), otherwise longitude = arccos(x/r)
-                    endlongangle = ymask + np.arccos((backtraj[kn+1,0] - sunpos[0])/endradxy)*longmask
-                    endlongangle = endlongangle*180/np.pi
-                    # finding the initial value of the distribution function based on the interpolated distributions
-                    endvelcoords = [backtraj[kn+1,5]/1000,backtraj[kn+1,4]/1000,backtraj[kn+1,3]/1000]
-                    if endlongangle > 22.5 and endlongangle <=67.5:
-                        initpsd = interp2(endvelcoords)
-                    elif endlongangle > 67.5 and endlongangle <=112.5:
-                        initpsd = interp3(endvelcoords)
-                    elif endlongangle > 112.5 and endlongangle <=157.5:
-                        initpsd = interp4(endvelcoords)
-                    elif endlongangle > 157.5 and endlongangle <=202.5:
-                        initpsd = interp5(endvelcoords)
-                    elif endlongangle > 202.5 and endlongangle <=247.5:
-                        initpsd = interp6(endvelcoords)
-                    elif endlongangle > 247.5 and endlongangle <=292.5:
-                        initpsd = interp7(endvelcoords)
-                    elif endlongangle > 292.5 and endlongangle <=337.5:
-                        initpsd = interp8(endvelcoords)
-                    elif endlongangle > 337.5 or endlongangle <= 22.5:
-                        initpsd = interp1(endvelcoords)
 
                     # approximate time-averaged charge exchange photoionization rate from Sokol et al. 2019
                     cxirate = 5*10**(-7)
@@ -804,9 +671,11 @@ if mode==3:
                     #btintegrand = btintegrand*(.85*(np.sin(latangle))**2 + (np.cos(latangle))**2)
                     # calculation of attenuation factor
                     attfact = scipy.integrate.simps(btintegrand, currentrad)
+                    # determining initial normalized phase space density using pristine LISM Maxwellian
+                    initpsd = np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)
                     # calculating the value of the phase space density after attenuation
                     psdval = np.exp(-np.abs(attfact))*initpsd
-                    if psdval > 10**(-11):
+                    if initpsd >= 10**(-3):
                         # retaining variables corresponding to vx, vy, t at the target point
                         farvx = np.append(farvx, [backtraj[0,3]])
                         farvy = np.append(farvy, [backtraj[0,4]])

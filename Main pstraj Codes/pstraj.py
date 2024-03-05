@@ -308,6 +308,77 @@ def rpnoisefluc(t):
     flucmag = .1
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + flucmag*np.sin(omeganoiset)*np.cos(omegaoverallfluct)
 
+def lya_abs(t,x,y,z,vr):
+    # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    r = np.sqrt(x**2 + y**2 + z**2)
+    rxy = np.sqrt(x**2 + y**2)
+    # calculating the latitudinal (polar) angle in 3D space
+    if z >= 0:
+        latangle = np.pi/2 - np.arcsin(z/r)
+    else:
+        latangle = np.pi/2 + np.arcsin(np.abs(z)/r)
+    # calculating the longitudinal (azimuthal) angle in 3D space
+    if y >= 0:
+        longangle = np.arccos(x/rxy)
+    else:
+        longangle = 2*np.pi - np.arccos(x/rxy)
+    longangle = longangle - np.pi
+    if longangle < 0:
+        longangle = 2*np.pi + longangle
+    latangled = latangle*180/np.pi
+    longangled = longangle*180/np.pi
+
+    alpha = .07 # alpha for the skew gaussian distribution
+    
+    # calculating parameters from IKL et al. 2022 paper: https://ui.adsabs.harvard.edu/abs/2022ApJ...926...27K/abstract
+    if r < au:
+        amp = 0
+    else:
+        amp = ((.59*(r/au - 12)/np.sqrt((r/au - 12)**2 + 200) + 0.38) + -0.4* \
+        np.e**(-(longangled - 90)**2/50**2 - (r - 31)**2/15**2)*(1 + \
+        scipy.special.erf(alpha*(r/au)/np.sqrt(2)))*(1 - np.e**(-(r/au)/4)))*1/.966
+    
+    mds = 20*np.sin(longangle)*np.cos((latangled-10)*np.pi/180)
+    disper = -.0006947*(r/au)**2 + .1745*(r/au) + 5.402 + \
+        1.2*np.e**(-(longangled - 275)**2/50**2 - ((r/au) - 80)**2/60**2) + \
+        3*np.e**(-(longangled - 90)**2/50**2 - ((r/au))**2/5**2) + \
+        1*np.e**(-(longangled - 100)**2/50**2 - ((r/au) - 25)**2/200**2) + \
+        .35*np.cos(((latangled + 15)*np.pi/180)*2)
+    if r >= 50*au:
+        fittype = 4
+    else:
+        fittype = 2
+    absval = amp*np.exp(-.5 * ((vr/1000 - mds)/disper)**fittype)
+
+    # time dependent portion of the radiation pressure force function
+    #tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor
+    tdependence = .95 + .5/(np.e**2 + 1) + .5/(np.e + 1/np.e)*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+    # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
+    # scalefactor should match divisor in first term of addfactor
+    scalefactor = .555
+    
+    # parameters of function
+    A_K = 6.523*(1 + 0.619*tdependence)
+    m_K = 5.143*(1 - 1.081*tdependence)
+    del_K = 38.008*(1 + 0.104*tdependence)
+    K = 2.165*(1 - 0.301*tdependence)
+    A_R = 580.37*(1 + 0.28*tdependence)
+    dm = -0.344*(1 - 0.828*tdependence)
+    del_R = 32.349*(1 - 0.049*tdependence)
+    b_bkg = 0.035*(1 + 0.184*tdependence)
+    a_bkg = 0.411**(-4) *(1 - 1.333*tdependence)
+    #print(a_bkg)
+    r_E = 0.6
+    r2 = 1
+    F_R = A_R / (del_R * np.sqrt(2 * np.pi)) *np.exp(-(np.square((vr/1000) - (m_K + dm))) / (2*(del_R ** 2)))
+    F_bkg = np.add(a_bkg*(vr/1000)*0.000001,b_bkg)
+    F_K = A_K * np.power(1 + np.square((vr/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
+
+    #(F_K-F_R+F_bkg)/((r_E/r)**2)
+    return scalefactor*(F_K-F_R+F_bkg)/(r_E/(r2**2))*(1 - absval)
+
+
 def dr_dt(x,t,rp):
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
     # dx0-2 = vx, vy, and vz, dx3-5 = ax, ay, and az
@@ -523,7 +594,10 @@ if mode==2:
             btintegrand = PIrate2/currentvr*(r1/currentrad)**2 + cxirate/currentvr*(r1/currentrad)**2
             # calculation of attenuation factor
             attfact = scipy.integrate.simps(btintegrand, currentrad)
-            psd = np.exp(-np.abs(attfact))*np.exp(-((singletraj[k-1,3]+26000)**2 + singletraj[k-1,4]**2 + singletraj[k-1,5]**2)/(5327)**2)
+            # pre-attenuation value of normalized phase space density from pristine LISM Maxwellian 
+            initpsd = np.exp(-((singletraj[k+1,3]+26000)**2 + singletraj[k+1,4]**2 + singletraj[k+1,5]**2)/(10195)**2)
+            # attenuated NPSD value
+            psd = np.exp(-np.abs(attfact))*initpsd
 
             print(np.sqrt((singletraj[k-1,3]+26000)**2 + (singletraj[k-1,4])**2 + (singletraj[k-1,5])**2))
             print("Perihelion distance in au is: " + str(perihelion/au))
