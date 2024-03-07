@@ -31,7 +31,7 @@ oneyear = 3.15545454545*10**7
 # 226250200 for second force free
 finalt = float(file.readline().strip()) # time to start backtracing
 #6.36674976e9 force free for cosexprp
-initialt = -10000000000
+initialt = -10000000000 # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
 tstepclose = float(file.readline().strip()) # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
@@ -41,8 +41,8 @@ refdist = 300
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = float(file.readline().strip()) # azimuthal angle of the target point from the upwind axis
-ibexrad = 1
+theta = float(file.readline().strip()) # angle with respect to upwind axis of target point
+ibexrad = 1 # radial distance of target point from Sun
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -56,13 +56,14 @@ ystart = ibexpos[1]
 zstart = ibexpos[2]
 
 # Set of initial conditions in velocity space
+# vx/vy initial conditions are sampled on a grid with chosen resolution
 vxstart = np.arange(float(file.readline().strip()), float(file.readline().strip()), float(file.readline().strip()))
 vystart = np.arange(float(file.readline().strip()), float(file.readline().strip()), float(file.readline().strip()))
 vzstart = np.arange(float(file.readline().strip()), float(file.readline().strip()), float(file.readline().strip()))
 
 startt = finalt
 lastt = initialt
-tmid = startt - 200000000 # time at which we switch from high resolution to low resolution - a little more than half of a cycle
+tmid = startt - 200000000 # time at which we switch from high resolution to low resolution - a little more than half of a solar cycle
 tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (close regime)
 tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
 t = np.concatenate((tclose, tfar))
@@ -147,7 +148,7 @@ interp7 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf7)
 interp8 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf8)
 
 
-def radPressure(t):
+def radPressure(t,x,y,z,v_r):
     # dummy function to model radiation pressure
     # takes the time as input and returns the radiation pressure function at that time
     #return (np.sin(2*np.pi*(t/347000000)))**2 + .5
@@ -155,7 +156,7 @@ def radPressure(t):
     return 0
 
 # extra radiation pressure functions for overlayed plots
-def cosexprp(t):
+def cosexprp(t,x,y,z,v_r):
     # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
     omegat = 2*np.pi/(3.47*10**(8))*t
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
@@ -203,18 +204,22 @@ def dr_dt(x,t,rp):
     return [dx0, dx1, dx2, dx3, dx4, dx5]
 
 
-def LyaRP(t,v_r):
+def LyaRP(t,x,y,z,v_r):
     # a double (triple) Gaussian function to mimic the Lyman-alpha profile
     lyafunction = 1.25*np.exp(-(v_r/1000-55)**2/(2*25**2)) + 1.25*np.exp(-(v_r/1000+55)**2/(2*25**2)) + .55*np.exp(-(v_r/1000)**2/(2*25**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
-    scalefactor = 1.3244
-    # added value to ensure scaling is correct at both solar minimum and solar maximum
-    addfactor = ((1.3244/1.616) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
-    return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
+    # scalefactor should match divisor in first term of addfactor
+    scalefactor = 1.8956
+    # added value to ensure scaling is throughout solar cycle
+    # matches total irradiance out to +-120 km/s
+    #addfactor = ((1.3244/1.616) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    # matches total irradiance out to +-370 km/s
+    addfactor = ((1.55363/1.8956) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
+    return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor)*lyafunction
 
 
-def LyaRP2(t,v_r):
+def LyaRP2(t,x,y,z,v_r):
     # My Ly-a line profile function
     #lyafunction = 1.25*np.exp(-(v_r-55000)**2/(2*25000**2)) + 1.25*np.exp(-(v_r+55000)**2/(2*25000**2)) + .55*np.exp(-v_r**2/(2*25000**2))
     # Ly-a line profile function from Tarnopolski 2007
@@ -227,7 +232,7 @@ def LyaRP2(t,v_r):
     #return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
     return 2.4543*10**-9*(1 + 4.5694*10**-4*tdependence)*lyafunction
 
-def LyaRP3(t,v_r):
+def LyaRP3(t,x,y,z,v_r):
     # constants for following function
     A_K = 6.523*(1 + 0.619)
     m_K = 5.143*(1 -0.081)
@@ -312,6 +317,87 @@ def LyaRP4(t,x,y,z,v_r):
     alya = .8
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
     return scalefactor*(F_K-F_R+F_bkg)/(r_E/(r2**2))*np.sqrt(alya*np.sin(latangle)**2 + np.cos(latangle)**2)
+
+
+def lya_abs(t,x,y,z,vr):
+    # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
+    omegat = 2*np.pi/(3.47*10**(8))*t
+    r = np.sqrt(x**2 + y**2 + z**2)
+    rxy = np.sqrt(x**2 + y**2)
+    # calculating the latitudinal (polar) angle in 3D space
+    # since sine/cosine only covers half of the space, we have to manually check where the point is to get the right angle
+    if z >= 0:
+        latangle = np.pi/2 - np.arcsin(z/r)
+    else:
+        latangle = np.pi/2 + np.arcsin(np.abs(z)/r)
+    # calculating the longitudinal (azimuthal) angle in 3D space
+    if y >= 0:
+        longangle = np.arccos(x/rxy)
+    else:
+        longangle = 2*np.pi - np.arccos(x/rxy)
+    longangle = longangle - np.pi
+    if longangle < 0:
+        longangle = 2*np.pi + longangle
+    latangled = latangle*180/np.pi
+    longangled = longangle*180/np.pi
+
+    alpha = .07 # alpha for the skew gaussian distribution
+    
+    # calculating parameters from IKL et al. 2022 paper: https://ui.adsabs.harvard.edu/abs/2022ApJ...926...27K/abstract
+    # manually fitted based on Figure 3
+    # amplitude
+    if r < au:
+        amp = 0
+    else:
+        amp = ((.59*(r/au - 12)/np.sqrt((r/au - 12)**2 + 200) + 0.38) + -0.4* \
+        np.e**(-(longangled - 90)**2/50**2 - (r - 31)**2/15**2)*(1 + \
+        scipy.special.erf(alpha*(r/au)/np.sqrt(2)))*(1 - np.e**(-(r/au)/4)))*1/.966
+    
+    # mean Doppler shift
+    mds = 20*np.sin(longangle)*np.cos((latangled-10)*np.pi/180)
+    # dispersion (width of the peak)
+    disper = -.0006947*(r/au)**2 + .1745*(r/au) + 5.402 + \
+        1.2*np.e**(-(longangled - 275)**2/50**2 - ((r/au) - 80)**2/60**2) + \
+        3*np.e**(-(longangled - 90)**2/50**2 - ((r/au))**2/5**2) + \
+        1*np.e**(-(longangled - 100)**2/50**2 - ((r/au) - 25)**2/200**2) + \
+        .35*np.cos(((latangled + 15)*np.pi/180)*2)
+    # fit exponent
+    if r >= 50*au:
+        fittype = 4
+    else:
+        fittype = 2
+    # calculating equation 12 from the 2022 paper
+    absval = amp*np.exp(-.5 * ((vr/1000 - mds)/disper)**fittype)
+
+    # time dependent portion of the radiation pressure force function
+    #tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor
+    tdependence = .95 + .5/(np.e**2 + 1) + .5/(np.e + 1/np.e)*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+    # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
+    # scalefactor should match divisor in first term of addfactor
+    scalefactor = .555
+    
+    # parameters of function
+    A_K = 6.523*(1 + 0.619*tdependence)
+    m_K = 5.143*(1 - 1.081*tdependence)
+    del_K = 38.008*(1 + 0.104*tdependence)
+    K = 2.165*(1 - 0.301*tdependence)
+    A_R = 580.37*(1 + 0.28*tdependence)
+    dm = -0.344*(1 - 0.828*tdependence)
+    del_R = 32.349*(1 - 0.049*tdependence)
+    b_bkg = 0.035*(1 + 0.184*tdependence)
+    a_bkg = 0.411**(-4) *(1 - 1.333*tdependence)
+    #print(a_bkg)
+    r_E = 0.6
+    r2 = 1
+    F_R = A_R / (del_R * np.sqrt(2 * np.pi)) *np.exp(-(np.square((vr/1000) - (m_K + dm))) / (2*(del_R ** 2)))
+    F_bkg = np.add(a_bkg*(vr/1000)*0.000001,b_bkg)
+    F_K = A_K * np.power(1 + np.square((vr/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
+
+    #(F_K-F_R+F_bkg)/((r_E/r)**2)
+    return scalefactor*(F_K-F_R+F_bkg)/(r_E/(r2**2))*(1 - absval)
+
+
+# odeint documentation: https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.odeint.html
 
 
 def Lya_dr_dt(x,t,rp):
@@ -450,6 +536,7 @@ for m in range(nprocs-1):
                                 # function for the photoionization rate at each point in time
                                 PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
                                 r1 = 1*au # reference radius
+                                # radial distance to the Sun at all points throughout the trajectory
                                 currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
                                 # calculating the component of the radial unit vector in each direction at each point in time
                                 nrvecx = (-sunpos[0]+backtraj[0:kn+1,0])/currentrad
@@ -472,6 +559,7 @@ for m in range(nprocs-1):
                                 # calculating value of phase space density based on the value at the crossing of x = 100 au
                                 attenval = np.exp(-np.abs(attfact))*initpsd
                                 
+                                # storing relevant values in a shared array
                                 data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,0] = vxstartn[i]
                                 data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,1] = vystart[j]
                                 data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]

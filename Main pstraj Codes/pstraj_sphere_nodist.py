@@ -26,7 +26,7 @@ oneyear = 3.15545454545*10**7
 # 226250200 for second force free
 finalt = -5*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
-initialt = -1*10**(10)
+initialt = -1*10**(10) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
 tstepclose = 300 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
@@ -36,8 +36,8 @@ refdist = 70 # upwind reference distance for backtraced trajectories, in au
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 120
-ibexrad = 1
+theta = 120 # angle with respect to upwind axis of target point
+ibexrad = 1 # radial distance of target point from Sun
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -50,7 +50,7 @@ ttotal = 7000000000
 if mode==2:
     startt = finalt
     lastt = initialt
-    tmid = startt - 500000000 # time at which we switch from high resolution to low resolution - a little more than half of a cycle
+    tmid = startt - 500000000 # time at which we switch from high resolution to low resolution - a little more than half of a solar cycle
     tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (close regime)
     tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
     t = np.concatenate((tclose, tfar))
@@ -64,6 +64,7 @@ ystart = ibexpos[1]
 zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
+# vx/vy initial conditions are sampled on a grid with chosen resolution
 #vxstart = np.arange(2000, 10000, 50)
 #vystart = np.arange(2000, 10000, 50)
 #vxstart = np.arange(-25000, 25000, 300)
@@ -77,7 +78,7 @@ vzstart = 0
 if mode==3:
     startt = finalt
     lastt = initialt
-    tmid = startt - 200000000 # time at which we switch from high resolution to low resolution - a little more than half of a cycle
+    tmid = startt - 200000000 # time at which we switch from high resolution to low resolution - a little more than half of a solar cycle
     tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (close regime)
     tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
     t = np.concatenate((tclose, tfar))
@@ -103,19 +104,19 @@ if mode==3:
 #
 #
 
-def radPressure(t):
+def radPressure(t,x,y,z,v_r):
     # dummy function to model radiation pressure
     # takes the time as input and returns the radiation pressure function at that time
     #return (np.sin(2*np.pi*(t/347000000)))**2 + .5
     #return .7
     return 0
 
-def LyaRP(t,v_r):
+def LyaRP(t,x,y,z,v_r):
     # a double (triple) Gaussian function to mimic the Lyman-alpha profile
     lyafunction = 1.25*np.exp(-(v_r/1000-55)**2/(2*25**2)) + 1.25*np.exp(-(v_r/1000+55)**2/(2*25**2)) + .55*np.exp(-(v_r/1000)**2/(2*25**2))
     omegat = 2*np.pi/(3.47*10**(8))*t
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
-    # scalefactor should match dividor in first term of addfactor
+    # scalefactor should match divisor in first term of addfactor
     scalefactor = 1.8956
     # added value to ensure scaling is throughout solar cycle
     # matches total irradiance out to +-120 km/s
@@ -124,7 +125,7 @@ def LyaRP(t,v_r):
     addfactor = ((1.55363/1.8956) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor)*lyafunction
 
-def LyaRP2(t,v_r):
+def LyaRP2(t,x,y,z,v_r):
     # My Ly-a line profile function
     #lyafunction = 1.25*np.exp(-(v_r-55000)**2/(2*25000**2)) + 1.25*np.exp(-(v_r+55000)**2/(2*25000**2)) + .55*np.exp(-v_r**2/(2*25000**2))
     # Ly-a line profile function from Tarnopolski 2007
@@ -138,7 +139,7 @@ def LyaRP2(t,v_r):
     return 2.4543*10**-9*(1 + 4.5694*10**-4*tdependence)*lyafunction
 
 
-def LyaRP3(t,v_r):
+def LyaRP3(t,x,y,z,v_r):
     # constants for following function
     A_K = 6.523*(1 + 0.619)
     m_K = 5.143*(1 -0.081)
@@ -179,7 +180,7 @@ def LyaRP3(t,v_r):
     return scalefactor*tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
 
 
-def LyaRP4(t,v_r):
+def LyaRP4(t,x,y,z,v_r):
     #Author: E. Samoylov, H. Mueller LISM Group (Adapted by L. Dyke for this code)
     #https://iopscience.iop.org/article/10.3847/1538-4357/aa9f2a/pdf
     # Revised version of the function from IKL et al. 2018 - time dependence introduced through parameters
@@ -217,12 +218,13 @@ def LyaRP4(t,v_r):
     return scalefactor*(F_K-F_R+F_bkg)/(r_E/(r2**2))
 
 
-def LyaminRP(t,v_r):
+def LyaminRP(t,x,y,z,v_r):
+    # gives the radiation pressure associated with the triple Gaussian at solar minimum, such that it doesn't change with time
     lyafunction = 1.25*np.exp(-(v_r-55000)**2/(2*25000**2)) + 1.25*np.exp(-(v_r+55000)**2/(2*25000**2)) + .55*np.exp(-v_r**2/(2*25000**2))
     return (.75 - .243)*lyafunction
 
 # extra radiation pressure functions for overlayed plots
-def cosexprp(t):
+def cosexprp(t,x,y,z,vr):
     # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
     omegat = 2*np.pi/(3.47*10**(8))*t
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
@@ -248,6 +250,7 @@ def cosexpabs(t,x,y,z,vr):
     alpha = .07 # alpha for the skew gaussian distribution
     
     # calculating parameters from IKL et al. 2022 paper: https://ui.adsabs.harvard.edu/abs/2022ApJ...926...27K/abstract
+    # manually fitted based on Figure 3
     if r < au:
         amp = 0
     else:
@@ -269,21 +272,21 @@ def cosexpabs(t,x,y,z,vr):
     return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*(1 - absval)
 
 
-def rpnoise(t):
+def rpnoise(t,x,y,z,vr):
     # a different form of the radiation pressure with fluctuations
     # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
     omegat = 2*np.pi/(3.47*10**(8))*t
     omeganoiset = 2*np.pi/(2.333*10**6)*t # 2.333*10**6 s = period of 27 days (rotational period of the sun)
-    flucmag = .1
+    flucmag = .1 # maximum magnitude of fluctuations
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + flucmag*np.sin(omeganoiset)
 
-def rpnoisefluc(t):
+def rpnoisefluc(t,x,y,z,vr):
     # a different form of the radiation pressure with fluctuations
     # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
     omegat = 2*np.pi/(3.47*10**(8))*t
     omeganoiset = 2*np.pi/(2.333*10**6)*t # 2.333*10**6 s = period of 27 days (rotational period of the sun)
-    omegaoverallfluct = omegat*20 # fluctuations of the noise itself
-    flucmag = .1
+    omegaoverallfluct = omegat*20 # omega*t for the fluctuations of the noise itself
+    flucmag = .1 # maximum magnitude of fluctuations
     return .75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + flucmag*np.sin(omeganoiset)*np.cos(omegaoverallfluct)
 
 
@@ -293,6 +296,7 @@ def lya_abs(t,x,y,z,vr):
     r = np.sqrt(x**2 + y**2 + z**2)
     rxy = np.sqrt(x**2 + y**2)
     # calculating the latitudinal (polar) angle in 3D space
+    # since sine/cosine only covers half of the space, we have to manually check where the point is to get the right angle
     if z >= 0:
         latangle = np.pi/2 - np.arcsin(z/r)
     else:
@@ -311,6 +315,8 @@ def lya_abs(t,x,y,z,vr):
     alpha = .07 # alpha for the skew gaussian distribution
     
     # calculating parameters from IKL et al. 2022 paper: https://ui.adsabs.harvard.edu/abs/2022ApJ...926...27K/abstract
+    # manually fitted based on Figure 3
+    # amplitude
     if r < au:
         amp = 0
     else:
@@ -318,16 +324,20 @@ def lya_abs(t,x,y,z,vr):
         np.e**(-(longangled - 90)**2/50**2 - (r - 31)**2/15**2)*(1 + \
         scipy.special.erf(alpha*(r/au)/np.sqrt(2)))*(1 - np.e**(-(r/au)/4)))*1/.966
     
+    # mean Doppler shift
     mds = 20*np.sin(longangle)*np.cos((latangled-10)*np.pi/180)
+    # dispersion (width of the peak)
     disper = -.0006947*(r/au)**2 + .1745*(r/au) + 5.402 + \
         1.2*np.e**(-(longangled - 275)**2/50**2 - ((r/au) - 80)**2/60**2) + \
         3*np.e**(-(longangled - 90)**2/50**2 - ((r/au))**2/5**2) + \
         1*np.e**(-(longangled - 100)**2/50**2 - ((r/au) - 25)**2/200**2) + \
         .35*np.cos(((latangled + 15)*np.pi/180)*2)
+    # fit exponent
     if r >= 50*au:
         fittype = 4
     else:
         fittype = 2
+    # calculating equation 12 from the 2022 paper
     absval = amp*np.exp(-.5 * ((vr/1000 - mds)/disper)**fittype)
 
     # time dependent portion of the radiation pressure force function
@@ -357,6 +367,7 @@ def lya_abs(t,x,y,z,vr):
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
     return scalefactor*(F_K-F_R+F_bkg)/(r_E/(r2**2))*(1 - absval)
 
+# odeint documentation: https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.odeint.html
 
 def dr_dt(x,t,rp):
     # integrating differential equation for gravitational force. x[0:2] = x,y,z and x[3:5] = vx,vy,vz
@@ -433,15 +444,15 @@ if mode==2:
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
-    #singletraj = odeint(dr_dt, init, t, mxstep=750, args=(rp6,))
+    # calculating the trajectory given the initial conditions
     singletraj = odeint(Lya_dr_dt, init, t, args=(LyaRP3,))
     print("Trajectory Calculated")
-    #print(singletraj)
+    # initializing arrays to store relevant values
     trackrp = np.zeros(t.size)
     Ltrack = np.zeros(t.size)
     Evartrack = np.zeros(t.size)
     Etrack = np.zeros(t.size)
-    #rtrack = np.zeros(t.size)
+    # getting the full array of radial distance values
     rtrack = np.sqrt((sunpos[0]-singletraj[:,0])**2 + (sunpos[1]-singletraj[:,1])**2 + (sunpos[2]-singletraj[:,2])**2)
     # calculating the component of the radial unit vector in each direction at each point in time
     nrvecxk = singletraj[:,0]/rtrack
@@ -452,6 +463,7 @@ if mode==2:
     for k in tqdm(range(t.size)):
         trackrp[k] = LyaRP3(t[k],v_rtrack[k]) # calculating the value of the radiation pressure at each time point
         #trackrp[k] = rp2(t[k])
+        # outdated code to track angular momentum/energy along the path
         """rmag = np.sqrt((sunpos[0]-singletraj[k,0])**2 + (sunpos[1]-singletraj[k,1])**2 + (sunpos[2]-singletraj[k,2])**2)
         rtrack[k] = rmag
         vmag = np.sqrt(singletraj[k,3]**2 + singletraj[k,4]**2 + singletraj[k,5]**2)
@@ -463,6 +475,7 @@ if mode==2:
         vdotr = rvec[0]*singletraj[k,3] + rvec[1]*singletraj[k,4] + rvec[2]*singletraj[k,5]
         Evartrack[k] = Evartrack[k-1] + (t[k]-t[k-1])*rp6(t[k])*vdotr/(rmag**2)
         Etrack[k] = (vmag**2)/2 - G*msolar/rmag - G*msolar*Evartrack[k]"""
+        # current value of the radial distance
         strajrad = np.sqrt((singletraj[k,0]-sunpos[0])**2 + (singletraj[k,1]-sunpos[1])**2 + (singletraj[k,2]-sunpos[2])**2)
         if strajrad <= .00465*au:
             # checking if the orbit is too close to the sun
@@ -478,6 +491,7 @@ if mode==2:
             rtrack = rtrack[:k]
             Ltrack = Ltrack[:k]
             rprange = trackrp[:k]
+            # calculating the perihelion of the orbit
             perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
             
             # approximate time-averaged charge exchange photoionization rate from Sokol et al. 2019
@@ -514,17 +528,17 @@ if mode==2:
             print("Perihelion distance in au is: " + str(perihelion/au))
             print("PSD value: " + str(psd))
             
-            t = t[:k]
-            ttime = t[0] - t[-1]
-            print("Travel time from 100 au in years: " + str(ttime/oneyear))
+            t = t[:k] # clipping array of time points
+            ttime = t[0] - t[-1] # calculating travel time from boundary surface to target point
+            print("Travel time from " + str(refdist) + " au in years: " + str(ttime/oneyear))
             break
         if k == t.size-1:
             perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
             ttime = 0
             psd = 0
-            #print(perihelion)
 
 if mode==2:
+    # lots of plotting code to plot the orbit on its own in 3D (above) or 2D (below)
     zer = [0]
     fosize = 10
     """fig3d = plt.figure()
@@ -559,12 +573,13 @@ if mode==2:
     # for fluctuating force
     # plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=((.75-.243/np.e)-.1), vmax=((.75+.243*np.e)+.1), zorder=2)
     # for non-fluctuating force
+    # vmin = minimum value of radiation pressure force, vmax = maximum value of radiation pressure force
     #plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=((.75-.243/np.e)), vmax=((.75+.243*np.e)), zorder=2)
     plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=0, vmax=2, zorder=2)
     #plt.scatter(singletraj[:,0]/au, singletraj[:,1]/au, c=trackrp[:], cmap='coolwarm', s=.02, vmin=min(rprange), zorder=2)
     cb = plt.colorbar()
-    plt.scatter(ibexpos[0]/au, ibexpos[1]/au, c='springgreen', zorder=3)
-    plt.scatter(zer, zer, c='orange', zorder=3)
+    plt.scatter(ibexpos[0]/au, ibexpos[1]/au, c='springgreen', zorder=3) # plotting the target point
+    plt.scatter(zer, zer, c='orange', zorder=3) # plotting the Sun
     plt.grid(zorder=0)
     cb.set_label("Value of $\mu$", fontsize=fosize)
     cb.ax.tick_params(labelsize=fosize)
@@ -580,6 +595,7 @@ if mode==2:
        \n Perihelion at $\\sim$ " + str(round(perihelion/au, 5)) + " au, Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years", fontsize=10)
     plt.show()
 
+    # extra code for plotting conserved values
     """f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
     l1, = ax1.plot(t,Etrack, color='r')
     l2, = ax2.plot(t,Ltrack, color='b')
@@ -621,10 +637,6 @@ if mode==3:
         for j in tqdm(range(vystart.size)):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
-            #if np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2) > 20:
-            #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
-            #else:
-            #   continue
             backtraj[:,:] = odeint(Abs_dr_dt, init, t, args=(lya_abs,))
             btr = np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2)
             if any(btr <= .00465*au):
@@ -637,10 +649,7 @@ if mode==3:
                 if btr[k+tclose.size] >= refdist*au and btr[k-1+tclose.size] <= refdist*au:
                     # adjusting the indexing to avoid checking in the close regime
                     kn = k+tclose.size
-                    # radius in paper given to be 14 km/s
                     # only saving initial conditions corresponding to points that lie within this Maxwellian at reference distance
-                    #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
-                    #if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 27000:
 
                     # approximate time-averaged charge exchange photoionization rate from Sokol et al. 2019
                     cxirate = 5*10**(-7)
@@ -650,6 +659,7 @@ if mode==3:
                     PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
                     #PIrate2 = 1.21163*10**(-7) # time average of above
                     r1 = 1*au # reference radius
+                    # radial distance to the Sun at all points throughout the trajectory
                     currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
                     # calculating the component of the radial unit vector in each direction at each point in time
                     nrvecx = (-sunpos[0]+backtraj[0:kn+1,0])/currentrad
@@ -657,6 +667,7 @@ if mode==3:
                     nrvecz = (-sunpos[2]+backtraj[0:kn+1,2])/currentrad
                     # calculating the magnitude of v_r at each point in time
                     currentvr = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
+                    # calculating maximum and minimum radial velocities throughout the whole trajectory
                     vrmax = np.append(vrmax, max(currentvr))
                     vrmin = np.append(vrmin, min(currentvr))
                     # integrand for the photoionization and charge exchange ionization losses
@@ -675,7 +686,7 @@ if mode==3:
                     initpsd = np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)
                     # calculating the value of the phase space density after attenuation
                     psdval = np.exp(-np.abs(attfact))*initpsd
-                    if initpsd >= 10**(-3):
+                    if initpsd >= 10**(-3): # only retaining trajectories whose value of the NPSD before attenuation is greater than 10^(-3)
                         # retaining variables corresponding to vx, vy, t at the target point
                         farvx = np.append(farvx, [backtraj[0,3]])
                         farvy = np.append(farvy, [backtraj[0,4]])
@@ -693,6 +704,7 @@ if mode==3:
     file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_2pi3_-5yr_direct_cxi+cepi_tclose300_r=1au_-11cut.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
+        # writes vx, vy, and attenuated NPSD value
         file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
     file.close()
 
@@ -701,13 +713,13 @@ if mode==3:
     f.set_figwidth(10)
     f.set_figheight(6)
     fsize = 18
-    #plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='rainbow')
-    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
+    #plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='rainbow') # linear scale
+    plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11))) # log scale, minimum value at vmin
     plt.rcParams.update({'font.size': fsize})
     cb = plt.colorbar()
     #cb.set_label('Time at which orbit passes through 100 au (s)')
     #cb.set_label('Travel Time from 100 au to Point of Interest (s)')
-    cb.set_label('Phase Space Density')
+    cb.set_label('Normalized Phase Space Density')
     #plt.xlim([-25, 25])
     #plt.ylim([-25, 25])
     plt.xticks(fontsize=fsize)
