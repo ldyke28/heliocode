@@ -31,12 +31,12 @@ oneyear = 3.15545454545*10**7
 # 226250200 for second force free
 finalt = float(file.readline().strip()) # time to start backtracing
 #6.36674976e9 force free for cosexprp
-initialt = -10000000000 # time in the past to which the code should backtrace
+initialt = -50000000000 # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
 tstepclose = float(file.readline().strip()) # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
-refdist = 300
+refdist = 115
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
@@ -495,7 +495,7 @@ for m in range(nprocs-1):
                             dirlosscount[0] += 1
                             continue
                         for k in range(t.size - tclose.size):
-                            if backtraj[k+tclose.size,0] >= 100*au and backtraj[k-1+tclose.size,0] <= refdist*au:
+                            if btr[k+tclose.size] >= refdist*au and btr[k-1+tclose.size] <= refdist*au:
                                 # adjusting the indexing to avoid checking in the close regime
                                 kn = k+tclose.size
                                 # radius in paper given to be 14 km/s
@@ -557,7 +557,7 @@ for m in range(nprocs-1):
                                 # calculation of attenuation factor
                                 attfact = scipy.integrate.simps(btintegrand, currentrad)
                                 # calculating value of phase space density based on the value at the crossing of x = 100 au
-                                attenval = np.exp(-np.abs(attfact))*initpsd
+                                attenval = np.exp(-np.abs(attfact))*initpsd[0]
                                 
                                 # storing relevant values in a shared array
                                 data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,0] = vxstartn[i]
@@ -568,6 +568,12 @@ for m in range(nprocs-1):
                                 restartfile.write(str(vxstartn[i]/1000) + ',' + str(vystart[j]/1000) + ',' + str(vzstart[l]/1000) + ',' + str(attenval) + '\n')
                                 break
                                 #break
+                            if k == (t.size - tclose.size) - 1:
+                                data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,0] = vxstartn[i]
+                                data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,1] = vystart[j]
+                                data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
+                                data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,3] = 0
+                                data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = 0
                     except Warning:
                         # Collects the points that seem to cause issues to be ran again with different temporal resolution
                         #lostpoints = np.vstack([lostpoints, [vxstartn[i], vystart[j], vzstart[l]]])

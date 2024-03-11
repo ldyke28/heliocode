@@ -24,9 +24,9 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 2*oneyear # time to start backtracing
+finalt = -1*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
-initialt = -1*10**(10) # time in the past to which the code should backtrace
+initialt = -5*10**(10) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
 tstepclose = 300 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
@@ -71,8 +71,8 @@ zstart = ibexpos[2]
 #vystart = np.arange(-25000, 25000, 300)
 #vxstart = np.arange(-60000, 40000, 300)
 #vystart = np.arange(-35000, 50000, 300)
-vxstart = np.arange(-60000, -10000, 300)
-vystart = np.arange(-45000, 25000, 300)
+vxstart = np.arange(-50000, 10000, 500)
+vystart = np.arange(-45000, 25000, 500)
 vzstart = 0
 
 if mode==3:
@@ -753,9 +753,21 @@ if mode==3:
             btr = np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2)
             if any(btr <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
+                print("In Sun")
+                farvx = np.append(farvx, [backtraj[0,3]])
+                farvy = np.append(farvy, [backtraj[0,4]])
+                fart = np.append(fart, [0])
+                # sets the value of the NPSD to 0 to indicate the trajectory isn't viable
+                maxwcolor = np.append(maxwcolor, [0])
                 continue
-            if all(btr < refdist*au):
+            if np.all(btr[:] < refdist*au):
                 # forgoes the following checks if the trajectory never passes through the plane at the reference distance upwind
+                print("Never escapes")
+                farvx = np.append(farvx, [backtraj[0,3]])
+                farvy = np.append(farvy, [backtraj[0,4]])
+                fart = np.append(fart, [0])
+                # sets the value of the NPSD to 0 to indicate the trajectory isn't viable
+                maxwcolor = np.append(maxwcolor, [0])
                 continue
             for k in range(t.size - tclose.size):
                 if btr[k+tclose.size] >= refdist*au and btr[k-1+tclose.size] <= refdist*au:
@@ -825,22 +837,30 @@ if mode==3:
                     attfact = scipy.integrate.simps(btintegrand, currentrad)
                     # calculating the value of the phase space density after attenuation
                     psdval = np.exp(-np.abs(attfact))*initpsd
-                    if psdval > 10**(-11):
-                        # retaining variables corresponding to vx, vy, t at the target point
-                        farvx = np.append(farvx, [backtraj[0,3]])
-                        farvy = np.append(farvy, [backtraj[0,4]])
-                        fart = np.append(fart, [startt - t[kn-1]])
-                        # calculating value of phase space density based on the value at the crossing of x = 100 au
-                        maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*initpsd])
-                        #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
+                    #if psdval > 10**(-11):
+                    # retaining variables corresponding to vx, vy, t at the target point
+                    farvx = np.append(farvx, [backtraj[0,3]])
+                    farvy = np.append(farvy, [backtraj[0,4]])
+                    fart = np.append(fart, [startt - t[kn-1]])
+                    # calculating value of phase space density based on the value at the crossing of x = 100 au
+                    maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*initpsd])
+                    #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
                     break
                     #break
+                if k == (t.size - tclose.size) - 1:
+                    farvx = np.append(farvx, [backtraj[0,3]])
+                    farvy = np.append(farvy, [backtraj[0,4]])
+                    fart = np.append(fart, [0])
+                    # sets the value of the NPSD to 0 to indicate the trajectory isn't viable
+                    maxwcolor = np.append(maxwcolor, [0])
+                
+                
 
 print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_2pi3_2yr_direct_cxi+cepi_tclose300_r=1au_-11cut.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_2pi3_-1yr_direct_cxi+cepi_tclose300_r=1au_nocut-11plot_alt_test.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value

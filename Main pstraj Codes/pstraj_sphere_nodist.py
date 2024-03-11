@@ -696,6 +696,12 @@ if mode==3:
                         #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
                     break
                     #break
+                if k == (t.size - tclose.size) - 1:
+                    farvx = np.append(farvx, [backtraj[0,3]])
+                    farvy = np.append(farvy, [backtraj[0,4]])
+                    fart = np.append(fart, [0])
+                    # sets the value of the NPSD to 0 to indicate the trajectory isn't viable
+                    maxwcolor = np.append(maxwcolor, [0])
 
 print('Finished')
 

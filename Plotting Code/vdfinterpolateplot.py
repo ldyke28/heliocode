@@ -1,15 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+import scipy
 
 vx = np.array([])
 vy = np.array([])
 f = np.array([])
 
-filenum = 1
-
 #file = open("C:\Users\lucas\Downloads\cosexprp_pi32_1p5e8_indirect_cosexppi.txt", "r")
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_2pi3_-4yr_direct_cxi+cepi_tclose300_r=1au_nocut-11plot_all.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_2pi3_-1yr_direct_cxi+cepi_tclose300_r=1au_nocut-11plot_alt.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper Data/cosexpminrp_17pi36_t0_indirect_cosexppi_tclose200_r=1au.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/Downloads/Data Files-20230406T214257Z-001/Data Files/lyaminrp_5pi6_0y_direct_cosexppi_tclose400_1.txt", delimiter=',')
 #file = np.loadtxt("/Users/ldyke/Downloads/drive-download-20221019T183112Z-001/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')
@@ -26,23 +25,48 @@ for i in range(np.shape(file)[0]):
     vy = np.append(vy, file[i,1])
     f = np.append(f, file[i,2])
 
-if filenum == 2:
-    for i in range(np.shape(file2)[0]):
-        vx = np.append(vx, file2[i,0])
-        vy = np.append(vy, file2[i,1])
-        f = np.append(f, file2[i,2])
+print(np.amax(f))
+#f = f*10**10
 
-if filenum == 3:
-    for i in range(np.shape(file2)[0]):
-        vx = np.append(vx, file2[i,0])
-        vy = np.append(vy, file2[i,1])
-        f = np.append(f, file2[i,2])
-    for i in range(np.shape(file3)[0]):
-        vx = np.append(vx, file3[i,0])
-        vy = np.append(vy, file3[i,1])
-        f = np.append(f, file3[i,2])
+vyshape = 0
+newvy = np.array([])
+for i in range(vx.size):
+    newvy = np.append(newvy, [vy[i]])
+    if vx[i+1] != vx[i]:
+        vyshape = i+1
+        #print(i+1)
+        break
+vxshape = int(vx.size/vyshape)
+newvx = np.array([])
+for i in range(vxshape):
+    newvx = np.append(newvx, [vx[vyshape*i]])
+#print(newvx)
+#print(newvy)
+
+freshape = np.zeros((vxshape, vyshape))
+for i in range(vxshape):
+    for j in range(vyshape):
+        freshape[i][j] = f[vyshape*i + j]
+
+
+
 
 fig = plt.figure()
+ax = fig.add_subplot(projection='3d')
+
+#xx = np.linspace(-60000, -10000, 1000)
+#yy = np.linspace(-45000, 25000, 1000)
+vxgrid, vygrid = np.meshgrid(newvx, newvy, indexing='ij')
+interpvdf = scipy.interpolate.RegularGridInterpolator((newvx, newvy), freshape, bounds_error=False, fill_value=None)
+
+print(interpvdf([-31,-4]))
+
+ax.plot_wireframe(vxgrid, vygrid, interpvdf((vxgrid, vygrid)), rstride=3, cstride=3, alpha=0.4, color='m', label='linear interp')
+plt.legend()
+plt.show()
+
+
+"""fig = plt.figure()
 fig.set_figwidth(10)
 fig.set_figheight(6)
 
@@ -69,7 +93,7 @@ plt.ylabel("$v_y$ at Target in km/s", fontsize=fsize)
 #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
 #plt.title('Target at (' + str(round(ibexpos[0]/au, 3)) + ' au, ' + str(round(ibexpos[1]/au, 3)) + ' au), Time Resolution Close to Target = ' + str(tstepclose) + ' s')
 #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
-plt.show()
+plt.show()"""
 
 
 
