@@ -736,9 +736,19 @@ if mode==3:
             backtraj[:,:] = odeint(Abs_dr_dt, init, t, args=(cosexprp,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
+                farvx = np.append(farvx, [backtraj[0,3]])
+                farvy = np.append(farvy, [backtraj[0,4]])
+                fart = np.append(fart, [0])
+                # sets the value of the NPSD to 0 to indicate the trajectory isn't viable
+                maxwcolor = np.append(maxwcolor, [0])
                 continue
             if all(backtraj[:,0]-sunpos[0] < refdist*au):
                 # forgoes the following checks if the trajectory never passes through the plane at the reference distance upwind
+                farvx = np.append(farvx, [backtraj[0,3]])
+                farvy = np.append(farvy, [backtraj[0,4]])
+                fart = np.append(fart, [0])
+                # sets the value of the NPSD to 0 to indicate the trajectory isn't viable
+                maxwcolor = np.append(maxwcolor, [0])
                 continue
             for k in range(t.size - tclose.size):
                 if backtraj[k+tclose.size,0] >= refdist*au and backtraj[k-1+tclose.size,0] <= refdist*au:

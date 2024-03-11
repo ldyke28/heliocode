@@ -753,7 +753,6 @@ if mode==3:
             btr = np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2)
             if any(btr <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
-                print("In Sun")
                 farvx = np.append(farvx, [backtraj[0,3]])
                 farvy = np.append(farvy, [backtraj[0,4]])
                 fart = np.append(fart, [0])
@@ -762,7 +761,6 @@ if mode==3:
                 continue
             if np.all(btr[:] < refdist*au):
                 # forgoes the following checks if the trajectory never passes through the plane at the reference distance upwind
-                print("Never escapes")
                 farvx = np.append(farvx, [backtraj[0,3]])
                 farvy = np.append(farvy, [backtraj[0,4]])
                 fart = np.append(fart, [0])
