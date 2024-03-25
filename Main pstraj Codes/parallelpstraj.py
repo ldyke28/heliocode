@@ -523,22 +523,30 @@ for m in range(nprocs-1):
                                 endlongangle = endlongangle*180/np.pi
                                 # finding the initial value of the distribution function based on the interpolated distributions
                                 endvelcoords = [backtraj[kn+1,5]/1000,backtraj[kn+1,4]/1000,backtraj[kn+1,3]/1000]
-                                if endlongangle > 22.5 and endlongangle <=67.5:
-                                    initpsd = interp2(endvelcoords)
-                                elif endlongangle > 67.5 and endlongangle <=112.5:
-                                    initpsd = interp3(endvelcoords)
-                                elif endlongangle > 112.5 and endlongangle <=157.5:
-                                    initpsd = interp4(endvelcoords)
-                                elif endlongangle > 157.5 and endlongangle <=202.5:
-                                    initpsd = interp5(endvelcoords)
-                                elif endlongangle > 202.5 and endlongangle <=247.5:
-                                    initpsd = interp6(endvelcoords)
-                                elif endlongangle > 247.5 and endlongangle <=292.5:
-                                    initpsd = interp7(endvelcoords)
-                                elif endlongangle > 292.5 and endlongangle <=337.5:
-                                    initpsd = interp8(endvelcoords)
-                                elif endlongangle > 337.5 or endlongangle <= 22.5:
-                                    initpsd = interp1(endvelcoords)
+                                if endlongangle >= 0 and endlongangle <= 45:
+                                    anglepct = (endlongangle)/45
+                                    initpsd = interp1(endvelcoords)*(1 - anglepct) + interp2(endvelcoords)*anglepct
+                                elif endlongangle > 45 and endlongangle <= 90:
+                                    anglepct = (endlongangle - 45)/45
+                                    initpsd = interp2(endvelcoords)*(1 - anglepct) + interp3(endvelcoords)*anglepct
+                                elif endlongangle > 90 and endlongangle <= 135:
+                                    anglepct = (endlongangle - 90)/45
+                                    initpsd = interp3(endvelcoords)*(1 - anglepct) + interp4(endvelcoords)*anglepct
+                                elif endlongangle > 135 and endlongangle <= 180:
+                                    anglepct = (endlongangle - 135)/45
+                                    initpsd = interp4(endvelcoords)*(1 - anglepct) + interp5(endvelcoords)*anglepct
+                                elif endlongangle > 180 and endlongangle <= 225:
+                                    anglepct = (endlongangle - 180)/45
+                                    initpsd = interp5(endvelcoords)*(1 - anglepct) + interp6(endvelcoords)*anglepct
+                                elif endlongangle > 225 and endlongangle <= 270:
+                                    anglepct = (endlongangle - 225)/45
+                                    initpsd = interp6(endvelcoords)*(1 - anglepct) + interp7(endvelcoords)*anglepct
+                                elif endlongangle > 270 and endlongangle <= 315:
+                                    anglepct = (endlongangle - 270)/45
+                                    initpsd = interp7(endvelcoords)*(1 - anglepct) + interp8(endvelcoords)*anglepct
+                                elif endlongangle > 315 and endlongangle <= 360:
+                                    anglepct = (endlongangle - 315)/45
+                                    initpsd = interp8(endvelcoords)*(1 - anglepct) + interp1(endvelcoords)*anglepct
 
                                 omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
                                 # function for the charge exchange ionization rate
