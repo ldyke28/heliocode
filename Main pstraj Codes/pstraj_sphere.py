@@ -24,7 +24,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = -1*oneyear # time to start backtracing
+finalt = 1*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5*10**(10) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
@@ -451,7 +451,7 @@ def lya_abs(t,x,y,z,vr):
     tdependence = .95 + .5/(np.e**2 + 1) + .5/(np.e + 1/np.e)*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
     # scalefactor should match divisor in first term of addfactor
-    scalefactor = .555
+    scalefactor = .333
     
     # parameters of function
     A_K = 6.523*(1 + 0.619*tdependence)
@@ -471,7 +471,7 @@ def lya_abs(t,x,y,z,vr):
     F_K = A_K * np.power(1 + np.square((vr/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
 
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
-    return scalefactor*(F_K-F_R+F_bkg)/(r_E/(r2**2))*(1 - absval)
+    return scalefactor*(F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval)
 
 
 # odeint documentation: https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.odeint.html
@@ -866,7 +866,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_2pi3_-1yr_direct_cxi+cepi_tclose300_r=1au_nocut-11plot_alt_test.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_2pi3_1yr_direct_cxi+cepi_tclose300_r=1au_nocut-11plot_interp.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value

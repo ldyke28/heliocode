@@ -374,7 +374,7 @@ def lya_abs(t,x,y,z,vr):
     tdependence = .95 + .5/(np.e**2 + 1) + .5/(np.e + 1/np.e)*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
     # scalefactor should match divisor in first term of addfactor
-    scalefactor = .555
+    scalefactor = .333
     
     # parameters of function
     A_K = 6.523*(1 + 0.619*tdependence)
@@ -394,7 +394,7 @@ def lya_abs(t,x,y,z,vr):
     F_K = A_K * np.power(1 + np.square((vr/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
 
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
-    return scalefactor*(F_K-F_R+F_bkg)/(r_E/(r2**2))*(1 - absval)
+    return scalefactor*(F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval)
 
 
 # odeint documentation: https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.odeint.html
@@ -484,7 +484,7 @@ for m in range(nprocs-1):
                         # Main code in try block
                         # If an ODEintWarning is raised, point will be set aside for testing later on
                         # calculating trajectories for each initial condition in phase space given
-                        backtraj = odeint(Var_dr_dt, init, t, args=(LyaRP4,))
+                        backtraj = odeint(Var_dr_dt, init, t, args=(lya_abs,))
                         btr = np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2)
                         if any(btr <= .00465*au):
                             # tells the code to not consider the trajectory if it at any point intersects the width of the sun

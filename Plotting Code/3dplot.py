@@ -6,16 +6,16 @@ from tqdm import tqdm
 ThreeD = True
 # Loading in the file to be unpacked
 #file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/pi_t0.txt", delimiter=',')
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/2pi3_t0_lya_direct_test.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/2pi3_t0_lya_Federicodist_higherres.txt", delimiter=',')
 #file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/GitHub/heliocode/supplementaldata1.txt", delimiter=',')
 
 #file = file[np.any(file > 1, axis=1)]
 
 # Unpacking variables based on how they're saved in the code
-vx = file[:,0]
-vy = file[:,1]
-vz = file[:,2]
-f = file[:,3]
+vxinit = file[:,0]
+vyinit = file[:,1]
+vzinit = file[:,2]
+finit = file[:,3]
 
 """vx2 = file2[:,0]
 vy2 = file2[:,1]
@@ -30,6 +30,23 @@ f = np.concatenate((f, f2))"""
 
 # Plotting data as a 3D scatter plot
 if ThreeD == True:
+    # getting rid of points with an f value of 0
+    vx = np.array([])
+    vy = np.array([])
+    vz = np.array([])
+    f = np.array([])
+
+    fmask = (finit != 0)
+    vx = vxinit*fmask
+    vy = vyinit*fmask
+    vz = vzinit*fmask
+    f = finit*fmask
+
+    #vx = vx[~(vx == 0)]
+    #vy = vy[~(vy == 0)]
+    #vz = vz[~(vz == 0)]
+    #f = f[~(f == 0)]
+
     fig3d = plt.figure()
     fig3d.set_figwidth(10)
     fig3d.set_figheight(7)
@@ -46,9 +63,9 @@ if ThreeD == True:
     #ax3d.view_init(0,270)
     #ax3d.view_init(0,180)
     # Can restrict the limits of the plot
-    #ax3d.set_xlim([-25, 25])
-    #ax3d.set_ylim([-25, 25])
-    #ax3d.set_zlim([-25, 25])
+    ax3d.set_xlim([-55, -20])
+    #ax3d.set_ylim([-30, 30])
+    #ax3d.set_zlim([-40, 40])
     #ax3d.set_title("Phase space population at target (t = 0 years) drawn from Maxwellian at 100 au centered on vx = -26 km/s \
     #    \n Target at (1 au, 0 au, 0 au), Time Resolution Close to Target = 1500 s")
     plt.show()
