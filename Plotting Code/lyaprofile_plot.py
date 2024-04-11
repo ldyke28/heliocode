@@ -11,13 +11,17 @@ def LyaRP(t,v_r):
     omegat = 2*np.pi/(3.47*10**(8))*t
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
     # scalefactor should match dividor in first term of addfactor
-    scalefactor = 1.616
+    scalefactor = 1.8956
     # added value to ensure scaling is correct at both solar minimum and solar maximum
     # matches total irradiance out to +-120 km/s
     #addfactor = ((1.3244/1.616) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     # matches total irradiance out to +-370 km/s
     addfactor = ((1.55363/1.8956) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor)*lyafunction
+    #return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
+    #return lyafunction
+
+
 
 def LyaRP2(t,v_r):
     # My Ly-a line profile function
@@ -73,6 +77,7 @@ def LyaRP3(t,v_r):
     scalefactor = .91
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
     return scalefactor*tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
+    #return tdependence*(F_K-F_R+F_bkg)/(r_E/(r2**2))
 
 def LyaRP4(t,v_r):
     #Author: E. Samoylov, H. Mueller LISM Group (Adapted by L. Dyke for this code)
@@ -122,7 +127,7 @@ t6 = oneyear*5.5
 trange = np.arange(0, 11*oneyear, 11*oneyear/1000)
 
 inputvr = np.arange(-370000, 370000, 740000/1000)
-"""profile1 = np.zeros(inputvr.size)
+profile1 = np.zeros(inputvr.size)
 profile1t2 = np.zeros(inputvr.size)
 profile1t3 = np.zeros(inputvr.size)
 profile1t4 = np.zeros(inputvr.size)
@@ -135,20 +140,20 @@ profile3 = np.zeros(inputvr.size)
 profile3t2 = np.zeros(inputvr.size)
 profile3t3 = np.zeros(inputvr.size)
 for i in range(inputvr.size):
-    profile1[i] = LyaRP4(t,inputvr[i])
-    profile1t2[i] = LyaRP4(t2,inputvr[i])
-    profile1t3[i] = LyaRP4(t3,inputvr[i])
-    profile1t4[i] = LyaRP4(t4,inputvr[i])
-    profile1t5[i] = LyaRP4(t5,inputvr[i])
-    profile1t6[i] = LyaRP4(t6,inputvr[i])
+    profile1[i] = LyaRP3(t,inputvr[i])
+    profile1t2[i] = LyaRP3(t2,inputvr[i])
+    profile1t3[i] = LyaRP3(t3,inputvr[i])
+    profile1t4[i] = LyaRP3(t4,inputvr[i])
+    profile1t5[i] = LyaRP3(t5,inputvr[i])
+    profile1t6[i] = LyaRP3(t6,inputvr[i])
     profile2[i] = LyaRP2(t,inputvr[i])
     profile2t2[i] = LyaRP2(t2,inputvr[i])
     profile2t3[i] = LyaRP2(t3,inputvr[i])
     profile3[i] = LyaRP3(t,inputvr[i])
     profile3t2[i] = LyaRP3(t2,inputvr[i])
-    profile3t3[i] = LyaRP3(t3,inputvr[i])"""
+    profile3t3[i] = LyaRP3(t3,inputvr[i])
 
-"""fsize = 18
+fsize = 18
 fig, ax = plt.subplots()
 fig.set_figwidth(9)
 fig.set_figheight(6)
@@ -158,17 +163,18 @@ ax.plot(inputvr/1000, profile1t3, label="t = 2.2 yrs")
 ax.plot(inputvr/1000, profile1t4, label="t = 3.3 yrs")
 ax.plot(inputvr/1000, profile1t5, label="t = 4.4 yrs")
 ax.plot(inputvr/1000, profile1t6, label="t = 5.5 yrs")
-#ax.legend()
+ax.legend()
 plt.xticks(fontsize=fsize)
 plt.yticks(fontsize=fsize)
 plt.ylim(bottom=0)
 plt.grid()
+plt.xlim(-40,40)
 ax.set_xlabel("Radial Velocity Component $v_r$ (km/s)", fontsize=fsize)
 ax.set_ylabel("Value of $\mu (t)$", fontsize=fsize)
 #plt.title("Photoionization Rate over Time", fontsize=fsize)
-plt.show()"""
+plt.show()
 
-trange, inputvr = np.meshgrid(trange, inputvr)
+"""trange, inputvr = np.meshgrid(trange, inputvr)
 
 #totalprofile = np.zeros((trange.size,inputvr.size))
 #for i in tqdm(range(trange.size)):
@@ -191,5 +197,5 @@ plt.grid()
 ax.set_xlabel("Time (years)")
 ax.set_ylabel("Radial Velocity Component $v_r$ (km/s)")
 ax.set_zlabel("Value of $\mu (t)$")
-plt.show()
+plt.show()"""
 

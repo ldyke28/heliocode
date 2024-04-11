@@ -8,7 +8,7 @@ vy = np.array([])
 f = np.array([])
 
 #file = open("C:\Users\lucas\Downloads\cosexprp_pi32_1p5e8_indirect_cosexppi.txt", "r")
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_2pi3_-1yr_direct_cxi+cepi_tclose300_r=1au_nocut-11plot_alt_test.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper 2/Version 1 Data/kowlyaabsrp_2pi3_-3yr_direct_cxi+cepi_tclose300_r=1au_nocut-11plot_interp.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper Data/cosexpminrp_17pi36_t0_indirect_cosexppi_tclose200_r=1au.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/Downloads/Data Files-20230406T214257Z-001/Data Files/lyaminrp_5pi6_0y_direct_cosexppi_tclose400_1.txt", delimiter=',')
 #file = np.loadtxt("/Users/ldyke/Downloads/drive-download-20221019T183112Z-001/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')
@@ -61,8 +61,12 @@ interpvdf = scipy.interpolate.RegularGridInterpolator((newvx, newvy), freshape, 
 
 print(interpvdf([-31,-4]))
 
-ax.plot_wireframe(vxgrid, vygrid, interpvdf((vxgrid, vygrid)), rstride=3, cstride=3, alpha=0.4, color='m', label='linear interp')
-plt.legend()
+#ax.plot_wireframe(vxgrid, vygrid, interpvdf((vxgrid, vygrid)), rstride=3, cstride=3, alpha=0.4, color='m', label='linear interp')
+ax.plot_wireframe(vxgrid, vygrid, interpvdf((vxgrid, vygrid)), rstride=3, cstride=3, alpha=0.4, color='b')
+ax.set_xlabel("$v_x$ (km s$^{-1}$)")
+ax.set_ylabel("$v_y$ (km s$^{-1}$)")
+ax.set_zlabel("PSD")
+#plt.legend()
 plt.show()
 
 

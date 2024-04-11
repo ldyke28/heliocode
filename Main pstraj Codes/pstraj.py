@@ -11,7 +11,7 @@ from tqdm import tqdm
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -24,12 +24,12 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 4000000 # time to start backtracing
+finalt = 000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
-initialt = -1*10**(10) # time in the past to which the code should backtrace
+initialt = -1*10**(11) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
-tstepclose = 100000 # time resolution for close regime
-tstepfar = 200000 # time resolution for far regime
+tstepclose = 1000 # time resolution for close regime
+tstepfar = 5000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 100 # upwind reference distance for backtraced trajectories, in au
 
@@ -38,8 +38,8 @@ refdist = 100 # upwind reference distance for backtraced trajectories, in au
 # https://ibex.princeton.edu/sites/g/files/toruqf1596/files/moebius_et_al_2012.pdf
 # above gives angle of ecliptic relative to ISM flow
 sunpos = np.array([0,0,0])
-theta = 45 # angle with respect to upwind axis of target point
-ibexrad = np.sqrt(2) # radial distance of target point from Sun
+theta = 150 # angle with respect to upwind axis of target point
+ibexrad = 1 # radial distance of target point from Sun
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -142,7 +142,8 @@ def LyaRP(t,x,y,z,v_r):
     #addfactor = ((1.3244/1.616) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
     # matches total irradiance out to +-370 km/s
     addfactor = ((1.55363/1.8956) - 1)*(.75 + .243*np.e)*1/(np.e + 1/np.e)*(1/np.e + np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))
-    return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor)*lyafunction
+    #return scalefactor*(.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor)*lyafunction
+    return (.75 + .243*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)))*lyafunction
 
 def LyaRP2(t,x,y,z,v_r):
     # My Ly-a line profile function
@@ -541,14 +542,14 @@ if mode==1:
 #
 # single trajectory plotting code
 if mode==2:
-    indxic = 9000
-    indyic = 6000
+    indxic = -20200
+    indyic = 16700
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
     # calculating the trajectory given the initial conditions
     #singletraj = odeint(dr_dt, init, t, mxstep=750, args=(rp6,))
-    singletraj = odeint(dr_dt, init, t, args=(cosexprp,))
+    singletraj = odeint(Abs_dr_dt, init, t, args=(LyaRP,))
     print("Trajectory Calculated")
     #print(singletraj)
     # initializing arrays to store relevant values
@@ -566,8 +567,8 @@ if mode==2:
     # calculating the magnitude of v_r at each point in time
     v_rtrack = singletraj[:,3]*nrvecxk[:] + singletraj[:,4]*nrvecyk[:] + singletraj[:,5]*nrveczk[:]
     for k in tqdm(range(t.size)):
-        #trackrp[k] = LyaRP3(t[k],v_rtrack[k]) # calculating the value of the radiation pressure at each time point
-        trackrp[k] = cosexprp(t[k])
+        trackrp[k] = LyaRP(t[k], singletraj[k,0], singletraj[k,1], singletraj[k,2], v_rtrack[k]) # calculating the value of the radiation pressure at each time point
+        #trackrp[k] = cosexprp(t[k])
         # outdated code to track angular momentum/energy along the path
         """rmag = np.sqrt((sunpos[0]-singletraj[k,0])**2 + (sunpos[1]-singletraj[k,1])**2 + (sunpos[2]-singletraj[k,2])**2)
         rtrack[k] = rmag
@@ -685,9 +686,9 @@ if mode==2:
     
     plt.xticks(fontsize=fosize)
     plt.yticks(fontsize=fosize)
-    plt.title("Individual Orbit at time t$\\approx$" + str(round(finalt/(oneyear), 3)) + " years, Target at (" + str(round(ibexpos[0]/au, 4)) + " au, " + str(round(ibexpos[1]/au, 4)) + " au, " + str(round(ibexpos[2]/au, 4)) + " au) \
-        \n At target point v = (" + str(indxic/1000) + " km/s, " + str(indyic/1000) + " km/s, " + str(indzic/1000) + " km/s), Value of distribution function = " + str(psd) + " \
-       \n Perihelion at $\\sim$ " + str(round(perihelion/au, 5)) + " au, Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years", fontsize=10)
+    #plt.title("Individual Orbit at time t$\\approx$" + str(round(finalt/(oneyear), 3)) + " years, Target at (" + str(round(ibexpos[0]/au, 4)) + " au, " + str(round(ibexpos[1]/au, 4)) + " au, " + str(round(ibexpos[2]/au, 4)) + " au) \
+    #    \n At target point v = (" + str(indxic/1000) + " km/s, " + str(indyic/1000) + " km/s, " + str(indzic/1000) + " km/s), Value of distribution function = " + str(psd) + " \
+    #   \n Perihelion at $\\sim$ " + str(round(perihelion/au, 5)) + " au, Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years", fontsize=10)
     plt.show()
 
     # extra code for plotting conserved values

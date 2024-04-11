@@ -314,6 +314,7 @@ def LyaRP4(t,x,y,z,v_r):
     else:
         latangle = np.pi/2 + np.arcsin(np.abs(z)/r)
 
+    # flattening factor for heliolatitude dependence of radiation pressure force
     alya = .8
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
     return scalefactor*(F_K-F_R+F_bkg)/(r_E/(r2**2))*np.sqrt(alya*np.sin(latangle)**2 + np.cos(latangle)**2)
@@ -393,8 +394,10 @@ def lya_abs(t,x,y,z,vr):
     F_bkg = np.add(a_bkg*(vr/1000)*0.000001,b_bkg)
     F_K = A_K * np.power(1 + np.square((vr/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
 
+    # flattening factor for heliolatitude dependence of radiation pressure force
+    alya = .8
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
-    return scalefactor*(F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval)
+    return scalefactor*(F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval)*np.sqrt(alya*np.sin(latangle)**2 + np.cos(latangle)**2)
 
 
 # odeint documentation: https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.odeint.html
@@ -471,7 +474,7 @@ dirlosscount = np.zeros(1)
 dirlosscounttotal = np.zeros(1)
 
 # Initializing array to collect problematic points to test afterward
-lostpoints = np.array([0,0,0])
+"""lostpoints = np.array([0,0,0])
 for m in range(nprocs-1):
     if rank == m+1:
         vxstartn = vxstart[bounds[m]:(bounds[m+1]+1)]
@@ -562,15 +565,14 @@ for m in range(nprocs-1):
                                 nrvecz = (-sunpos[2]+backtraj[0:kn+1,2])/currentrad
                                 # calculating the magnitude of v_r at each point in time
                                 currentvr = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
-                                # integrand for the photoionization losses
-                                btintegrand = PIrate2/currentvr*(r1/currentrad)**2 + + cxirate/currentvr*(r1/currentrad)**2
+                                
                                 # calculation of heliographic latitude angle (polar angle)
                                 belowxy = backtraj[0:kn+1,2] < 0
                                 zmask = 2*(belowxy-.5)
                                 latangle = np.pi/2 + zmask*np.arcsin(np.abs(backtraj[0:kn+1,2] - sunpos[2])/currentrad[:])
                                 
-                                # calculation of attenuation factor based on heliographic latitude angle
-                                btintegrand = btintegrand*(.85*(np.sin(latangle))**2 + (np.cos(latangle))**2)
+                                # integrand for the photoionization losses, with photoionization adjusted based on heliographic latitude angle
+                                btintegrand = PIrate2/currentvr*(r1/currentrad)**2*(.85*(np.sin(latangle))**2 + (np.cos(latangle))**2) + + cxirate/currentvr*(r1/currentrad)**2
 
                                 # calculation of attenuation factor
                                 attfact = scipy.integrate.simps(btintegrand, currentrad)
@@ -597,6 +599,128 @@ for m in range(nprocs-1):
                         #lostpoints = np.vstack([lostpoints, [vxstartn[i], vystart[j], vzstart[l]]])
                         lostpoints = np.append(lostpoints, [vxstartn[i], vystart[j], vzstart[l]])
                         #file2.write(str(vxstartn[i]) + ',' + str(vystart[j]) + ',' + str(vzstart[l]) + '\n')
+            restartfile.close()           
+                    
+        break"""
+
+for m in range(nprocs-1):
+    if rank == m+1:
+        vxstartn = vxstart[bounds[m]:(bounds[m+1]+1)]
+        for i in range(vxstartn.size): # displays progress bars for both loops to measure progress
+            restartfile = open('restart%s' % rank, 'a')
+            for j in range(vystart.size):
+                for l in range(vzstart.size):
+                    init = [xstart, ystart, zstart, vxstartn[i], vystart[j], vzstart[l]]
+                    
+                    # Code not using try/except to try and retain all points for plotting purposes
+                    # calculating trajectories for each initial condition in phase space given
+                    backtraj = odeint(Var_dr_dt, init, t, args=(lya_abs,))
+                    btr = np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2)
+                    if any(btr <= .00465*au):
+                        # tells the code to not consider the trajectory if it at any point intersects the width of the sun
+                        sunlosscount[0] += 1
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,0] = vxstartn[i]
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,1] = vystart[j]
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,3] = 0
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = 0
+                        continue
+                    if all(btr < refdist*au):
+                        # forgoes the following checks if the trajectory never passes through x = 100 au
+                        dirlosscount[0] += 1
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,0] = vxstartn[i]
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,1] = vystart[j]
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,3] = 0
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = 0
+                        continue
+                    for k in range(t.size - tclose.size):
+                        if btr[k+tclose.size] >= refdist*au and btr[k-1+tclose.size] <= refdist*au:
+                            # adjusting the indexing to avoid checking in the close regime
+                            kn = k+tclose.size
+                            # radius in paper given to be 14 km/s
+                            # only saving initial conditions corresponding to points that lie within this Maxwellian at x = 100 au
+                            #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
+                            #if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 27000:
+
+                            # determining which distribution to use by calculating heliolongitude
+                            endradxy = np.sqrt((sunpos[0]-backtraj[kn+1,0])**2 + (sunpos[1]-backtraj[kn+1,1])**2)
+                            belowxaxis = backtraj[kn+1,1] < 0
+                            ymask = belowxaxis*2*np.pi
+                            longmask = -2*(belowxaxis-.5) # -1 if below x axis in xy plane, 1 if above
+                            # if y < 0, longitude = 2pi-arccos(x/r), otherwise longitude = arccos(x/r)
+                            endlongangle = ymask + np.arccos((backtraj[kn+1,0] - sunpos[0])/endradxy)*longmask
+                            endlongangle = endlongangle*180/np.pi
+                            # finding the initial value of the distribution function based on the interpolated distributions
+                            endvelcoords = [backtraj[kn+1,5]/1000,backtraj[kn+1,4]/1000,backtraj[kn+1,3]/1000]
+                            if endlongangle >= 0 and endlongangle <= 45:
+                                anglepct = (endlongangle)/45
+                                initpsd = interp1(endvelcoords)*(1 - anglepct) + interp2(endvelcoords)*anglepct
+                            elif endlongangle > 45 and endlongangle <= 90:
+                                anglepct = (endlongangle - 45)/45
+                                initpsd = interp2(endvelcoords)*(1 - anglepct) + interp3(endvelcoords)*anglepct
+                            elif endlongangle > 90 and endlongangle <= 135:
+                                anglepct = (endlongangle - 90)/45
+                                initpsd = interp3(endvelcoords)*(1 - anglepct) + interp4(endvelcoords)*anglepct
+                            elif endlongangle > 135 and endlongangle <= 180:
+                                anglepct = (endlongangle - 135)/45
+                                initpsd = interp4(endvelcoords)*(1 - anglepct) + interp5(endvelcoords)*anglepct
+                            elif endlongangle > 180 and endlongangle <= 225:
+                                anglepct = (endlongangle - 180)/45
+                                initpsd = interp5(endvelcoords)*(1 - anglepct) + interp6(endvelcoords)*anglepct
+                            elif endlongangle > 225 and endlongangle <= 270:
+                                anglepct = (endlongangle - 225)/45
+                                initpsd = interp6(endvelcoords)*(1 - anglepct) + interp7(endvelcoords)*anglepct
+                            elif endlongangle > 270 and endlongangle <= 315:
+                                anglepct = (endlongangle - 270)/45
+                                initpsd = interp7(endvelcoords)*(1 - anglepct) + interp8(endvelcoords)*anglepct
+                            elif endlongangle > 315 and endlongangle <= 360:
+                                anglepct = (endlongangle - 315)/45
+                                initpsd = interp8(endvelcoords)*(1 - anglepct) + interp1(endvelcoords)*anglepct
+
+                            omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
+                            # function for the charge exchange ionization rate
+                            cxirate = 5*10**(-7)
+                            # function for the photoionization rate at each point in time
+                            PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
+                            r1 = 1*au # reference radius
+                            # radial distance to the Sun at all points throughout the trajectory
+                            currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
+                            # calculating the component of the radial unit vector in each direction at each point in time
+                            nrvecx = (-sunpos[0]+backtraj[0:kn+1,0])/currentrad
+                            nrvecy= (-sunpos[1]+backtraj[0:kn+1,1])/currentrad
+                            nrvecz = (-sunpos[2]+backtraj[0:kn+1,2])/currentrad
+                            # calculating the magnitude of v_r at each point in time
+                            currentvr = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
+                           
+                            # calculation of heliographic latitude angle (polar angle)
+                            belowxy = backtraj[0:kn+1,2] < 0
+                            zmask = 2*(belowxy-.5)
+                            latangle = np.pi/2 + zmask*np.arcsin(np.abs(backtraj[0:kn+1,2] - sunpos[2])/currentrad[:])
+                            
+                            # integrand for the photoionization losses, with photoionization adjusted based on heliographic latitude angle
+                            btintegrand = PIrate2/currentvr*(r1/currentrad)**2*(.85*(np.sin(latangle))**2 + (np.cos(latangle))**2) + + cxirate/currentvr*(r1/currentrad)**2
+
+                            # calculation of attenuation factor
+                            attfact = scipy.integrate.simps(btintegrand, currentrad)
+                            # calculating value of phase space density based on the value at the crossing of x = 100 au
+                            attenval = np.exp(-np.abs(attfact))*initpsd[0]
+                            
+                            # storing relevant values in a shared array
+                            data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,0] = vxstartn[i]
+                            data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,1] = vystart[j]
+                            data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
+                            data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,3] = startt - t[kn-1]
+                            data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = np.exp(-np.abs(attfact))*initpsd[0]
+                            restartfile.write(str(vxstartn[i]/1000) + ',' + str(vystart[j]/1000) + ',' + str(vzstart[l]/1000) + ',' + str(attenval) + '\n')
+                            break
+                            #break
+                        if k == (t.size - tclose.size) - 1:
+                            data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,0] = vxstartn[i]
+                            data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,1] = vystart[j]
+                            data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
+                            data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,3] = 0
+                            data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = 0
             restartfile.close()           
                     
         break
