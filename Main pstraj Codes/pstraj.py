@@ -345,17 +345,17 @@ def lya_abs(t,x,y,z,vr):
         amp = 0
     else:
         amp = ((.59*(r/au - 12)/np.sqrt((r/au - 12)**2 + 200) + 0.38) + -0.4* \
-        np.e**(-(longangled - 90)**2/50**2 - (r - 31)**2/15**2)*(1 + \
+        np.e**(-(longangled - 90)**2/50**2 - (r/au - 31)**2/15**2)*(1 + \
         scipy.special.erf(alpha*(r/au)/np.sqrt(2)))*(1 - np.e**(-(r/au)/4)))*1/.966
-    
+
     # mean Doppler shift
-    mds = 20*np.sin(longangle)*np.cos((latangled-10)*np.pi/180)
+    mds = 20*np.sin(longangle)*np.cos((latangled-100)*np.pi/180)
     # dispersion (width of the peak)
     disper = -.0006947*(r/au)**2 + .1745*(r/au) + 5.402 + \
         1.2*np.e**(-(longangled - 275)**2/50**2 - ((r/au) - 80)**2/60**2) + \
         3*np.e**(-(longangled - 90)**2/50**2 - ((r/au))**2/5**2) + \
         1*np.e**(-(longangled - 100)**2/50**2 - ((r/au) - 25)**2/200**2) + \
-        .35*np.cos(((latangled + 15)*np.pi/180)*2)
+        .35*np.cos(((latangled - 75)*np.pi/180)*2)
     # fit exponent
     if r >= 50*au:
         fittype = 4
@@ -369,7 +369,7 @@ def lya_abs(t,x,y,z,vr):
     tdependence = .95 + .5/(np.e**2 + 1) + .5/(np.e + 1/np.e)*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
     # scalefactor should match divisor in first term of addfactor
-    scalefactor = .555
+    scalefactor = .333
     
     # parameters of function
     A_K = 6.523*(1 + 0.619*tdependence)
@@ -389,7 +389,7 @@ def lya_abs(t,x,y,z,vr):
     F_K = A_K * np.power(1 + np.square((vr/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
 
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
-    return scalefactor*(F_K-F_R+F_bkg)/(r_E/(r2**2))*(1 - absval)
+    return scalefactor*(F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval)
 
 
 # odeint documentation: https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.odeint.html
