@@ -17,6 +17,7 @@ mode = 3
 au = 1.496*10**11
 msolar = 1.98847*10**30 # mass of the sun in kg
 G = 6.6743*10**(-11) # value for gravitational constant in SI units
+mH = 1.6736*10**(-27) # mass of hydrogen in kg
 # one year in s = 3.156e7 s (Julian year, average length of a year)
 # 11 Julian years = 3.471e8 s
 # Note to self: solar maximum in April 2014
@@ -24,7 +25,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 0*oneyear # time to start backtracing
+finalt = -3*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5*10**(10) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
@@ -36,7 +37,7 @@ refdist = 70 # upwind reference distance for backtraced trajectories, in au
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 60 # angle with respect to upwind axis of target point
+theta = 120 # angle with respect to upwind axis of target point
 ibexrad = 1 # radial distance of target point from Sun
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -71,14 +72,16 @@ zstart = ibexpos[2]
 #vystart = np.arange(-25000, 25000, 300)
 #vxstart = np.arange(-60000, 40000, 300)
 #vystart = np.arange(-35000, 50000, 300)
-vxstart = np.arange(-40000, 20000, 500)
-vystart = np.arange(-35000, 35000, 500)
+vxstart = np.arange(-50000, 10000, 500)
+vystart = np.arange(-45000, 25000, 500)
 vzstart = 0
 
 if mode==3:
     startt = finalt
     lastt = initialt
     tmid = startt - 11*oneyear # time at which we switch from high resolution to low resolution - a little more than half of a solar cycle
+    #countoffset = int((11*oneyear) / (tstepclose) / 7)
+    countoffset = 0
     tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (close regime)
     tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
     t = np.concatenate((tclose, tfar))
@@ -427,17 +430,17 @@ def lya_abs(t,x,y,z,vr):
         amp = 0
     else:
         amp = ((.59*(r/au - 12)/np.sqrt((r/au - 12)**2 + 200) + 0.38) + -0.4* \
-        np.e**(-(longangled - 90)**2/50**2 - (r - 31)**2/15**2)*(1 + \
+        np.e**(-(longangled - 90)**2/50**2 - (r/au - 31)**2/15**2)*(1 + \
         scipy.special.erf(alpha*(r/au)/np.sqrt(2)))*(1 - np.e**(-(r/au)/4)))*1/.966
-    
+
     # mean Doppler shift
-    mds = 20*np.sin(longangle)*np.cos((latangled-10)*np.pi/180)
+    mds = 20*np.sin(longangle)*np.cos((latangled-100)*np.pi/180)
     # dispersion (width of the peak)
     disper = -.0006947*(r/au)**2 + .1745*(r/au) + 5.402 + \
         1.2*np.e**(-(longangled - 275)**2/50**2 - ((r/au) - 80)**2/60**2) + \
         3*np.e**(-(longangled - 90)**2/50**2 - ((r/au))**2/5**2) + \
         1*np.e**(-(longangled - 100)**2/50**2 - ((r/au) - 25)**2/200**2) + \
-        .35*np.cos(((latangled + 15)*np.pi/180)*2)
+        .35*np.cos(((latangled - 75)*np.pi/180)*2)
     # fit exponent
     if r >= 50*au:
         fittype = 4
@@ -547,13 +550,13 @@ def Abs_dr_dt(x,t,rp):
 #
 # single trajectory plotting code
 if mode==2:
-    indxic = 100
-    indyic = -16900
+    indxic = -35000
+    indyic = -20000
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
     # calculating the trajectory given the initial conditions
-    singletraj = odeint(Lya_dr_dt, init, t, args=(LyaRP3,))
+    singletraj = odeint(Abs_dr_dt, init, t, args=(lya_abs,))
     print("Trajectory Calculated")
     # initializing arrays to store relevant values
     trackrp = np.zeros(t.size)
@@ -569,7 +572,7 @@ if mode==2:
     # calculating the magnitude of v_r at each point in time
     v_rtrack = singletraj[:,3]*nrvecxk[:] + singletraj[:,4]*nrvecyk[:] + singletraj[:,5]*nrveczk[:]
     for k in tqdm(range(t.size)):
-        trackrp[k] = LyaRP3(t[k],v_rtrack[k]) # calculating the value of the radiation pressure at each time point
+        trackrp[k] = LyaRP3(t[k], singletraj[k,0], singletraj[k,1], singletraj[k,2], v_rtrack[k]) # calculating the value of the radiation pressure at each time point
         #trackrp[k] = rp2(t[k])
         # outdated code to track angular momentum/energy along the path
         """rmag = np.sqrt((sunpos[0]-singletraj[k,0])**2 + (sunpos[1]-singletraj[k,1])**2 + (sunpos[2]-singletraj[k,2])**2)
@@ -767,10 +770,11 @@ if mode==3:
                 # sets the value of the NPSD to 0 to indicate the trajectory isn't viable
                 maxwcolor = np.append(maxwcolor, [0])
                 continue
-            for k in range(t.size - tclose.size):
-                if btr[k+tclose.size] >= refdist*au and btr[k-1+tclose.size] <= refdist*au:
+            for k in range(t.size - countoffset):
+                if btr[k+countoffset] >= refdist*au and btr[k-1+countoffset] <= refdist*au:
                     # adjusting the indexing to avoid checking in the close regime
-                    kn = k+tclose.size
+                    #kn = k+tclose.size
+                    kn = k+countoffset
                     # radius in paper given to be 14 km/s
                     # only saving initial conditions corresponding to points that lie within this Maxwellian at reference distance
                     #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
@@ -810,16 +814,43 @@ if mode==3:
                         anglepct = (endlongangle - 315)/45
                         initpsd = interp8(endvelcoords)*(1 - anglepct) + interp1(endvelcoords)*anglepct
 
+                    vsolarwindms = 400000 # solar wind speed in m/s
+                    vsolarwindcms = vsolarwindms*100 # solar wind speed in cm/s
+                    nsw1au = 5 # solar wind density at 1 au in cm^-3
+
+                    r1 = 1*au # reference radius
+                    # radial distance to the Sun at all points throughout the trajectory
+                    currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
+
+                    # velocity squared at each point in time for the trajectory
+                    currentvsq = np.square(backtraj[0:kn+1,3]) + np.square(backtraj[0:kn+1,4]) + np.square(backtraj[0:kn+1,5])
+                    # calculating the current collision velocity of the particle and the SW
+                    currentvrel = np.abs(np.sqrt(currentvsq) - vsolarwindms)
+                    # calculating kinetic energy in keV at each point in time
+                    currentKE = (.5 * mH * np.square(currentvrel)) * 6.242*10**(15)
+
+                    # parameters for function to calculate charge exchange cross section
+                    a1 = 4.049
+                    a2 = 0.447
+                    a3 = 60.5
+                    # function for H-H+ charge exchange cross section, from Swaczyna et al. (2019)
+                    # result is in cm^2
+                    # https://ui.adsabs.harvard.edu/abs/2019AGUFMSH51C3344S/abstract
+                    cxcrosssection = ((a1 - a2*np.log(currentKE))**2 * (1 - np.exp(-a3 / currentKE))**(4.5))*10**(-16)
+
+                    #nsw = nsw1au * (r1/currentrad)**2 # assuming r^2 falloff for density (Sokol et al. 2019)
+
+                    cxirate = nsw1au * currentvrel*100 * cxcrosssection
+
+                    #print(cxirate)
+
                     # approximate time-averaged charge exchange photoionization rate from Sokol et al. 2019
-                    cxirate = 5*10**(-7)
+                    #cxirate = 5*10**(-7)
                     # omega*t for each time point in the trajectory
                     omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
                     # function for the photoionization rate at each point in time
                     PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
                     #PIrate2 = 1.21163*10**(-7) # time average of above
-                    r1 = 1*au # reference radius
-                    # radial distance to the Sun at all points throughout the trajectory
-                    currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
                     # calculating the component of the radial unit vector in each direction at each point in time
                     nrvecx = (-sunpos[0]+backtraj[0:kn+1,0])/currentrad
                     nrvecy = (-sunpos[1]+backtraj[0:kn+1,1])/currentrad
@@ -849,11 +880,12 @@ if mode==3:
                     farvy = np.append(farvy, [backtraj[0,4]])
                     fart = np.append(fart, [startt - t[kn-1]])
                     # calculating value of phase space density based on the value at the crossing of x = 100 au
-                    maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*initpsd])
+                    maxwcolor = np.append(maxwcolor, [psdval])
                     #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
                     break
                     #break
-                if k == (t.size - tclose.size) - 1:
+                if k == (t.size + countoffset) - 1:
+                    print("fail")
                     farvx = np.append(farvx, [backtraj[0,3]])
                     farvy = np.append(farvy, [backtraj[0,4]])
                     fart = np.append(fart, [0])
@@ -866,7 +898,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_pi3_0yr_direct_cxi+cepi_tclose300_r=1au_nocut-11plot_interp_shifted.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_2pi3_-3yr_whole_bettercxi+cepi_tclose300_r=1au_interpdist_fix.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value
@@ -880,6 +912,7 @@ if mode==3:
     fsize = 18
     #plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='rainbow') # linear scale
     plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11))) # log scale, minimum value at vmin
+    #plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm())
     plt.rcParams.update({'font.size': fsize})
     cb = plt.colorbar()
     #cb.set_label('Time at which orbit passes through 100 au (s)')
@@ -967,7 +1000,7 @@ if mode==3:
     plt.show()
 
     # calculating the actual kinetic energy of each trajectory at the target point in eV
-    totalke = .5 * (1.6736*10**(-27)) * vsqshifted * 6.242*10**(18)
+    totalke = .5 * (mH) * vsqshifted * 6.242*10**(18)
 
     # plotting counts of energies for each observable trajectory
     fig = plt.figure()

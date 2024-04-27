@@ -24,12 +24,12 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 000000 # time to start backtracing
+finalt = 4000000 # time to start backtracing
 #6.36674976e9 force free for cosexprp
-initialt = -1*10**(11) # time in the past to which the code should backtrace
+initialt = -1*10**(12) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
 tstepclose = 1000 # time resolution for close regime
-tstepfar = 5000 # time resolution for far regime
+tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 100 # upwind reference distance for backtraced trajectories, in au
 
@@ -39,7 +39,7 @@ refdist = 100 # upwind reference distance for backtraced trajectories, in au
 # above gives angle of ecliptic relative to ISM flow
 sunpos = np.array([0,0,0])
 theta = 150 # angle with respect to upwind axis of target point
-ibexrad = 1 # radial distance of target point from Sun
+ibexrad = 10 # radial distance of target point from Sun
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -85,8 +85,8 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # vx/vy initial conditions are sampled on a grid with chosen resolution
-vxstart = np.arange(-53000, 40000, 400)
-vystart = np.arange(-26000, 38000, 300)
+vxstart = np.arange(-5000, 5000, 50)
+vystart = np.arange(-10000, 10000, 100)
 #vxstart = np.arange(-25000, 25000, 300)
 #vystart = np.arange(-25000, 25000, 300)
 #vxstart = np.arange(-60000, 30000, 300)
@@ -542,14 +542,14 @@ if mode==1:
 #
 # single trajectory plotting code
 if mode==2:
-    indxic = -20200
-    indyic = 16700
+    indxic = 1700
+    indyic = 1000
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
     # calculating the trajectory given the initial conditions
     #singletraj = odeint(dr_dt, init, t, mxstep=750, args=(rp6,))
-    singletraj = odeint(Abs_dr_dt, init, t, args=(LyaRP,))
+    singletraj = odeint(Abs_dr_dt, init, t, args=(cosexprp,))
     print("Trajectory Calculated")
     #print(singletraj)
     # initializing arrays to store relevant values
@@ -681,8 +681,8 @@ if mode==2:
     cb.ax.tick_params(labelsize=fosize)
     plt.xlabel("x (au)", fontsize=fosize)
     plt.ylabel("y (au)", fontsize=fosize)
-    plt.xlim([-2,5])
-    plt.ylim([-2,2])
+    plt.xlim([-20,20])
+    plt.ylim([-20,20])
     
     plt.xticks(fontsize=fosize)
     plt.yticks(fontsize=fosize)
@@ -737,7 +737,7 @@ if mode==3:
             #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
             #else:
             #   continue
-            backtraj[:,:] = odeint(Abs_dr_dt, init, t, args=(cosexpmax,))
+            backtraj[:,:] = odeint(Abs_dr_dt, init, t, args=(cosexprp,))
             if any(np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2) <= .00465*au):
                 # tells the code to not consider the trajectory if it at any point intersects the width of the sun
                 #farvx = np.append(farvx, [backtraj[0,3]])
@@ -794,8 +794,8 @@ if mode==3:
                         farvy = np.append(farvy, [backtraj[0,4]])
                         fart = np.append(fart, [startt - t[kn-1]])
                         # calculating value of phase space density based on the value at the crossing of x = 100 au
-                        #maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
-                        maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
+                        maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
+                        #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
                         break
                     break
                 """if k == (t.size - tclose.size) - 1:
@@ -809,7 +809,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexpmax_pi4_5p5yrs_centerzoom_nopi_tclose100000_r=sqrt2au.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_p1268yrs_centerzoom_cosexp+cxpi_tclose1000_r=10au.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value
