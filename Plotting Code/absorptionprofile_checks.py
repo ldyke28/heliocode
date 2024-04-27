@@ -8,9 +8,11 @@ oneyear = 3.15545454545*10**7
 au = 1.496*10**11
 
 def quantity(x, y, z):
-
     r = np.sqrt(x**2 + y**2 + z**2)
     rxy = np.sqrt(x**2 + y**2)
+    #print(x)
+    #print(rxy)
+    #print(np.arccos(x/rxy))
     # calculating the latitudinal (polar) angle in 3D space
     # since sine/cosine only covers half of the space, we have to manually check where the point is to get the right angle
     if z >= 0:
@@ -22,14 +24,13 @@ def quantity(x, y, z):
         longangle = np.arccos(x/rxy)
     else:
         longangle = 2*np.pi - np.arccos(x/rxy)
-    longangle = longangle - np.pi
-    if longangle < 0:
-        longangle = 2*np.pi + longangle
+    longangle = longangle + 3*np.pi/2
+    #if longangle < 0:
+    #    longangle = 2*np.pi + longangle
     latangled = latangle*180/np.pi
     longangled = longangle*180/np.pi
 
     print(longangle)
-    print(latangled)
 
     alpha = .07 # alpha for the skew gaussian distribution
 
@@ -66,7 +67,7 @@ for i in range(longangles.size):
     longangley[i] = raddist*np.sin(longangles[i])*np.cos(latanglefixed)
     longanglez[i] = raddist*np.sin(latanglefixed)
 
-#print(longanglex)
+print(longanglex)
 #print(longangley)
 #print(longanglez)
 
@@ -83,7 +84,7 @@ ax.plot(longangles, profile1)
 #ax.legend()
 plt.xticks(fontsize=fsize)
 plt.yticks(fontsize=fsize)
-plt.ylim(bottom=0)
+#plt.ylim(bottom=0)
 plt.grid()
 #plt.xlim(-100,100)
 #ax.set_xlabel("Radial Velocity Component $v_r$ (km/s)", fontsize=fsize)

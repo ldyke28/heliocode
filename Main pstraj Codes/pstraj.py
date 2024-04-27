@@ -345,16 +345,16 @@ def lya_abs(t,x,y,z,vr):
         amp = 0
     else:
         amp = ((.59*(r/au - 12)/np.sqrt((r/au - 12)**2 + 200) + 0.38) + -0.4* \
-        np.e**(-(longangled - 90)**2/50**2 - (r/au - 31)**2/15**2)*(1 + \
+        np.e**(-(180 - longangled)**2/50**2 - (r/au - 31)**2/15**2)*(1 + \
         scipy.special.erf(alpha*(r/au)/np.sqrt(2)))*(1 - np.e**(-(r/au)/4)))*1/.966
 
     # mean Doppler shift
-    mds = 20*np.sin(longangle)*np.cos((latangled-100)*np.pi/180)
+    mds = -20*np.cos(longangle)*np.cos((latangled-100)*np.pi/180)
     # dispersion (width of the peak)
     disper = -.0006947*(r/au)**2 + .1745*(r/au) + 5.402 + \
-        1.2*np.e**(-(longangled - 275)**2/50**2 - ((r/au) - 80)**2/60**2) + \
-        3*np.e**(-(longangled - 90)**2/50**2 - ((r/au))**2/5**2) + \
-        1*np.e**(-(longangled - 100)**2/50**2 - ((r/au) - 25)**2/200**2) + \
+        1.2*np.e**(-(longangled - 5)**2/50**2 - ((r/au) - 80)**2/60**2) + \
+        3*np.e**(-(longangled - 180)**2/50**2 - ((r/au))**2/5**2) + \
+        1*np.e**(-(longangled - 170)**2/50**2 - ((r/au) - 25)**2/200**2) + \
         .35*np.cos(((latangled - 75)*np.pi/180)*2)
     # fit exponent
     if r >= 50*au:
