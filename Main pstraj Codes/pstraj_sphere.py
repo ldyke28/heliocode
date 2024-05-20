@@ -11,7 +11,7 @@ import h5py
 # MODE LIST
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -25,7 +25,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = -3*oneyear # time to start backtracing
+finalt = 0*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5*10**(10) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
@@ -72,8 +72,8 @@ zstart = ibexpos[2]
 #vystart = np.arange(-25000, 25000, 300)
 #vxstart = np.arange(-60000, 40000, 300)
 #vystart = np.arange(-35000, 50000, 300)
-vxstart = np.arange(-50000, 10000, 500)
-vystart = np.arange(-45000, 25000, 500)
+vxstart = np.arange(-50000, 50000, 500)
+vystart = np.arange(-45000, 45000, 500)
 vzstart = 0
 
 if mode==3:
@@ -550,8 +550,8 @@ def Abs_dr_dt(x,t,rp):
 #
 # single trajectory plotting code
 if mode==2:
-    indxic = -35000
-    indyic = -20000
+    indxic = 49000
+    indyic = 23000
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
@@ -572,7 +572,7 @@ if mode==2:
     # calculating the magnitude of v_r at each point in time
     v_rtrack = singletraj[:,3]*nrvecxk[:] + singletraj[:,4]*nrvecyk[:] + singletraj[:,5]*nrveczk[:]
     for k in tqdm(range(t.size)):
-        trackrp[k] = LyaRP3(t[k], singletraj[k,0], singletraj[k,1], singletraj[k,2], v_rtrack[k]) # calculating the value of the radiation pressure at each time point
+        trackrp[k] = lya_abs(t[k], singletraj[k,0], singletraj[k,1], singletraj[k,2], v_rtrack[k]) # calculating the value of the radiation pressure at each time point
         #trackrp[k] = rp2(t[k])
         # outdated code to track angular momentum/energy along the path
         """rmag = np.sqrt((sunpos[0]-singletraj[k,0])**2 + (sunpos[1]-singletraj[k,1])**2 + (sunpos[2]-singletraj[k,2])**2)
@@ -596,8 +596,8 @@ if mode==2:
             ttime = 0
             break
         if strajrad >= refdist*au:
-            print(singletraj[k-1,:])
-            print(t[k-1])
+            #print(singletraj[k-1,:])
+            #print(t[k-1])
             Etrack = Etrack[:k]
             rtrack = rtrack[:k]
             Ltrack = Ltrack[:k]
@@ -635,7 +635,107 @@ if mode==2:
             # attenuated NPSD value
             psd = np.exp(-np.abs(attfact))*initpsd
 
+
+            updatedprofile = True
+            if updatedprofile:
+                endradxy = np.sqrt((sunpos[0]-singletraj[k,0])**2 + (sunpos[1]-singletraj[k,1])**2)
+                belowxaxis = singletraj[k,1] < 0
+                ymask = belowxaxis*2*np.pi
+                longmask = -2*(belowxaxis-.5) # -1 if below x axis in xy plane, 1 if above
+                # if y < 0, longitude = 2pi-arccos(x/r), otherwise longitude = arccos(x/r)
+                endlongangle = ymask + np.arccos((singletraj[k,0] - sunpos[0])/endradxy)*longmask
+                endlongangle = endlongangle*180/np.pi
+                # finding the initial value of the distribution function based on the interpolated distributions
+                endvelcoords = [singletraj[k,5]/1000,singletraj[k,4]/1000,singletraj[k,3]/1000]
+                if endlongangle >= 0 and endlongangle <= 45:
+                    anglepct = (endlongangle)/45
+                    initpsd = interp1(endvelcoords)*(1 - anglepct) + interp2(endvelcoords)*anglepct
+                elif endlongangle > 45 and endlongangle <= 90:
+                    anglepct = (endlongangle - 45)/45
+                    initpsd = interp2(endvelcoords)*(1 - anglepct) + interp3(endvelcoords)*anglepct
+                elif endlongangle > 90 and endlongangle <= 135:
+                    anglepct = (endlongangle - 90)/45
+                    initpsd = interp3(endvelcoords)*(1 - anglepct) + interp4(endvelcoords)*anglepct
+                elif endlongangle > 135 and endlongangle <= 180:
+                    anglepct = (endlongangle - 135)/45
+                    initpsd = interp4(endvelcoords)*(1 - anglepct) + interp5(endvelcoords)*anglepct
+                elif endlongangle > 180 and endlongangle <= 225:
+                    anglepct = (endlongangle - 180)/45
+                    initpsd = interp5(endvelcoords)*(1 - anglepct) + interp6(endvelcoords)*anglepct
+                elif endlongangle > 225 and endlongangle <= 270:
+                    anglepct = (endlongangle - 225)/45
+                    initpsd = interp6(endvelcoords)*(1 - anglepct) + interp7(endvelcoords)*anglepct
+                elif endlongangle > 270 and endlongangle <= 315:
+                    anglepct = (endlongangle - 270)/45
+                    initpsd = interp7(endvelcoords)*(1 - anglepct) + interp8(endvelcoords)*anglepct
+                elif endlongangle > 315 and endlongangle <= 360:
+                    anglepct = (endlongangle - 315)/45
+                    initpsd = interp8(endvelcoords)*(1 - anglepct) + interp1(endvelcoords)*anglepct
+                
+                print("Initial PSD value: " + str(initpsd[0]))
+
+                vsolarwindms = 400000 # solar wind speed in m/s
+                vsolarwindcms = vsolarwindms*100 # solar wind speed in cm/s
+                nsw1au = 5 # solar wind density at 1 au in cm^-3
+
+                r1 = 1*au # reference radius
+                # radial distance to the Sun at all points throughout the trajectory
+                currentrad = np.sqrt((sunpos[0]-singletraj[0:k,0])**2 + (sunpos[1]-singletraj[0:k,1])**2 + (sunpos[2]-singletraj[0:k,2])**2)
+
+                # velocity squared at each point in time for the trajectory
+                currentvsq = np.square(singletraj[0:k,3]) + np.square(singletraj[0:k,4]) + np.square(singletraj[0:k,5])
+                # calculating the current collision velocity of the particle and the SW
+                currentvrel = np.abs(np.sqrt(currentvsq) - vsolarwindms)
+                # calculating kinetic energy in keV at each point in time
+                currentKE = (.5 * mH * np.square(currentvrel)) * 6.242*10**(15)
+
+                # parameters for function to calculate charge exchange cross section
+                a1 = 4.049
+                a2 = 0.447
+                a3 = 60.5
+                # function for H-H+ charge exchange cross section, from Swaczyna et al. (2019)
+                # result is in cm^2
+                # https://ui.adsabs.harvard.edu/abs/2019AGUFMSH51C3344S/abstract
+                cxcrosssection = ((a1 - a2*np.log(currentKE))**2 * (1 - np.exp(-a3 / currentKE))**(4.5))*10**(-16)
+
+                #nsw = nsw1au * (r1/currentrad)**2 # assuming r^2 falloff for density (Sokol et al. 2019)
+
+                cxirate = nsw1au * currentvrel*100 * cxcrosssection
+
+                #print(cxirate)
+
+                # approximate time-averaged charge exchange photoionization rate from Sokol et al. 2019
+                #cxirate = 5*10**(-7)
+                # omega*t for each time point in the trajectory
+                omt = 2*np.pi/(3.47*10**(8))*t[0:k]
+                # function for the photoionization rate at each point in time
+                PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
+                #PIrate2 = 1.21163*10**(-7) # time average of above
+                # calculating the component of the radial unit vector in each direction at each point in time
+                nrvecx = (-sunpos[0]+singletraj[0:k,0])/currentrad
+                nrvecy = (-sunpos[1]+singletraj[0:k,1])/currentrad
+                nrvecz = (-sunpos[2]+singletraj[0:k,2])/currentrad
+                # calculating the magnitude of v_r at each point in time
+                currentvr = singletraj[0:k,3]*nrvecx[0:k] + singletraj[0:k,4]*nrvecy[0:k] + singletraj[0:k,5]*nrvecz[0:k]
+                # calculating maximum and minimum radial velocities throughout the whole trajectory
+                #vrmax = np.append(vrmax, max(currentvr))
+                #vrmin = np.append(vrmin, min(currentvr))
+                # integrand for the photoionization and charge exchange ionization losses
+                btintegrand = PIrate2/currentvr*(r1/currentrad)**2 + cxirate/currentvr*(r1/currentrad)**2
+
+                # calculation of heliographic latitude angle (polar angle)
+                #belowxy = singletraj[0:k,2] < 0
+                #zmask = 2*(belowxy-.5)
+                #latangle = np.pi/2 + zmask*np.arcsin(np.abs(singletraj[0:k,2] - sunpos[2])/currentrad[:])
+                
+                # calculation of attenuation factor based on heliographic latitude angle
+                #btintegrand = btintegrand*(.85*(np.sin(latangle))**2 + (np.cos(latangle))**2)
+                # calculation of attenuation factor
+                attfact = scipy.integrate.simps(btintegrand, currentrad)
+                # calculating the value of the phase space density after attenuation
+                psd = np.exp(-np.abs(attfact))*initpsd[0]
             print(np.sqrt((singletraj[k-1,3]+26000)**2 + (singletraj[k-1,4])**2 + (singletraj[k-1,5])**2))
+            print("Velocity components in x and y: " + str(singletraj[k-1,3]) + ", " + str(singletraj[k-1,4]))
             print("Perihelion distance in au is: " + str(perihelion/au))
             print("PSD value: " + str(psd))
             
@@ -898,7 +998,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_2pi3_-3yr_whole_bettercxi+cepi_tclose300_r=1au_interpdist_fix.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_pi3_0yr_wholeextended_bettercxi+cepi_tclose300_r=1au_interpdist_fix.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value
