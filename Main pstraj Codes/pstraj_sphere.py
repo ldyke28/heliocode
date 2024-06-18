@@ -11,7 +11,7 @@ import h5py
 # MODE LIST
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 2
+mode = 3
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -980,7 +980,7 @@ if mode==3:
                     farvy = np.append(farvy, [backtraj[0,4]])
                     fart = np.append(fart, [startt - t[kn-1]])
                     # calculating value of phase space density based on the value at the crossing of x = 100 au
-                    maxwcolor = np.append(maxwcolor, [psdval])
+                    maxwcolor = np.append(maxwcolor, [initpsd])
                     #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
                     break
                     #break
@@ -998,7 +998,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_pi3_0yr_wholeextended_bettercxi+cepi_tclose300_r=1au_interpdist_fix.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_2pi3_0yr_wholeextended_nopi_tclose300_r=1au_interpdist_fix.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value

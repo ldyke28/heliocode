@@ -105,17 +105,40 @@ maxwcolorus = np.array([])
 vsqshifted = np.array([])
 thetarad = theta*np.pi/180 # expressing the value of theta in radians
 # calculating the shift of the particle velocities into the spacecraft frame
-vxshift = vx - vsc*np.cos(thetarad - np.pi/2)
-vyshift = vy - vsc*np.sin(thetarad - np.pi/2)
+xshiftfactor = -vsc*np.cos(thetarad + np.pi/2)
+yshiftfactor = -vsc*np.sin(thetarad + np.pi/2)
+vxshift = vx + xshiftfactor
+vyshift = vy + yshiftfactor
 vshifttotal = np.sqrt(vxshift**2 + vyshift**2)
 vsquaredtotal = vxshift**2 + vyshift**2 # calculating total energies (v^2) associated with each trajectory in spacecraft frame
 vangle = np.arccos(vxshift/vshifttotal) # calculating the new angle in which the velocity vector points for each trajectory
+minangle1 = (thetarad - np.pi/2 - vahwr)
+maxangle1 = (thetarad - np.pi/2 + vahwr)
+if minangle1 < 0:
+    minangle1 = minangle1 + 2*np.pi
+if maxangle1 < 0:
+    maxangle1 = maxangle1 + 2*np.pi
+minangle2 = (thetarad + np.pi/2 - vahwr)
+maxangle2 = (thetarad + np.pi/2 + vahwr)
+if minangle2 > 2*np.pi:
+    minangle2 = minangle2 - 2*np.pi
+if maxangle2 > 2*np.pi:
+    maxangle2 = maxangle2 - 2*np.pi
 for i in range(vx.size):
     if vyshift[i] < 0:
         # accounting for angles below the x axis, which will have a cosine equal to the ones mirrored across the x axis
         vangle[i] = 2*np.pi - vangle[i]
-    if (thetarad + np.pi/2 - vahwr) < vangle[i] and (thetarad + np.pi/2 + vahwr) > vangle[i]:
-        # appending values to the list of observable velocity shifted trajectories
+    if minangle1 < vangle[i] and maxangle1 > vangle[i]:
+        # appending values to the list of observable velocity shifted trajectories for trajectories in anti-ram
+        vxshifted = np.append(vxshifted, vxshift[i])
+        vyshifted = np.append(vyshifted, vyshift[i])
+        vxunshifted = np.append(vxunshifted, vx[i])
+        vyunshifted = np.append(vyunshifted, vy[i])
+        trackvangle = np.append(trackvangle, vangle[i])
+        maxwcolorus = np.append(maxwcolorus, f[i])
+        vsqshifted = np.append(vsqshifted, vsquaredtotal[i])
+    elif minangle2 < vangle[i] and maxangle2 > vangle[i]:
+        # doing so for the set of trajectories in the ram direction
         vxshifted = np.append(vxshifted, vxshift[i])
         vyshifted = np.append(vyshifted, vyshift[i])
         vxunshifted = np.append(vxunshifted, vx[i])
@@ -125,16 +148,48 @@ for i in range(vx.size):
         vsqshifted = np.append(vsqshifted, vsquaredtotal[i])
 
 
+# finding the slopes of the lines associated with the IBEX viewing angle
+slope1 = np.tan(thetarad - np.pi/2 + vahwr)
+slope2 = np.tan(thetarad - np.pi/2 - vahwr)
+
+def viewangle1(x):
+    #equation for the line of one boundary of the viewing angle
+    return slope1*(x + xshiftfactor/1000) - yshiftfactor/1000
+
+def viewangle2(x):
+    # equation for the line of the other boundary of the viewing angle
+    return slope2*(x + xshiftfactor/1000) - yshiftfactor/1000
+
+# set of sample vx values to generate the lines
+samplevxs = np.arange(-50, 50, 1)
+
+esas = np.array([17, 19.44, 37.47, 72.83]) # value for ESA1's high energy boundary in keV
+
+def eVtov(esaenergy):
+    # converts energy in eV to velocity in m/s
+    return np.sqrt(esaenergy/(.5 * 1.6736*10**(-27) * 6.242*10**(18)))
+
+angleset1 = np.arange(thetarad - np.pi/2 - vahwr, thetarad - np.pi/2 + vahwr, .001)
+angleset2 = np.arange(thetarad + np.pi/2 - vahwr, thetarad + np.pi/2 + vahwr, .001)
+
+
+
 # plotting this set of trajectories
 f2 = plt.figure()
 f2.set_figwidth(10)
 f2.set_figheight(6)
-plt.scatter(vxunshifted[:]/1000, vyunshifted[:]/1000, c=maxwcolorus[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
+#plt.scatter(vxunshifted[:]/1000, vyunshifted[:]/1000, c=maxwcolorus[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
+plt.scatter(vx[:]/1000, vy[:]/1000, c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
+plt.plot(samplevxs, viewangle1(samplevxs), c='k')
+plt.plot(samplevxs, viewangle2(samplevxs), c='k')
+for i in range(esas.size):
+    plt.plot(eVtov(esas[i])/1000*np.cos(angleset1) - xshiftfactor/1000, eVtov(esas[i])/1000*np.sin(angleset1) - yshiftfactor/1000, c='k')
+    plt.plot(-eVtov(esas[i])/1000*np.cos(angleset1) - xshiftfactor/1000, -eVtov(esas[i])/1000*np.sin(angleset1) - yshiftfactor/1000, c='k')
 plt.rcParams.update({'font.size': fsize})
 cb = plt.colorbar()
 cb.set_label('Normalized Phase Space Density')
-#plt.xlim([-25, 25])
-#plt.ylim([-25, 25])
+plt.xlim([-50, 50])
+plt.ylim([-45, 45])
 plt.xticks(fontsize=fsize)
 plt.yticks(fontsize=fsize)
 plt.xlabel("$v_x$ at Target in km/s", fontsize=fsize)
@@ -146,10 +201,13 @@ totalke = .5 * (1.6736*10**(-27)) * vsqshifted * 6.242*10**(18)
 
 # plotting counts of energies for each observable trajectory
 fig = plt.figure()
-fig.set_figwidth(8)
-fig.set_figheight(5)
+fig.set_figwidth(9)
+fig.set_figheight(6)
 # counts are weighted by value of the normalized phase space density
-plt.hist(totalke, bins=100, weights=maxwcolorus)
+plt.hist(totalke, bins=100, weights=maxwcolorus, log=True)
+#plt.hist(totalke, bins=100, weights=maxwcolorus)
+#plt.yscale('log')
+plt.ylim([10**(-12),10**(-5)])
 plt.xlabel("Particle Energy at Target Point in eV")
 plt.ylabel("Weighted Counts")
 plt.show()
