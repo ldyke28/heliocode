@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import ticker
 import matplotlib
 import scipy
 
@@ -8,7 +9,7 @@ vy = np.array([])
 f = np.array([])
 
 #file = open("C:\Users\lucas\Downloads\cosexprp_pi32_1p5e8_indirect_cosexppi.txt", "r")
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper 2/Version 1 Fixed Model Data/kowlyaabsrp_2pi3_0yr_wholeextended_bettercxi+cepi_tclose300_r=1au_interpdist_fix.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper 2/Version 2 Data/kowlyaabsrp_-17pi36_0yr_wholeextended_newcx+pi_tclose300_r=1au_interpdist.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper Data/cosexpminrp_17pi36_t0_indirect_cosexppi_tclose200_r=1au.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/Downloads/Data Files-20230406T214257Z-001/Data Files/lyaminrp_5pi6_0y_direct_cosexppi_tclose400_1.txt", delimiter=',')
 #file = np.loadtxt("/Users/ldyke/Downloads/drive-download-20221019T183112Z-001/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')
@@ -19,6 +20,8 @@ file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper 
 
 #file3 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_6p36675e9_direct_cosexppi.txt", delimiter=',')
 
+theta = 240 # angle with respect to upwind axis of target point
+
 
 for i in range(np.shape(file)[0]):
     vx = np.append(vx, file[i,0])
@@ -28,6 +31,11 @@ for i in range(np.shape(file)[0]):
 print(np.amax(f))
 #f = f*10**10
 
+for i in range(f.size):
+    if f[i] == -1:
+        # points in Sun are set to -1 - this will not work for integration, so we revert them to 0 here
+        f[i] = 0
+
 vyshape = 0
 newvy = np.array([])
 for i in range(vx.size):
@@ -36,6 +44,8 @@ for i in range(vx.size):
         vyshape = i+1
         #print(i+1)
         break
+
+# finding all of the unique vx values and putting them in an array by their order in the original file
 vxshape = int(vx.size/vyshape)
 newvx = np.array([])
 for i in range(vxshape):
@@ -43,12 +53,15 @@ for i in range(vxshape):
 #print(newvx)
 #print(newvy)
 
+# reshaping the array of f values to be two-dimensional on the grid of vx and vy final conditions
 freshape = np.zeros((vxshape, vyshape))
 for i in range(vxshape):
     for j in range(vyshape):
         freshape[i][j] = f[vyshape*i + j]
 
 
+######################################################################################################################################
+# pcolormesh plot of PSD/VDF
 
 
 fig = plt.figure()
@@ -56,11 +69,14 @@ ax = fig.add_subplot(projection='3d')
 
 #xx = np.linspace(-60000, -10000, 1000)
 #yy = np.linspace(-45000, 25000, 1000)
+# creating a mesh grid with the re-shaped vx and vy arrays
 vxgrid, vygrid = np.meshgrid(newvx, newvy, indexing='ij')
+# interpolating the values of the PSD/VDF on the grid from the simulation
 interpvdf = scipy.interpolate.RegularGridInterpolator((newvx, newvy), freshape, bounds_error=False, fill_value=None)
 
 print(interpvdf([-31,-4]))
 
+# plotting a wireframe of the interpolated PSD/VDF
 #ax.plot_wireframe(vxgrid, vygrid, interpvdf((vxgrid, vygrid)), rstride=3, cstride=3, alpha=0.4, color='m', label='linear interp')
 ax.plot_wireframe(vxgrid, vygrid, interpvdf((vxgrid, vygrid)), rstride=3, cstride=3, alpha=0.4, color='b')
 ax.set_xlabel("$v_x$ (km s$^{-1}$)")
@@ -69,12 +85,39 @@ ax.set_zlabel("PSD")
 #plt.legend()
 plt.show()
 
+freshape2 = freshape.transpose()
+print(freshape2.shape)
+freshapecopy = np.zeros((len(freshape2), len(freshape2[0])))
+print(len(freshape2))
+print(len(freshape2[0]))
+for i in range(len(freshape2)):
+    for j in range(len(freshape2[0])):
 
-"""fig = plt.figure()
+        freshapecopy[i][j] = freshape2[len(freshape2)-1 - i][j]
+
+fig = plt.figure()
 fig.set_figwidth(10)
 fig.set_figheight(6)
 
 fsize = 18
+n = matplotlib.colors.LogNorm(vmin=10**(-11))
+#plt.contourf(vxgrid, vygrid, freshape, cmap='rainbow', locator=ticker.LogLocator())
+#plt.imshow(freshapecopy, interpolation='bilinear', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
+#plt.imshow(freshapecopy, interpolation='bilinear', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-100)), extent=[min(newvx),max(newvx),min(newvy),max(newvy)])
+#im = plt.imshow(n(freshapecopy), cmap='rainbow', extent=[min(newvx),max(newvx),min(newvy),max(newvy)])
+plt.pcolormesh(newvx, newvy, freshape2, cmap='rainbow', norm=n)
+#plt.imshow(newinterp, norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
+plt.rcParams.update({'font.size': fsize})
+cb = plt.colorbar()
+cb.set_label('Phase Space Density')
+plt.xticks(fontsize=fsize)
+plt.yticks(fontsize=fsize)
+plt.xlabel("$v_x$ at Target in km/s", fontsize=fsize)
+plt.ylabel("$v_y$ at Target in km/s", fontsize=fsize)
+plt.show()
+
+
+"""fsize = 18
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', vmin=0, vmax=0.5221685831603383)
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', vmin=0, vmax=0.0020312330211150137)
 plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow')
@@ -115,11 +158,12 @@ plt.title('Target at (-.707 au, .707 au)')
 plt.show()"""
 
 
+###################################################################################################################################
+
 
 # section of code to calculate which trajectories could be observed by spacecraft - considers velocity shifts and viewing angle
 vx = vx*1000
 vy = vy*1000
-theta = 120
 vahw = 3.5 # half width of the total viewing angle width of the explorer probe in 2D
 vahwr = vahw*np.pi/180 # same width expressed in radians
 vsc = 30000 # velocity of spacecraft in m/s
@@ -139,14 +183,16 @@ vyshift = vy + yshiftfactor
 vshifttotal = np.sqrt(vxshift**2 + vyshift**2)
 vsquaredtotal = vxshift**2 + vyshift**2 # calculating total energies (v^2) associated with each trajectory in spacecraft frame
 vangle = np.arccos(vxshift/vshifttotal) # calculating the new angle in which the velocity vector points for each trajectory
-minangle1 = (thetarad - np.pi/2 - vahwr)
+minangle1 = (thetarad - np.pi/2 - vahwr) # calculating the viewing angle limits in the anti-ram direction
 maxangle1 = (thetarad - np.pi/2 + vahwr)
+# ensuring that all angles are between 0 and 2pi
 if minangle1 < 0:
     minangle1 = minangle1 + 2*np.pi
 if maxangle1 < 0:
     maxangle1 = maxangle1 + 2*np.pi
-minangle2 = (thetarad + np.pi/2 - vahwr)
+minangle2 = (thetarad + np.pi/2 - vahwr) # calculating the viewing angle limits in the ram direction
 maxangle2 = (thetarad + np.pi/2 + vahwr)
+# also ensuring angles are between 0 and 2pi
 if minangle2 > 2*np.pi:
     minangle2 = minangle2 - 2*np.pi
 if maxangle2 > 2*np.pi:
@@ -156,7 +202,7 @@ for i in range(vx.size):
         # accounting for angles below the x axis, which will have a cosine equal to the ones mirrored across the x axis
         vangle[i] = 2*np.pi - vangle[i]
     if minangle1 < vangle[i] and maxangle1 > vangle[i]:
-        # appending values to the list of observable velocity shifted trajectories
+        # appending values to the list of observable velocity shifted trajectories for trajectories in anti-ram
         vxshifted = np.append(vxshifted, vxshift[i])
         vyshifted = np.append(vyshifted, vyshift[i])
         vxunshifted = np.append(vxunshifted, vx[i])
@@ -165,7 +211,7 @@ for i in range(vx.size):
         maxwcolorus = np.append(maxwcolorus, f[i])
         vsqshifted = np.append(vsqshifted, vsquaredtotal[i])
     elif minangle2 < vangle[i] and maxangle2 > vangle[i]:
-        # doing so for the set of trajectories on the other side of IBEX (?)
+        # doing so for the set of trajectories in the ram direction
         vxshifted = np.append(vxshifted, vxshift[i])
         vyshifted = np.append(vyshifted, vyshift[i])
         vxunshifted = np.append(vxunshifted, vx[i])
@@ -190,15 +236,18 @@ def viewangle2(x):
 # set of sample vx values to generate the lines
 samplevxs = np.arange(-50, 50, 1)
 
-esas = np.array([17, 19.44, 37.47, 72.83]) # value for ESA1's high energy boundary in keV
+esas = np.array([10, 19.44, 37.47, 72.83]) # value for ESA1's high energy boundary in keV
 
 def eVtov(esaenergy):
     # converts energy in eV to velocity in m/s
-    return np.sqrt(esaenergy/(.5 * 1.6736*10**(-27) * 6.242*10**(18)))
+    return np.sqrt(esaenergy*1.602*10**(-19)/(.5 * 1.6736*10**(-27)))
 
+# range of angles within the viewing region of IBEX
 angleset1 = np.arange(thetarad - np.pi/2 - vahwr, thetarad - np.pi/2 + vahwr, .001)
 angleset2 = np.arange(thetarad + np.pi/2 - vahwr, thetarad + np.pi/2 + vahwr, .001)
 
+
+############################################################################################################################
 
 
 fsize = 18
@@ -207,9 +256,12 @@ f2 = plt.figure()
 f2.set_figwidth(10)
 f2.set_figheight(6)
 #plt.scatter(vxunshifted[:]/1000, vyunshifted[:]/1000, c=maxwcolorus[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
-plt.scatter(vx[:]/1000, vy[:]/1000, c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
+#plt.scatter(vx[:]/1000, vy[:]/1000, c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
+plt.pcolormesh(newvx, newvy, freshape2, cmap='rainbow', norm=n)
+# plotting outer range of viewing angle
 plt.plot(samplevxs, viewangle1(samplevxs), c='k')
 plt.plot(samplevxs, viewangle2(samplevxs), c='k')
+# plotting ESA boundaries within viewing angle
 for i in range(esas.size):
     plt.plot(eVtov(esas[i])/1000*np.cos(angleset1) - xshiftfactor/1000, eVtov(esas[i])/1000*np.sin(angleset1) - yshiftfactor/1000, c='k')
     plt.plot(-eVtov(esas[i])/1000*np.cos(angleset1) - xshiftfactor/1000, -eVtov(esas[i])/1000*np.sin(angleset1) - yshiftfactor/1000, c='k')
@@ -224,22 +276,41 @@ plt.xlabel("$v_x$ at Target in km/s", fontsize=fsize)
 plt.ylabel("$v_y$ at Target in km/s", fontsize=fsize)
 plt.show()
 
+
+############################################################################################################################
+
 # calculating the actual kinetic energy of each trajectory at the target point in eV
 totalke = .5 * (1.6736*10**(-27)) * vsqshifted * 6.242*10**(18)
+
+mH = 1.6736*10**(-27) # mass of hydrogen in kg
+
+particleflux = vsqshifted/mH * maxwcolorus # calculating particle flux at the device (https://link.springer.com/chapter/10.1007/978-3-030-82167-8_3 chapter 3.3)
 
 # plotting counts of energies for each observable trajectory
 fig = plt.figure()
 fig.set_figwidth(9)
 fig.set_figheight(6)
 # counts are weighted by value of the normalized phase space density
-plt.hist(totalke, bins=100, weights=maxwcolorus, log=True)
+bincount = 100
+#binmeans, binedges, binnum = scipy.stats.binned_statistic(totalke, values=maxwcolorus, statistic=np.mean, bins=bincount)
+binmeans, binedges, binnum = scipy.stats.binned_statistic(totalke, values=particleflux, statistic=np.mean, bins=bincount)
+binwidth = (binedges[1] - binedges[0])
+bincenters = binedges[1:] - binwidth/2
+#plt.hist(totalke, bins=bincount, weights=maxwcolorus, log=True)
+plt.hist(totalke, bins=bincount, weights=particleflux, log=True)
+plt.hlines(binmeans, binedges[:-1], binedges[1:], colors='r',lw=2, label='Mean PSD value in each bin')
 #plt.hist(totalke, bins=100, weights=maxwcolorus)
 #plt.yscale('log')
+plt.axvline(x=10, c='k')
+plt.axvline(x=19.44, c='k')
+plt.axvline(x=37.47, c='k')
 plt.ylim([10**(-12),10**(-5)])
-plt.xlabel("Particle Energy at Target Point in eV")
+plt.xlabel("Particle Kinetic Energy at Target Point in eV (Spacecraft Frame)")
 plt.ylabel("Weighted Counts")
+plt.legend(fontsize=10)
 plt.show()
 
+############################################################################################################################
 
 erangehigh = 10 # establishing boundaries for acceptable energies of particles in eV so we can probe specific energy regions
 erangelow = 0
@@ -268,45 +339,87 @@ xplotrange = np.arange(-xshiftfactor/1000 - 10, -xshiftfactor/1000, .1)
 
 psdintegrate = scipy.integrate.dblquad(psdfind, -xshiftfactor/1000 - 10, -xshiftfactor/1000, viewangle1, viewangle2)
 print(psdintegrate)
-plt.plot(xplotrange, viewangle1(xplotrange))
-plt.plot(xplotrange, viewangle2(xplotrange))
-plt.show()
+#plt.plot(xplotrange, viewangle1(xplotrange))
+#plt.plot(xplotrange, viewangle2(xplotrange))
+#plt.show()
 
 
 
 #####################################################################################################################################################################
 
+nH = 0.195 # hydrogen density in num/cm^3
+
 vxrotate = np.zeros(vx.size)
 vyrotate = np.zeros(vx.size)
-rotangle = thetarad - np.pi/2
+rotangle = thetarad - np.pi/2 # angle tangent to spacecraft path
+# applying rotation to put center of viewing angle on x-axis
 for i in range(vx.size):
     vxrotate[i] = vx[i]*np.cos(-rotangle) - vy[i]*np.sin(-rotangle)
     vyrotate[i] = vx[i]*np.sin(-rotangle) + vy[i]*np.cos(-rotangle)
 
+# applying shift to align origin with origin of spacecraft frame
 vxrotate = vxrotate + vsc
+# viewing angle slopes
 upperslope = np.tan(vahwr)
 lowerslope = np.tan(-vahwr)
 
 def vaupper(x):
+    # y = mx in the rotated and shifted frame for positive slope
     return upperslope*x
 
 def valower(x):
+    # same for negative slope
     return lowerslope*x
 
-testxs = np.arange(-50, 50, 1)
+testxs = np.arange(-50, 50, 1) # sample values to use to draw lines
 
+# ESA boundaries translated into km/s to use for integration
 energybounds = eVtov(esas)/1000
 
-def psdfindrotated(vxrotated, vyrotated):
+def psdfindrotated(vyrotated, vxrotated):
+    # velocity component values in the rotated frame ascribed their PSD value in the original frame
     return interpvdf([(vxrotated-vsc)*np.cos(rotangle) - vyrotated*np.sin(rotangle), (vxrotated-vsc)*np.sin(rotangle) + vyrotated*np.cos(rotangle)])
 
-print(energybounds[0])
+def interpolatedvdfvalue(vy, vx):
+    # returns value of PSD at different values of vx and vy
+    return interpvdf([vx, vy])/nH
+
+def velocitymoment(vy, vx):
+    vmag = np.sqrt(vx**2 + vy**2)
+    return vmag*interpvdf([vx, vy])
+
+def velocitymomentx(vy, vx):
+    return vx*interpvdf([vx, vy])/nH
+
+def velocitymomenty(vy, vx):
+    return vy*interpvdf([vx, vy])/nH
+
+# integrated PSD between zero and lower first bound
 psdintegrate1 = scipy.integrate.dblquad(psdfindrotated, 0, energybounds[0], valower, vaupper)
+# integrated PSD between first two bounds (within first ESA)
 psdintegrate2 = scipy.integrate.dblquad(psdfindrotated, energybounds[0], energybounds[1], valower, vaupper)
+print("at least I got here")
+# integrated PSD across all of velocity space
+xlowbound = min(vx)/1000
+xhighbound = max(vx)/1000
+ylowbound = min(vy)/1000
+yhighbound = max(vy)/1000
+buffer = 0.01
+psdintegrate3 = scipy.integrate.dblquad(interpolatedvdfvalue, xlowbound+buffer, xhighbound-buffer, ylowbound+buffer, yhighbound-buffer)
+
+psdintegratexs = scipy.integrate.dblquad(velocitymomentx, xlowbound+buffer, xhighbound-buffer, ylowbound+buffer, yhighbound-buffer)
+psdintegrateys = scipy.integrate.dblquad(velocitymomenty, xlowbound+buffer, xhighbound-buffer, ylowbound+buffer, yhighbound-buffer)
+psdintegratex = 1/psdintegrate[0] * psdintegratexs[0]
+psdintegratey = 1/psdintegrate[0] * psdintegrateys[0]
+
 
 print("Integrated psd is: " + str(psdintegrate1))
 print("Second integrated psd is: " + str(psdintegrate2))
+print("PSD Integrated across all velocity space: " + str(psdintegrate3))
 
+print("Velocity Moment Across Entire Space: (" + str(psdintegratex) + ", " + str(psdintegratey) + ")")
+
+# plotting scenario in the rotated frame
 plt.scatter(vxrotate[:]/1000, vyrotate[:]/1000, c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
 plt.plot(testxs, vaupper(testxs), c='k')
 plt.plot(testxs, valower(testxs), c='k')

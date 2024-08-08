@@ -84,7 +84,7 @@ def lya_abs(t,x,y,z,vr):
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
     return scalefactor*(F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval)
 
-
+# series of times at which to plot profiles for convenience
 t = 0
 t2 = oneyear*1.1
 t3 = oneyear*2.2
@@ -92,17 +92,21 @@ t4 = oneyear*3.3
 t5 = oneyear*4.4
 t6 = oneyear*5.5
 
+# x, y, and z coordinates to allow for plotting of the profile at any target point (relevant for absorption)
 xplot = 2.5*au
 yplot = 0
 zplot = 0
 
+# radial distances from the Sun (also relevant for absorption)
 rplot1 = 2.5*au
 rplot2 = 17*au
 rplot3 = 50*au
 rplot4 = 70*au
 
+# a range of times throughout the whole solar cycle
 trange = np.arange(0, 11*oneyear, 11*oneyear/1000)
 
+# range of vr values to plot across 
 inputvr = np.arange(-370000, 370000, 740000/1000)
 profile1 = np.zeros(inputvr.size)
 profile1p2 = np.zeros(inputvr.size)
@@ -132,28 +136,3 @@ ax.set_xlabel("Radial Velocity Component $v_r$ (km/s)", fontsize=fsize)
 ax.set_ylabel("Value of $\mu (t)$", fontsize=fsize)
 plt.title("Downwind Profile", fontsize=fsize)
 plt.show()
-
-"""trange, inputvr = np.meshgrid(trange, inputvr)
-
-#totalprofile = np.zeros((trange.size,inputvr.size))
-#for i in tqdm(range(trange.size)):
-#    for j in tqdm(range(inputvr.size)):
-#        totalprofile[i][j] = LyaRP4(trange[i], inputvr[j])
-
-totalprofile = LyaRP4(trange, inputvr)
-
-fsize = 18
-fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-fig.set_figwidth(9)
-fig.set_figheight(6)
-surface = ax.plot_surface(trange/oneyear, inputvr/1000, totalprofile, cmap=plt.cm.coolwarm, linewidth=0)
-fig.colorbar(surface, shrink=0.5, aspect=5)
-#ax.legend()
-#plt.xticks(fontsize=fsize)
-#plt.yticks(fontsize=fsize)
-#plt.zticks(fontsize=fsize)
-plt.grid()
-ax.set_xlabel("Time (years)")
-ax.set_ylabel("Radial Velocity Component $v_r$ (km/s)")
-ax.set_zlabel("Value of $\mu (t)$")
-plt.show()"""

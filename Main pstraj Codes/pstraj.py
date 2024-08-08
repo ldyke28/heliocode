@@ -17,6 +17,7 @@ mode = 2
 au = 1.496*10**11
 msolar = 1.98847*10**30 # mass of the sun in kg
 G = 6.6743*10**(-11) # value for gravitational constant in SI units
+mH = 1.6736*10**(-27) # mass of hydrogen in kg
 # one year in s = 3.156e7 s (Julian year, average length of a year)
 # 11 Julian years = 3.471e8 s
 # Note to self: solar maximum in April 2014
@@ -597,8 +598,37 @@ if mode==2:
             rprange = trackrp[:k]
             perihelion = min(np.sqrt((singletraj[0:k,0]-sunpos[0])**2 + (singletraj[0:k,1]-sunpos[1])**2 + (singletraj[0:k,2]-sunpos[2])**2))
             
-            # approximate time-averaged charge exchange photoionization rate from Sokol et al. 2019
-            cxirate = 5*10**(-7)
+            vsolarwindms = 400000 # solar wind speed in m/s
+            vsolarwindcms = vsolarwindms*100 # solar wind speed in cm/s
+            nsw1au = 5 # solar wind density at 1 au in cm^-3
+
+            r1 = 1*au # reference radius
+            # radial distance to the Sun at all points throughout the trajectory
+            currentrad = np.sqrt((sunpos[0]-singletraj[0:k+1,0])**2 + (sunpos[1]-singletraj[0:k+1,1])**2 + (sunpos[2]-singletraj[0:k+1,2])**2)
+
+            # velocity squared at each point in time for the trajectory
+            currentvsq = np.square(singletraj[0:k,3]) + np.square(singletraj[0:k,4]) + np.square(singletraj[0:k,5])
+            # thermal velocity (temperature taken from Federico's given temperature)
+            vth = np.sqrt(2 * 1.381*10**(-23) * 7500 / (1.672*10**(-27)))
+            # omega for the relative velocity
+            omegavs = np.abs(np.sqrt(currentvsq) - vsolarwindms)/vth
+            # calculating the current collision velocity of the particle and the SW
+            currentvrel = vth*(np.exp(-omegavs**2)/np.sqrt(np.pi) + (omegavs + 1/(2*omegavs))*scipy.special.erf(omegavs))
+            # calculating kinetic energy in keV at each point in time
+            currentKE = (.5 * mH * np.square(currentvrel)) * 6.242*10**(15)
+
+            # parameters for function to calculate charge exchange cross section
+            a1 = 4.049
+            a2 = 0.447
+            a3 = 60.5
+            # function for H-H+ charge exchange cross section, from Swaczyna et al. (2019)
+            # result is in cm^2
+            # https://ui.adsabs.harvard.edu/abs/2019AGUFMSH51C3344S/abstract
+            cxcrosssection = ((a1 - a2*np.log(currentKE))**2 * (1 - np.exp(-a3 / currentKE))**(4.5))*10**(-16)
+
+            #nsw = nsw1au * (r1/currentrad)**2 # assuming r^2 falloff for density (Sokol et al. 2019)
+
+            cxirate = nsw1au * currentvrel*100 * cxcrosssection
             omt = 2*np.pi/(3.47*10**(8))*t[0:k+1]
             # function for the photoionization rate at each point in time
             PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
@@ -767,15 +797,47 @@ if mode==3:
                     if np.sqrt((backtraj[kn-1,3]+26000)**2 + (backtraj[kn-1,4])**2 + (backtraj[kn-1,5])**2) <= 26795:
                         # INSERT CHARGE EXCHANGE - 1/r^2 force with constant value (look for average value)
                         # approximate time-averaged charge exchange photoionization rate from Sokol et al. 2019
-                        cxirate = 5*10**(-7)
+                        #cxirate = 5*10**(-7)
+                        
+                        vsolarwindms = 400000 # solar wind speed in m/s
+                        vsolarwindcms = vsolarwindms*100 # solar wind speed in cm/s
+                        nsw1au = 5 # solar wind density at 1 au in cm^-3
+
+                        r1 = 1*au # reference radius
+                        # radial distance to the Sun at all points throughout the trajectory
+                        currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
+
+                        # velocity squared at each point in time for the trajectory
+                        currentvsq = np.square(backtraj[0:kn+1,3]) + np.square(backtraj[0:kn+1,4]) + np.square(backtraj[0:kn+1,5])
+                        # thermal velocity (temperature taken from Federico's given temperature)
+                        vth = np.sqrt(2 * 1.381*10**(-23) * 7500 / (1.672*10**(-27)))
+                        # omega for the relative velocity
+                        omegavs = np.abs(np.sqrt(currentvsq) - vsolarwindms)/vth
+                        # calculating the current collision velocity of the particle and the SW
+                        currentvrel = vth*(np.exp(-omegavs**2)/np.sqrt(np.pi) + (omegavs + 1/(2*omegavs))*scipy.special.erf(omegavs))
+                        # calculating kinetic energy in keV at each point in time
+                        currentKE = (.5 * mH * np.square(currentvrel)) * 6.242*10**(15)
+
+                        # parameters for function to calculate charge exchange cross section
+                        a1 = 4.049
+                        a2 = 0.447
+                        a3 = 60.5
+                        # function for H-H+ charge exchange cross section, from Swaczyna et al. (2019)
+                        # result is in cm^2
+                        # https://ui.adsabs.harvard.edu/abs/2019AGUFMSH51C3344S/abstract
+                        cxcrosssection = ((a1 - a2*np.log(currentKE))**2 * (1 - np.exp(-a3 / currentKE))**(4.5))*10**(-16)
+
+                        #nsw = nsw1au * (r1/currentrad)**2 # assuming r^2 falloff for density (Sokol et al. 2019)
+
+                        cxirate = nsw1au * currentvrel*100 * cxcrosssection
+
                         # omega*t for each time point in the trajectory
                         omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
                         # function for the photoionization rate at each point in time
                         PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
                         #PIrate2 = 1.21163*10**(-7) # time average of above
                         r1 = 1*au # reference radius
-                        # radial distance to the Sun at all points throughout the trajectory
-                        currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
+                        
                         # calculating the component of the radial unit vector in each direction at each point in time
                         nrvecx = (-sunpos[0]+backtraj[0:kn+1,0])/currentrad
                         nrvecy = (-sunpos[1]+backtraj[0:kn+1,1])/currentrad

@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+import scipy
 
 vx = np.array([])
 vy = np.array([])
@@ -9,7 +10,7 @@ f = np.array([])
 filenum = 1
 
 #file = open("C:\Users\lucas\Downloads\cosexprp_pi32_1p5e8_indirect_cosexppi.txt", "r")
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper 2/Version 1 Fixed Model Data/kowlyaabsrp_2pi3_0yr_wholeextended_bettercxi+cepi_tclose300_r=1au_interpdist_fix.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper 2/Version 2 Data/kowlyaabsrp_-17pi36_5p5yr_wholeextended_newcx+pi_tclose300_r=1au_interpdist.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper Data/cosexpminrp_17pi36_t0_indirect_cosexppi_tclose200_r=1au.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/Downloads/Data Files-20230406T214257Z-001/Data Files/lyaminrp_5pi6_0y_direct_cosexppi_tclose400_1.txt", delimiter=',')
 #file = np.loadtxt("/Users/ldyke/Downloads/drive-download-20221019T183112Z-001/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')
@@ -45,6 +46,19 @@ if filenum == 3:
 fig = plt.figure()
 fig.set_figwidth(10)
 fig.set_figheight(6)
+
+#for i in range(f.size):
+#    if f[i] < 10**(-11):
+#        f[i] = 0
+
+vdftopsd = False
+# Parameters (density and temperature) taken from Federico's code
+nH = 0.195 # hydrogen density in num/cm^3
+tempH = 7500 # LISM hydrogen temperature in K
+mH = 1.6736*10**(-27) # mass of hydrogen in kg
+vthn = np.sqrt(2*1.381*10**(-29)*tempH/mH)
+if vdftopsd:
+    f = f*nH*(1/(np.sqrt(np.pi)*vthn))**3 # scaling for normalized PSD values to turn normalized VDF's into PSD's
 
 fsize = 18
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', vmin=0, vmax=0.5221685831603383)
@@ -88,11 +102,12 @@ plt.title('Target at (-.707 au, .707 au)')
 plt.show()"""
 
 
+#######################################################################################################################################
 
 # section of code to calculate which trajectories could be observed by spacecraft - considers velocity shifts and viewing angle
 vx = vx*1000
 vy = vy*1000
-theta = 120
+theta = 275
 vahw = 3.5 # half width of the total viewing angle width of the explorer probe in 2D
 vahwr = vahw*np.pi/180 # same width expressed in radians
 vsc = 30000 # velocity of spacecraft in m/s
@@ -163,11 +178,11 @@ def viewangle2(x):
 # set of sample vx values to generate the lines
 samplevxs = np.arange(-50, 50, 1)
 
-esas = np.array([17, 19.44, 37.47, 72.83]) # value for ESA1's high energy boundary in keV
+esas = np.array([10, 19.44, 37.47, 72.83]) # value for ESA1's high energy boundary in keV
 
 def eVtov(esaenergy):
     # converts energy in eV to velocity in m/s
-    return np.sqrt(esaenergy/(.5 * 1.6736*10**(-27) * 6.242*10**(18)))
+    return np.sqrt(esaenergy*1.602*10**(-19)/(.5 * 1.6736*10**(-27)))
 
 angleset1 = np.arange(thetarad - np.pi/2 - vahwr, thetarad - np.pi/2 + vahwr, .001)
 angleset2 = np.arange(thetarad + np.pi/2 - vahwr, thetarad + np.pi/2 + vahwr, .001)
@@ -196,6 +211,11 @@ plt.xlabel("$v_x$ at Target in km/s", fontsize=fsize)
 plt.ylabel("$v_y$ at Target in km/s", fontsize=fsize)
 plt.show()
 
+
+#######################################################################################################################################
+
+
+
 # calculating the actual kinetic energy of each trajectory at the target point in eV
 totalke = .5 * (1.6736*10**(-27)) * vsqshifted * 6.242*10**(18)
 
@@ -204,14 +224,25 @@ fig = plt.figure()
 fig.set_figwidth(9)
 fig.set_figheight(6)
 # counts are weighted by value of the normalized phase space density
-plt.hist(totalke, bins=100, weights=maxwcolorus, log=True)
+bincount = 100
+binmeans, binedges, binnum = scipy.stats.binned_statistic(totalke, values=maxwcolorus, statistic=np.mean, bins=bincount)
+binwidth = (binedges[1] - binedges[0])
+bincenters = binedges[1:] - binwidth/2
+plt.hist(totalke, bins=bincount, weights=maxwcolorus, log=True)
+plt.hlines(binmeans, binedges[:-1], binedges[1:], colors='r',lw=2, label='Mean PSD value in each bin')
 #plt.hist(totalke, bins=100, weights=maxwcolorus)
 #plt.yscale('log')
+plt.axvline(x=10, c='k')
+plt.axvline(x=19.44, c='k')
+plt.axvline(x=37.47, c='k')
 plt.ylim([10**(-12),10**(-5)])
 plt.xlabel("Particle Energy at Target Point in eV")
 plt.ylabel("Weighted Counts")
+plt.legend(fontsize=10)
 plt.show()
 
+
+#######################################################################################################################################
 
 erangehigh = 10 # establishing boundaries for acceptable energies of particles in eV so we can probe specific energy regions
 erangelow = 0
@@ -230,3 +261,10 @@ plt.scatter(-np.cos(vangleselect), -np.sin(vangleselect), c=maxwcolorselect, mar
 plt.xlim([-1.1,1.1])
 plt.ylim([-1.1,1.1])
 plt.show()
+
+
+#######################################################################################################################################
+
+
+maxind = np.argmax(f)
+print("Maximum value of the PSD is at velocity point (" + str(vx[maxind]) + ", " + str(vy[maxind]) + "), with PSD value " + str(f[maxind]))

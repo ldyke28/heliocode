@@ -6,7 +6,7 @@ from tqdm import tqdm
 ThreeD = True
 # Loading in the file to be unpacked
 #file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/pi_t0.txt", delimiter=',')
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Data from Cluster/5pi6_-4p5e7_lya_test.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/2pi3_t0_lya_Federicodist_updatedmu.txt", delimiter=',')
 #file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/GitHub/heliocode/supplementaldata1.txt", delimiter=',')
 
 #file = file[np.any(file > 1, axis=1)]
@@ -31,7 +31,7 @@ f = np.concatenate((f, f2))"""
 # Plotting data as a 3D scatter plot
 if ThreeD == True:
     # getting rid of points with an f value of 0
-    vx = np.array([])
+    """vx = np.array([])
     vy = np.array([])
     vz = np.array([])
     f = np.array([])
@@ -40,7 +40,7 @@ if ThreeD == True:
     vx = vxinit*fmask
     vy = vyinit*fmask
     vz = vzinit*fmask
-    f = finit*fmask
+    f = finit*fmask"""
 
     #vx = vx[~(vx == 0)]
     #vy = vy[~(vy == 0)]
@@ -53,7 +53,8 @@ if ThreeD == True:
     ax3d = plt.axes(projection='3d')
     #scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='rainbow', s=.02, vmin=(.75-.243/np.e), vmax=(.75+.243*np.e))
     #scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='rainbow', s=.001, alpha=.15)
-    scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='rainbow', s=.001)
+    #scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='rainbow', s=.001)
+    scatterplot = ax3d.scatter3D(vxinit[:], vyinit[:], vzinit[:], c=finit[:], cmap='rainbow', s=.04, norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
     cb = fig3d.colorbar(scatterplot)
     ax3d.set_xlabel("$v_x$ at Target Point (km/s)")
     ax3d.set_ylabel("$v_y$ at Target Point (km/s)")

@@ -37,7 +37,7 @@ refdist = 70 # upwind reference distance for backtraced trajectories, in au
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 120 # angle with respect to upwind axis of target point
+theta = 275 # angle with respect to upwind axis of target point
 ibexrad = 1 # radial distance of target point from Sun
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -550,8 +550,8 @@ def Abs_dr_dt(x,t,rp):
 #
 # single trajectory plotting code
 if mode==2:
-    indxic = 49000
-    indyic = 23000
+    indxic = 20000
+    indyic = 5000
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
@@ -684,8 +684,12 @@ if mode==2:
 
                 # velocity squared at each point in time for the trajectory
                 currentvsq = np.square(singletraj[0:k,3]) + np.square(singletraj[0:k,4]) + np.square(singletraj[0:k,5])
+                # thermal velocity (temperature taken from Federico's given temperature)
+                vth = np.sqrt(2 * 1.381*10**(-23) * 7500 / (1.672*10**(-27)))
+                # omega for the relative velocity
+                omegavs = np.abs(np.sqrt(currentvsq) - vsolarwindms)/vth
                 # calculating the current collision velocity of the particle and the SW
-                currentvrel = np.abs(np.sqrt(currentvsq) - vsolarwindms)
+                currentvrel = vth*(np.exp(-omegavs**2)/np.sqrt(np.pi) + (omegavs + 1/(2*omegavs))*scipy.special.erf(omegavs))
                 # calculating kinetic energy in keV at each point in time
                 currentKE = (.5 * mH * np.square(currentvrel)) * 6.242*10**(15)
 
@@ -796,13 +800,13 @@ if mode==2:
     cb.ax.tick_params(labelsize=fosize)
     plt.xlabel("x (au)", fontsize=fosize)
     plt.ylabel("y (au)", fontsize=fosize)
-    plt.xlim([-2,5])
-    plt.ylim([-2,2])
+    plt.xlim([-70,70])
+    plt.ylim([-70,70])
     
     plt.xticks(fontsize=fosize)
     plt.yticks(fontsize=fosize)
     plt.title("Individual Orbit at time t$\\approx$" + str(round(finalt/(oneyear), 3)) + " years, Target at (" + str(round(ibexpos[0]/au, 4)) + " au, " + str(round(ibexpos[1]/au, 4)) + " au, " + str(round(ibexpos[2]/au, 4)) + " au) \
-        \n At target point v = (" + str(indxic/1000) + " km/s, " + str(indyic/1000) + " km/s, " + str(indzic/1000) + " km/s), Value of distribution function = " + str(psd) + " \
+        \n At target point v = (" + str(indxic/1000) + " km/s, " + str(indyic/1000) + " km/s, " + str(indzic/1000) + " km/s), Value of distribution function = " + str(round(psd, 13)) + " \
        \n Perihelion at $\\sim$ " + str(round(perihelion/au, 5)) + " au, Travel time from x = 100 au to target $\\approx$ " + str(round(ttime/oneyear, 3)) + " years", fontsize=10)
     plt.show()
 
@@ -859,8 +863,8 @@ if mode==3:
                 farvx = np.append(farvx, [backtraj[0,3]])
                 farvy = np.append(farvy, [backtraj[0,4]])
                 fart = np.append(fart, [0])
-                # sets the value of the NPSD to 0 to indicate the trajectory isn't viable
-                maxwcolor = np.append(maxwcolor, [0])
+                # sets the value of the NPSD to -1 to indicate the trajectory isn't viable, as a special flag to investigate later
+                maxwcolor = np.append(maxwcolor, [-1])
                 continue
             if np.all(btr[:] < refdist*au):
                 # forgoes the following checks if the trajectory never passes through the plane at the reference distance upwind
@@ -924,8 +928,12 @@ if mode==3:
 
                     # velocity squared at each point in time for the trajectory
                     currentvsq = np.square(backtraj[0:kn+1,3]) + np.square(backtraj[0:kn+1,4]) + np.square(backtraj[0:kn+1,5])
+                    # thermal velocity (temperature taken from Federico's given temperature)
+                    vth = np.sqrt(2 * 1.381*10**(-23) * 7500 / (1.672*10**(-27)))
+                    # omega for the relative velocity
+                    omegavs = np.abs(np.sqrt(currentvsq) - vsolarwindms)/vth
                     # calculating the current collision velocity of the particle and the SW
-                    currentvrel = np.abs(np.sqrt(currentvsq) - vsolarwindms)
+                    currentvrel = vth*(np.exp(-omegavs**2)/np.sqrt(np.pi) + (omegavs + 1/(2*omegavs))*scipy.special.erf(omegavs))
                     # calculating kinetic energy in keV at each point in time
                     currentKE = (.5 * mH * np.square(currentvrel)) * 6.242*10**(15)
 
@@ -980,6 +988,7 @@ if mode==3:
                     farvy = np.append(farvy, [backtraj[0,4]])
                     fart = np.append(fart, [startt - t[kn-1]])
                     # calculating value of phase space density based on the value at the crossing of x = 100 au
+                    #maxwcolor = np.append(maxwcolor, [psdval])
                     maxwcolor = np.append(maxwcolor, [initpsd])
                     #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
                     break
@@ -998,7 +1007,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_2pi3_0yr_wholeextended_nopi_tclose300_r=1au_interpdist_fix.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_-2pi3_0yr_wholeextended_nopi_tclose300_r=1au_interpdist.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value
