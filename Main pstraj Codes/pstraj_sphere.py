@@ -25,7 +25,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 0*oneyear # time to start backtracing
+finalt = 5.5*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5*10**(10) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
@@ -66,14 +66,14 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # vx/vy initial conditions are sampled on a grid with chosen resolution
-#vxstart = np.arange(2000, 10000, 50)
-#vystart = np.arange(2000, 10000, 50)
+vxstart = np.arange(-36300, -29200, 20)
+vystart = np.arange(-6600, -4600, 20)
 #vxstart = np.arange(-25000, 25000, 300)
 #vystart = np.arange(-25000, 25000, 300)
 #vxstart = np.arange(-60000, 40000, 300)
 #vystart = np.arange(-35000, 50000, 300)
-vxstart = np.arange(-50000, 50000, 500)
-vystart = np.arange(-45000, 45000, 500)
+#vxstart = np.arange(-50000, 50000, 500)
+#vystart = np.arange(-45000, 45000, 500)
 vzstart = 0
 
 if mode==3:
@@ -550,8 +550,8 @@ def Abs_dr_dt(x,t,rp):
 #
 # single trajectory plotting code
 if mode==2:
-    indxic = 20000
-    indyic = 5000
+    indxic = -32340
+    indyic = 16260
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
@@ -800,8 +800,8 @@ if mode==2:
     cb.ax.tick_params(labelsize=fosize)
     plt.xlabel("x (au)", fontsize=fosize)
     plt.ylabel("y (au)", fontsize=fosize)
-    plt.xlim([-70,70])
-    plt.ylim([-70,70])
+    plt.xlim([-10,10])
+    plt.ylim([-10,10])
     
     plt.xticks(fontsize=fosize)
     plt.yticks(fontsize=fosize)
@@ -988,8 +988,8 @@ if mode==3:
                     farvy = np.append(farvy, [backtraj[0,4]])
                     fart = np.append(fart, [startt - t[kn-1]])
                     # calculating value of phase space density based on the value at the crossing of x = 100 au
-                    #maxwcolor = np.append(maxwcolor, [psdval])
-                    maxwcolor = np.append(maxwcolor, [initpsd])
+                    maxwcolor = np.append(maxwcolor, [psdval])
+                    #maxwcolor = np.append(maxwcolor, [initpsd])
                     #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
                     break
                     #break
@@ -1007,7 +1007,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_-2pi3_0yr_wholeextended_nopi_tclose300_r=1au_interpdist.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_-17pi36_5p5yr_wholeextended_newcx+pi_tclose300_r=1au_interpdist_zoomed.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value

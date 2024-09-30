@@ -10,7 +10,7 @@ f = np.array([])
 filenum = 1
 
 #file = open("C:\Users\lucas\Downloads\cosexprp_pi32_1p5e8_indirect_cosexppi.txt", "r")
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper 2/Version 2 Data/kowlyaabsrp_-17pi36_5p5yr_wholeextended_newcx+pi_tclose300_r=1au_interpdist.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_-17pi36_4yrs_direct_cosexp+cxpi_tclose300_r=1au.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper Data/cosexpminrp_17pi36_t0_indirect_cosexppi_tclose200_r=1au.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/Downloads/Data Files-20230406T214257Z-001/Data Files/lyaminrp_5pi6_0y_direct_cosexppi_tclose400_1.txt", delimiter=',')
 #file = np.loadtxt("/Users/ldyke/Downloads/drive-download-20221019T183112Z-001/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')
@@ -51,7 +51,7 @@ fig.set_figheight(6)
 #    if f[i] < 10**(-11):
 #        f[i] = 0
 
-vdftopsd = False
+vdftopsd = True
 # Parameters (density and temperature) taken from Federico's code
 nH = 0.195 # hydrogen density in num/cm^3
 tempH = 7500 # LISM hydrogen temperature in K
@@ -65,7 +65,8 @@ fsize = 18
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', vmin=0, vmax=0.0020312330211150137)
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow')
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-50), vmax=10**(-6)))
-plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
+#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
+plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm())
 plt.rcParams.update({'font.size': fsize})
 cb = plt.colorbar()
 #cb.set_label('Time at which orbit passes through 100 au (s)')
@@ -101,13 +102,29 @@ plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwel
 plt.title('Target at (-.707 au, .707 au)')
 plt.show()"""
 
+#######################################################################################################################################
+
+
+for i in range(f.size):
+    if f[i] == -1:
+        # points in Sun are set to -1 - this will skew bulk velocities
+        f[i] = 0
+
+vxtimesf = np.sum(f*vx)
+vytimesf = np.sum(f*vy)
+bulkux = vxtimesf/np.sum(f)
+bulkuy = vytimesf/np.sum(f)
+
+print("The bulk velocity for this phase space plot is approximately (" + str(bulkux) + ", " + str(bulkuy) + ")")
+
+
 
 #######################################################################################################################################
 
 # section of code to calculate which trajectories could be observed by spacecraft - considers velocity shifts and viewing angle
 vx = vx*1000
 vy = vy*1000
-theta = 275
+theta = 240
 vahw = 3.5 # half width of the total viewing angle width of the explorer probe in 2D
 vahwr = vahw*np.pi/180 # same width expressed in radians
 vsc = 30000 # velocity of spacecraft in m/s
@@ -219,7 +236,7 @@ plt.show()
 # calculating the actual kinetic energy of each trajectory at the target point in eV
 totalke = .5 * (1.6736*10**(-27)) * vsqshifted * 6.242*10**(18)
 
-# plotting counts of energies for each observable trajectory
+"""# plotting counts of energies for each observable trajectory
 fig = plt.figure()
 fig.set_figwidth(9)
 fig.set_figheight(6)
@@ -229,7 +246,7 @@ binmeans, binedges, binnum = scipy.stats.binned_statistic(totalke, values=maxwco
 binwidth = (binedges[1] - binedges[0])
 bincenters = binedges[1:] - binwidth/2
 plt.hist(totalke, bins=bincount, weights=maxwcolorus, log=True)
-plt.hlines(binmeans, binedges[:-1], binedges[1:], colors='r',lw=2, label='Mean PSD value in each bin')
+#plt.hlines(binmeans, binedges[:-1], binedges[1:], colors='r',lw=2, label='Mean PSD value in each bin')
 #plt.hist(totalke, bins=100, weights=maxwcolorus)
 #plt.yscale('log')
 plt.axvline(x=10, c='k')
@@ -238,8 +255,8 @@ plt.axvline(x=37.47, c='k')
 plt.ylim([10**(-12),10**(-5)])
 plt.xlabel("Particle Energy at Target Point in eV")
 plt.ylabel("Weighted Counts")
-plt.legend(fontsize=10)
-plt.show()
+#plt.legend(fontsize=10)
+plt.show()"""
 
 
 #######################################################################################################################################

@@ -11,7 +11,7 @@ from tqdm import tqdm
 # 1 = generate a list of trajectories that come within proximity
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 2
+mode = 3
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -25,11 +25,11 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 4000000 # time to start backtracing
+finalt = 5.5*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -1*10**(12) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
-tstepclose = 1000 # time resolution for close regime
+tstepclose = 20 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 100 # upwind reference distance for backtraced trajectories, in au
@@ -39,8 +39,8 @@ refdist = 100 # upwind reference distance for backtraced trajectories, in au
 # https://ibex.princeton.edu/sites/g/files/toruqf1596/files/moebius_et_al_2012.pdf
 # above gives angle of ecliptic relative to ISM flow
 sunpos = np.array([0,0,0])
-theta = 150 # angle with respect to upwind axis of target point
-ibexrad = 10 # radial distance of target point from Sun
+theta = 275 # angle with respect to upwind axis of target point
+ibexrad = 1 # radial distance of target point from Sun
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -86,12 +86,12 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # vx/vy initial conditions are sampled on a grid with chosen resolution
-vxstart = np.arange(-5000, 5000, 50)
-vystart = np.arange(-10000, 10000, 100)
+#vxstart = np.arange(-5000, 5000, 50)
+#vystart = np.arange(-10000, 10000, 100)
 #vxstart = np.arange(-25000, 25000, 300)
 #vystart = np.arange(-25000, 25000, 300)
-#vxstart = np.arange(-60000, 30000, 300)
-#vystart = np.arange(-35000, 50000, 300)
+vxstart = np.arange(-26500, -25500, 20)
+vystart = np.arange(-5500, -4500, 20)
 #vxstart = np.arange(-10000, -5000, 30)
 #vystart = np.arange(-10000, -5000, 30)
 vzstart = 0
@@ -871,7 +871,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_p1268yrs_centerzoom_cosexp+cxpi_tclose1000_r=10au.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_-17pi36_5p5yrs_directcore_cosexp+cxpi_tclose20_r=1au.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value

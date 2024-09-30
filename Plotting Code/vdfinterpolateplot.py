@@ -20,7 +20,7 @@ file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper 
 
 #file3 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_6p36675e9_direct_cosexppi.txt", delimiter=',')
 
-theta = 240 # angle with respect to upwind axis of target point
+theta = 275 # angle with respect to upwind axis of target point
 
 
 for i in range(np.shape(file)[0]):
@@ -283,12 +283,14 @@ plt.show()
 totalke = .5 * (1.6736*10**(-27)) * vsqshifted * 6.242*10**(18)
 
 mH = 1.6736*10**(-27) # mass of hydrogen in kg
+nH = 0.195 # hydrogen density in num/cm^3
 
-particleflux = vsqshifted/mH * maxwcolorus # calculating particle flux at the device (https://link.springer.com/chapter/10.1007/978-3-030-82167-8_3 chapter 3.3)
+particleflux = (vsqshifted/1000)/(mH*6.242*10**(16)) * maxwcolorus # calculating particle flux at the device (https://link.springer.com/chapter/10.1007/978-3-030-82167-8_3 chapter 3.3)
+# converting to cm^-2 s^-1 ster^-1 keV^-1
 
 # plotting counts of energies for each observable trajectory
 fig = plt.figure()
-fig.set_figwidth(9)
+fig.set_figwidth(11)
 fig.set_figheight(6)
 # counts are weighted by value of the normalized phase space density
 bincount = 100
@@ -298,15 +300,17 @@ binwidth = (binedges[1] - binedges[0])
 bincenters = binedges[1:] - binwidth/2
 #plt.hist(totalke, bins=bincount, weights=maxwcolorus, log=True)
 plt.hist(totalke, bins=bincount, weights=particleflux, log=True)
-plt.hlines(binmeans, binedges[:-1], binedges[1:], colors='r',lw=2, label='Mean PSD value in each bin')
+plt.hlines(binmeans, binedges[:-1], binedges[1:], colors='r',lw=2, label='Mean flux value in each bin')
 #plt.hist(totalke, bins=100, weights=maxwcolorus)
 #plt.yscale('log')
 plt.axvline(x=10, c='k')
 plt.axvline(x=19.44, c='k')
 plt.axvline(x=37.47, c='k')
-plt.ylim([10**(-12),10**(-5)])
+#plt.ylim([10**(-12),10**(-5)])
+plt.ylim([10**(0),10**(15)])
 plt.xlabel("Particle Kinetic Energy at Target Point in eV (Spacecraft Frame)")
-plt.ylabel("Weighted Counts")
+#plt.ylabel("Counts Weighted by PSD Value")
+plt.ylabel("Spacecraft Frame Particle Flux (cm$^{-2}$ s$^{-1}$ ster$^{-1}$ keV$^{-1}$)")
 plt.legend(fontsize=10)
 plt.show()
 
@@ -346,8 +350,6 @@ print(psdintegrate)
 
 
 #####################################################################################################################################################################
-
-nH = 0.195 # hydrogen density in num/cm^3
 
 vxrotate = np.zeros(vx.size)
 vyrotate = np.zeros(vx.size)
