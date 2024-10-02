@@ -613,6 +613,23 @@ for m in range(nprocs-1):
             for j in range(vystart.size):
                 for l in range(vzstart.size):
                     init = [xstart, ystart, zstart, vxstartn[i], vystart[j], vzstart[l]]
+                    if np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2 + (vzstart[l]/1000)**2) < 10:
+                        #print("\n skipped")
+                        # skips calculating the trajectory if the initial velocity is within a certain distance in velocity space from the origin
+                        continue
+                    thetarad = theta*np.pi/180
+                    fxea = 50*np.cos(thetarad) # distance of a point far away on the exclusion axis in the x direction
+                    fyea = 50*np.sin(thetarad) # distance of a point far away on the exclusion axis in the y direction
+                    origin = np.array([0,0,0])
+                    fea = np.array([fxea, fyea, 0])
+                    initialv = np.array([vxstart[i]/1000, vystart[j]/1000, vzstart[l]/1000])
+                    if np.linalg.norm(np.cross(fea-origin, origin-initialv))/np.linalg.norm(fea-origin) < 5 and np.abs(np.linalg.norm(fea-initialv)) < 50:
+                        # skips calculating the trajectory if it is too close to the axis of exclusion
+                        # checks distance to axis of exclusion, then checks if point is within 50 km/s of
+                        # 50 km/s from the origin along the axis of exclusion
+                        # since the effect of the axis of exclusion only goes one way from the origin
+                        #print(initialv)
+                        continue
                     
                     # Code not using try/except to try and retain all points for plotting purposes
                     # calculating trajectories for each initial condition in phase space given

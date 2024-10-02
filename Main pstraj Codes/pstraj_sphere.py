@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 from scipy.integrate import odeint
 import scipy
+import scipy.interpolate
 from tqdm import tqdm
 import h5py
 
@@ -25,7 +26,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 5.5*oneyear # time to start backtracing
+finalt = 0*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5*10**(10) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
@@ -37,7 +38,7 @@ refdist = 70 # upwind reference distance for backtraced trajectories, in au
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 275 # angle with respect to upwind axis of target point
+theta = 120 # angle with respect to upwind axis of target point
 ibexrad = 1 # radial distance of target point from Sun
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -66,14 +67,14 @@ zstart = ibexpos[2]
 
 # Multiple sets of initial vx/vy conditions for convenience
 # vx/vy initial conditions are sampled on a grid with chosen resolution
-vxstart = np.arange(-36300, -29200, 20)
-vystart = np.arange(-6600, -4600, 20)
+#vxstart = np.arange(-36300, -29200, 20)
+#vystart = np.arange(-6600, -4600, 20)
 #vxstart = np.arange(-25000, 25000, 300)
 #vystart = np.arange(-25000, 25000, 300)
 #vxstart = np.arange(-60000, 40000, 300)
 #vystart = np.arange(-35000, 50000, 300)
-#vxstart = np.arange(-50000, 50000, 500)
-#vystart = np.arange(-45000, 45000, 500)
+vxstart = np.arange(-50000, 50000, 500)
+vystart = np.arange(-45000, 45000, 500)
 vzstart = 0
 
 if mode==3:
@@ -852,10 +853,25 @@ if mode==3:
         for j in tqdm(range(vystart.size)):
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
-            #if np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2) > 20:
-            #    backtraj[:,:] = odeint(Lya_dr_dt, init, t, args=(LyaminRP,))
-            #else:
-            #   continue
+            #print("\n" + str(np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2)))
+            if np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2) < 10:
+                #print("\n skipped")
+                # skips calculating the trajectory if the initial velocity is within a certain distance in velocity space from the origin
+                continue
+            thetarad = theta*np.pi/180
+            fxea = 50*np.cos(thetarad) # distance of a point far away on the exclusion axis in the x direction
+            fyea = 50*np.sin(thetarad) # distance of a point far away on the exclusion axis in the y direction
+            origin = np.array([0,0,0])
+            fea = np.array([fxea, fyea, 0])
+            initialv = np.array([vxstart[i]/1000, vystart[j]/1000, vzstart/1000])
+            if np.linalg.norm(np.cross(fea-origin, origin-initialv))/np.linalg.norm(fea-origin) < 5 and np.abs(np.linalg.norm(fea-initialv)) < 50:
+                # skips calculating the trajectory if it is too close to the axis of exclusion
+                # checks distance to axis of exclusion, then checks if point is within 50 km/s of
+                # 50 km/s from the origin along the axis of exclusion
+                # since the effect of the axis of exclusion only goes one way from the origin
+                #print(initialv)
+                continue
+            #print("\n not skipped")
             backtraj[:,:] = odeint(Abs_dr_dt, init, t, args=(lya_abs,))
             btr = np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2)
             if any(btr <= .00465*au):
@@ -988,8 +1004,8 @@ if mode==3:
                     farvy = np.append(farvy, [backtraj[0,4]])
                     fart = np.append(fart, [startt - t[kn-1]])
                     # calculating value of phase space density based on the value at the crossing of x = 100 au
-                    maxwcolor = np.append(maxwcolor, [psdval])
-                    #maxwcolor = np.append(maxwcolor, [initpsd])
+                    #maxwcolor = np.append(maxwcolor, [psdval])
+                    maxwcolor = np.append(maxwcolor, [initpsd])
                     #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
                     break
                     #break
@@ -1007,7 +1023,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_-17pi36_5p5yr_wholeextended_newcx+pi_tclose300_r=1au_interpdist_zoomed.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_2pi3_0yr_wholeextended_noionization_tclose300_r=1au_interpdist_testing.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value

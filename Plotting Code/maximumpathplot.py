@@ -13,13 +13,13 @@ import pandas as pd
 #f = np.array([8.04*10**(-8), 1.30*10**(-7), 2.65*10**(-7), 3.85*10**(-7), 4.27*10**(-7), 4.38*10**(-7), 4.42*10**(-7), 4.34*10**(-7), 3.78*10**(-7), 2.54*10**(-7), 1.41*10**(-7), 3.30*10**(-8)])
 
 # Paper 1 maxima
-#vxarray = np.array([-28.76, -29.54, -33, -35.38, -36.2, -36.45, -36.52, -36.38, -35.26, -32.58, -31.74, -25.78])
-#vyarray = np.array([1.22, 2.44, 6.92, 9.2, 9.68, 9.7, 9.7, 9.38, 7.7, 4.08, 2.94, -5.06])
-#f = np.array([4.87*10**(-7), 5.88*10**(-7), 1.11*10**(-6), 1.56*10**(-6), 1.73*10**(-6), 1.79*10**(-6), 1.81*10**(-6), 1.79*10**(-6), 1.58*10**(-6), 1.14*10**(-6), 1.01*10**(-6), 2.02*10**(-7)])
+vxarray = np.array([-28.76, -29.54, -33, -35.38, -36.2, -36.45, -36.52, -36.38, -35.26, -32.58, -31.74, -25.78])
+vyarray = np.array([1.22, 2.44, 6.92, 9.2, 9.68, 9.7, 9.7, 9.38, 7.7, 4.08, 2.94, -5.06])
+f = np.array([4.87*10**(-7), 5.88*10**(-7), 1.11*10**(-6), 1.56*10**(-6), 1.73*10**(-6), 1.79*10**(-6), 1.81*10**(-6), 1.79*10**(-6), 1.58*10**(-6), 1.14*10**(-6), 1.01*10**(-6), 2.02*10**(-7)])
 
 # Paper 2 bulk velocities (approximation)
-vxarray = np.array([-24.093, -24.580, -26.877, -28.507, -28.976, -29.059, -29.076, -28.926, -27.940, -25.680, -25.023, -22.037])
-vyarray = np.array([2.594, 3.250, 6.279, 8.159, 8.612, 8.673, 8.676, 8.413, 6.989, 3.969, 3.117, 0.311])
+#vxarray = np.array([-24.093, -24.580, -26.877, -28.507, -28.976, -29.059, -29.076, -28.926, -27.940, -25.680, -25.023, -22.037])
+#vyarray = np.array([2.594, 3.250, 6.279, 8.159, 8.612, 8.673, 8.676, 8.413, 6.989, 3.969, 3.117, 0.311])
 
 labels = np.array(["-4 yr", "-3.824 yr", "-3 yr", "-2 yr", "-1 yr", "0 yr", "1 yr", "2 yr", "3 yr", "3.824 yr", "4 yr", "5.5 yr"])
 
@@ -60,16 +60,16 @@ def text_plotter(x_data, y_data, labels, text_positions, axis,txt_width,txt_heig
                        zorder=0,length_includes_head=True)
 
 fsize = 16
-fig = plt.figure(figsize=(15,8))
+fig = plt.figure(figsize=(10,8))
 ax = fig.add_subplot(111)
-plt.plot(vxarray, vyarray, zorder=0)
+plt.plot(vxarray, vyarray, zorder=1)
 for i in range(vxarray.size-1):
     veclength = np.sqrt((vxarray[i+1] - vxarray[i])**2 + (vyarray[i+1] - vyarray[i])**2)
-    #plt.arrow((vxarray[i+1] + vxarray[i])/2, (vyarray[i+1] + vyarray[i])/2, (vxarray[i+1] - vxarray[i])/veclength*.0001, (vyarray[i+1] - vyarray[i])/veclength*.0001, shape='full', lw=0, length_includes_head=False, head_width=.2)
-#plt.scatter(vxarray[:], vyarray[:], c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(), zorder=1)
-plt.scatter(vxarray[:], vyarray[:], marker='o', zorder=1)
+    #plt.arrow((vxarray[i+1] + vxarray[i])/2, (vyarray[i+1] + vyarray[i])/2, (vxarray[i+1] - vxarray[i])/veclength*.000001, (vyarray[i+1] - vyarray[i])/veclength*.000001, shape='full', lw=0, length_includes_head=False, head_width=.2)
+plt.scatter(vxarray[:], vyarray[:], c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(), zorder=2)
+#plt.scatter(vxarray[:], vyarray[:], marker='o', zorder=2)
 
-#set the bbox for the text. Increase txt_width for wider text.
+"""#set the bbox for the text. Increase txt_width for wider text.
 txt_height = 0.04*(plt.ylim()[1] - plt.ylim()[0])
 txt_width = 0.02*(plt.xlim()[1] - plt.xlim()[0])
 #Get the corrected text positions, then write the text.
@@ -77,13 +77,13 @@ text_positions = get_text_positions(vxarray, vyarray, txt_width, txt_height)
 text_plotter(vxarray, vyarray, labels, text_positions, ax, txt_width, txt_height)
 
 plt.ylim(0,max(text_positions)+2*txt_height)
-plt.xlim(-0.1,1.1)
+plt.xlim(-0.1,1.1)"""
 
-#ann = []
-#for i in range(labels.size):
-#    ann.append(ax.annotate(labels[i], (vxarray[i], vyarray[i]), weight='bold'))
+ann = []
+for i in range(labels.size):
+    ann.append(ax.annotate(labels[i], (vxarray[i], vyarray[i]+0.1), weight='bold', fontsize=12))
 
-"""mask = np.zeros(fig.canvas.get_width_height(), bool)
+mask = np.zeros(fig.canvas.get_width_height(), bool)
 
 fig.canvas.draw()
 
@@ -98,14 +98,16 @@ for a in ann:
     if np.any(mask[s]):
         a.set_visible(False)
     else:
-        mask[s] = True"""
+        mask[s] = True
 
 
 plt.rcParams.update({'font.size': fsize})
-#cb = plt.colorbar()
-#cb.set_label('Normalized Phase Space Density')
-plt.xlim([-40, 0])
-plt.ylim([-20, 20])
+cb = plt.colorbar()
+cb.set_label('Adjusted Phase Space Density')
+plt.grid(zorder=0)
+ax.set_axisbelow(True)
+#plt.xlim([-30, -21])
+#plt.ylim([0, 10])
 plt.xticks(fontsize=fsize)
 plt.yticks(fontsize=fsize)
 plt.xlabel("$v_x$ at Target in km/s", fontsize=fsize)
