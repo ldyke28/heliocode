@@ -12,7 +12,7 @@ import h5py
 # MODE LIST
 # 2 = plot an individual trajectory traced backward from point of interest
 # 3 = generate phase space diagram
-mode = 3
+mode = 2
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -26,7 +26,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 0*oneyear # time to start backtracing
+finalt = 5.5*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5*10**(10) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
@@ -38,7 +38,7 @@ refdist = 70 # upwind reference distance for backtraced trajectories, in au
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 120 # angle with respect to upwind axis of target point
+theta = 275 # angle with respect to upwind axis of target point
 ibexrad = 1 # radial distance of target point from Sun
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -551,8 +551,8 @@ def Abs_dr_dt(x,t,rp):
 #
 # single trajectory plotting code
 if mode==2:
-    indxic = -32340
-    indyic = 16260
+    indxic = -22037
+    indyic = 311
     indzic = 00
     init = [ibexpos[0], ibexpos[1], ibexpos[2], indxic, indyic, indzic]
     print("Calculating trajectory...")
@@ -857,6 +857,11 @@ if mode==3:
             if np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2) < 10:
                 #print("\n skipped")
                 # skips calculating the trajectory if the initial velocity is within a certain distance in velocity space from the origin
+                farvx = np.append(farvx, [vxstart[i]])
+                farvy = np.append(farvy, [vystart[i]])
+                fart = np.append(fart, [0])
+                # sets the value of the NPSD to 0
+                maxwcolor = np.append(maxwcolor, [0])
                 continue
             thetarad = theta*np.pi/180
             fxea = 50*np.cos(thetarad) # distance of a point far away on the exclusion axis in the x direction
@@ -870,8 +875,12 @@ if mode==3:
                 # 50 km/s from the origin along the axis of exclusion
                 # since the effect of the axis of exclusion only goes one way from the origin
                 #print(initialv)
+                farvx = np.append(farvx, [vxstart[i]])
+                farvy = np.append(farvy, [vystart[i]])
+                fart = np.append(fart, [0])
+                # sets the value of the NPSD to 0
+                maxwcolor = np.append(maxwcolor, [0])
                 continue
-            #print("\n not skipped")
             backtraj[:,:] = odeint(Abs_dr_dt, init, t, args=(lya_abs,))
             btr = np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2)
             if any(btr <= .00465*au):

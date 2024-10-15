@@ -856,7 +856,7 @@ if mode==3:
                         farvy = np.append(farvy, [backtraj[0,4]])
                         fart = np.append(fart, [startt - t[kn-1]])
                         # calculating value of phase space density based on the value at the crossing of x = 100 au
-                        maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
+                        maxwcolor = np.append(maxwcolor, [np.exp(-np.abs(attfact))*np.exp(-((backtraj[kn-1,3]/1000+26)**2 + (backtraj[kn-1,4]/1000)**2 + (backtraj[kn-1,5]/1000)**2)/(10.195)**2)])
                         #maxwcolor = np.append(maxwcolor, [np.exp(-((backtraj[kn-1,3]+26000)**2 + backtraj[kn-1,4]**2 + backtraj[kn-1,5]**2)/(10195)**2)])
                         break
                     break

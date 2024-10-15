@@ -616,6 +616,11 @@ for m in range(nprocs-1):
                     if np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2 + (vzstart[l]/1000)**2) < 10:
                         #print("\n skipped")
                         # skips calculating the trajectory if the initial velocity is within a certain distance in velocity space from the origin
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,0] = vxstartn[i]
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,1] = vystart[j]
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,3] = 0
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = 0
                         continue
                     thetarad = theta*np.pi/180
                     fxea = 50*np.cos(thetarad) # distance of a point far away on the exclusion axis in the x direction
@@ -629,6 +634,11 @@ for m in range(nprocs-1):
                         # 50 km/s from the origin along the axis of exclusion
                         # since the effect of the axis of exclusion only goes one way from the origin
                         #print(initialv)
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,0] = vxstartn[i]
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,1] = vystart[j]
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,3] = 0
+                        data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = 0
                         continue
                     
                     # Code not using try/except to try and retain all points for plotting purposes

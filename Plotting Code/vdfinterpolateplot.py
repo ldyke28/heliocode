@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from matplotlib import ticker
 import matplotlib
 import scipy
+import scipy.interpolate
+import scipy.stats
 
 vx = np.array([])
 vy = np.array([])
@@ -36,6 +38,7 @@ for i in range(f.size):
         # points in Sun are set to -1 - this will not work for integration, so we revert them to 0 here
         f[i] = 0
 
+# finding unique vy values and putting them in an array by their order in the original file
 vyshape = 0
 newvy = np.array([])
 for i in range(vx.size):
