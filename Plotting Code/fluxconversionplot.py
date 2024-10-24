@@ -116,14 +116,15 @@ testvy = np.array([])
 testvz = np.array([])
 testpf = np.array([])
 #testvmag = np.array([10000, 20000, 30000, 40000])
-testvmag = np.arange(37470, 72830, 2000)
+testvmag = np.arange(35000, 45000, 2000)
 #testvmag = np.array([10000])
 
 for i in tqdm(range(testphi.size)):
     for j in range(testtheta.size):
         for k in range(testvmag.size):
-            currentvx = testvmag[k]*np.cos(testphi[i])*np.cos(testtheta[j])
-            currentvy = testvmag[k]*np.sin(testphi[i])*np.cos(testtheta[j])
+            # calculating vx, vy, vz values while shifting the center into the spacecraft frame
+            currentvx = testvmag[k]*np.cos(testphi[i])*np.cos(testtheta[j]) + xshiftfactor
+            currentvy = testvmag[k]*np.sin(testphi[i])*np.cos(testtheta[j]) + yshiftfactor
             currentvz = testvmag[k]*np.sin(testtheta[j])
             testvx = np.append(testvx, currentvx)
             testvy = np.append(testvy, currentvy)
@@ -224,6 +225,7 @@ thetabounds = np.linspace(-np.pi/2, np.pi/2, int(180/ibexvaw+1))
 
 # creating an array to track the PSD value at the center of the cells made by the grid points
 psdtracker = np.zeros((phibounds.size-1, thetabounds.size-1))
+bincounter = np.zeros((phibounds.size-1, thetabounds.size-1))
 
 # finds which cell each velocity point lies in
 for k in tqdm(range(phi.size)):
@@ -234,10 +236,12 @@ for k in tqdm(range(phi.size)):
                 # adding the value of the PSD to the associated value for the cell and exiting the loop
                 #psdtracker[i,j] += particleflux[k]
                 psdtracker[i,j] += testpf[k]
+                bincounter[i,j] += 1
                 checker = True
         if checker == True:
             continue
 
+psdtracker = psdtracker/bincounter
 
 
 fig = plt.figure()
