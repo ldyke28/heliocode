@@ -69,6 +69,11 @@ tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (clos
 tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
 t = np.concatenate((tclose, tfar))
 
+if rank == 0:
+    fname = file.readline().strip()
+
+file.close()
+
 
 datafilename1 = 'VDF3D_HE013Ksw_PRB_Eclip256_R115_001_H_RegAll.h5'
 datafilename2 = 'VDF3D_HE013Ksw_PRB_Eclip256_R115_002_H_RegAll.h5'
@@ -611,6 +616,7 @@ for m in range(nprocs-1):
         for i in range(vxstartn.size): # displays progress bars for both loops to measure progress
             restartfile = open('restart%s' % rank, 'a')
             for j in range(vystart.size):
+                print(str(rank) + ", " + str(vystart[j]))
                 for l in range(vzstart.size):
                     init = [xstart, ystart, zstart, vxstartn[i], vystart[j], vzstart[l]]
                     if np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2 + (vzstart[l]/1000)**2) < 10:
@@ -810,7 +816,6 @@ comm.Reduce(dirlosscount, dirlosscounttotal, op=MPI.SUM, root=0)
 if rank == 0:
     # masking the points in the completed trajectories that are irrelevant
     data = data[~np.all(data == 0, axis=1)]
-    fname = file.readline().strip()
     dfile = open(fname, 'w')
     for i in range(np.size(data, 0)):
         # writing relevant data points to a file
@@ -830,5 +835,4 @@ if rank == 0:
     print('All done!')
 
 comm.Barrier()
-file.close()
 print("Completed.")
