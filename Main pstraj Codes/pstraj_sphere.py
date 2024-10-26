@@ -876,7 +876,7 @@ if mode==3:
                 # since the effect of the axis of exclusion only goes one way from the origin
                 #print(initialv)
                 farvx = np.append(farvx, [vxstart[i]])
-                farvy = np.append(farvy, [vystart[i]])
+                farvy = np.append(farvy, [vystart[j]])
                 fart = np.append(fart, [0])
                 # sets the value of the NPSD to 0
                 maxwcolor = np.append(maxwcolor, [0])

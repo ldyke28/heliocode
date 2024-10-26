@@ -614,7 +614,6 @@ for m in range(nprocs-1):
     if rank == m+1:
         vxstartn = vxstart[bounds[m]:(bounds[m+1]+1)]
         for i in range(vxstartn.size): # displays progress bars for both loops to measure progress
-            restartfile = open('restart%s' % rank, 'a')
             for j in range(vystart.size):
                 print(str(rank) + ", " + str(vystart[j]))
                 for l in range(vzstart.size):
@@ -776,7 +775,9 @@ for m in range(nprocs-1):
                             data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
                             data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,3] = startt - t[kn-1]
                             data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = np.exp(-np.abs(attfact))*initpsd[0]
+                            restartfile = open('restart%s' % rank, 'a')
                             restartfile.write(str(vxstartn[i]/1000) + ',' + str(vystart[j]/1000) + ',' + str(vzstart[l]/1000) + ',' + str(attenval) + '\n')
+                            restartfile.close()
                             break
                             #break
                         if k == (t.size - tclose.size) - 1:
@@ -785,7 +786,7 @@ for m in range(nprocs-1):
                             data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
                             data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,3] = 0
                             data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = 0
-            restartfile.close()           
+                       
                     
         break
 
