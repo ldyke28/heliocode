@@ -64,6 +64,7 @@ vzstart = np.arange(float(file.readline().strip()), float(file.readline().strip(
 
 startt = finalt
 lastt = initialt
+countoffset = 0
 tmid = startt - 200000000 # time at which we switch from high resolution to low resolution - a little more than half of a solar cycle
 tclose = np.arange(startt, tmid, -tstepclose) # high resolution time array (close regime)
 tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime)
@@ -660,7 +661,7 @@ for m in range(nprocs-1):
                         data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = 0
                         continue
                     if all(btr < refdist*au):
-                        # forgoes the following checks if the trajectory never passes through x = 100 au
+                        # forgoes the following checks if the trajectory never passes through x = 70 au
                         dirlosscount[0] += 1
                         data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,0] = vxstartn[i]
                         data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,1] = vystart[j]
@@ -668,10 +669,11 @@ for m in range(nprocs-1):
                         data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,3] = 0
                         data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,4] = 0
                         continue
-                    for k in range(t.size - tclose.size):
-                        if btr[k+tclose.size] >= refdist*au and btr[k-1+tclose.size] <= refdist*au:
+                    for k in range(t.size - countoffset):
+                        if btr[k+countoffset] >= refdist*au and btr[k-1+countoffset] <= refdist*au:
                             # adjusting the indexing to avoid checking in the close regime
-                            kn = k+tclose.size
+                            #kn = k+tclose.size
+                            kn = k+countoffset
                             # radius in paper given to be 14 km/s
                             # only saving initial conditions corresponding to points that lie within this Maxwellian at x = 100 au
                             #if backtraj[k-1,3,(i)*vystart.size + (j)] <= -22000 and backtraj[k-1,3,(i)*vystart.size + (j)] >= -40000 and backtraj[k-1,4,(i)*vystart.size + (j)] <= 14000 and backtraj[k-1,4,(i)*vystart.size + (j)] >= -14000:
@@ -765,7 +767,7 @@ for m in range(nprocs-1):
                             btintegrand = PIrate2/currentvr*(r1/currentrad)**2*(.85*(np.sin(latangle))**2 + (np.cos(latangle))**2) + + cxirate/currentvr*(r1/currentrad)**2
 
                             # calculation of attenuation factor
-                            attfact = scipy.integrate.simps(btintegrand, currentrad)
+                            attfact = scipy.integrate.simpson(btintegrand, x=currentrad)
                             # calculating value of phase space density based on the value at the crossing of x = 100 au
                             attenval = np.exp(-np.abs(attfact))*initpsd[0]
                             
@@ -780,7 +782,7 @@ for m in range(nprocs-1):
                             restartfile.close()
                             break
                             #break
-                        if k == (t.size - tclose.size) - 1:
+                        if k == (t.size + countoffset) - 1:
                             data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,0] = vxstartn[i]
                             data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,1] = vystart[j]
                             data[bounds[m]*vystart.size*vzstart.size + vystart.size*vzstart.size*i + vzstart.size*j + l,2] = vzstart[l]
@@ -790,6 +792,8 @@ for m in range(nprocs-1):
                     
         break
 
+
+print(str(rank) + " here")
 # Forces processes to wait until all have finished before moving on
 comm.Barrier()
 

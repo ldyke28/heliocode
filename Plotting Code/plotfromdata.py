@@ -10,7 +10,7 @@ f = np.array([])
 filenum = 1
 
 #file = open("C:\Users\lucas\Downloads\cosexprp_pi32_1p5e8_indirect_cosexppi.txt", "r")
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_-17pi36_4yrs_direct_cosexp+cxpi_tclose300_r=1au.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper 2/Extra Plots Data/kowlyaabsrp_0p5deg_5yr_wholeextended_newcx+pi_tclose300_r=1au_interpdist.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper Data/cosexpminrp_17pi36_t0_indirect_cosexppi_tclose200_r=1au.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/Downloads/Data Files-20230406T214257Z-001/Data Files/lyaminrp_5pi6_0y_direct_cosexppi_tclose400_1.txt", delimiter=',')
 #file = np.loadtxt("/Users/ldyke/Downloads/drive-download-20221019T183112Z-001/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')
@@ -43,15 +43,15 @@ if filenum == 3:
         vy = np.append(vy, file3[i,1])
         f = np.append(f, file3[i,2])
 
-fig = plt.figure()
-fig.set_figwidth(10)
-fig.set_figheight(6)
+#fig = plt.figure()
+#fig.set_figwidth(10)
+#fig.set_figheight(6)
 
 #for i in range(f.size):
 #    if f[i] < 10**(-11):
 #        f[i] = 0
 
-vdftopsd = True
+vdftopsd = False
 # Parameters (density and temperature) taken from Federico's code
 nH = 0.195 # hydrogen density in num/cm^3
 tempH = 7500 # LISM hydrogen temperature in K
@@ -61,7 +61,7 @@ if vdftopsd:
     f = f*nH*(1/(np.sqrt(np.pi)*vthn))**3 # scaling for normalized PSD values to turn normalized VDF's into PSD's
 
 fsize = 18
-#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', vmin=0, vmax=0.5221685831603383)
+"""#plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', vmin=0, vmax=0.5221685831603383)
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', vmin=0, vmax=0.0020312330211150137)
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow')
 #plt.scatter(vx[:], vy[:], c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-50), vmax=10**(-6)))
@@ -85,7 +85,7 @@ plt.ylabel("$v_y$ at Target in km/s", fontsize=fsize)
 #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
 #plt.title('Target at (' + str(round(ibexpos[0]/au, 3)) + ' au, ' + str(round(ibexpos[1]/au, 3)) + ' au), Time Resolution Close to Target = ' + str(tstepclose) + ' s')
 #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
-plt.show()
+plt.show()"""
 
 
 
@@ -211,7 +211,8 @@ f2 = plt.figure()
 f2.set_figwidth(10)
 f2.set_figheight(6)
 #plt.scatter(vxunshifted[:]/1000, vyunshifted[:]/1000, c=maxwcolorus[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
-plt.scatter(vx[:]/1000, vy[:]/1000, c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
+#plt.scatter(vx[:]/1000, vy[:]/1000, c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
+plt.scatter(vx[:]/1000, vy[:]/1000, c=f[:], marker='o', cmap='rainbow')
 plt.plot(samplevxs, viewangle1(samplevxs), c='k')
 plt.plot(samplevxs, viewangle2(samplevxs), c='k')
 for i in range(esas.size):
