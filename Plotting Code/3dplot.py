@@ -6,7 +6,7 @@ from tqdm import tqdm
 ThreeD = True
 # Loading in the file to be unpacked
 #file = np.loadtxt("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/pi_t0.txt", delimiter=',')
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/2pi3_t0_lya_Federicodist_updatedmu.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/-17pi36_1yr_lya_Federicodist_updatedmu_higherres.txt", delimiter=',')
 #file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/GitHub/heliocode/supplementaldata1.txt", delimiter=',')
 
 #file = file[np.any(file > 1, axis=1)]
@@ -47,6 +47,11 @@ if ThreeD == True:
     #vz = vz[~(vz == 0)]
     #f = f[~(f == 0)]
 
+    vx = vxinit
+    vy = vyinit
+    vz = vzinit
+    f = finit
+
     fig3d = plt.figure()
     fig3d.set_figwidth(10)
     fig3d.set_figheight(7)
@@ -54,7 +59,7 @@ if ThreeD == True:
     #scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='rainbow', s=.02, vmin=(.75-.243/np.e), vmax=(.75+.243*np.e))
     #scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='rainbow', s=.001, alpha=.15)
     #scatterplot = ax3d.scatter3D(vx[:], vy[:], vz[:], c=f[:], cmap='rainbow', s=.001)
-    scatterplot = ax3d.scatter3D(vxinit[:], vyinit[:], vzinit[:], c=finit[:], cmap='rainbow', s=.04, norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
+    scatterplot = ax3d.scatter3D(vxinit[:], vyinit[:], vzinit[:], c=finit[:], cmap='rainbow', s=.5, norm=matplotlib.colors.LogNorm(vmin=10**(-11)))
     cb = fig3d.colorbar(scatterplot)
     ax3d.set_xlabel("$v_x$ at Target Point (km/s)")
     ax3d.set_ylabel("$v_y$ at Target Point (km/s)")

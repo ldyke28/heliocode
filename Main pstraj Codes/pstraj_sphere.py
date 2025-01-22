@@ -26,7 +26,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 3.824*oneyear # time to start backtracing
+finalt = -3*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5*10**(10) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
@@ -1032,7 +1032,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_0p5deg_3p824yr_wholeextended_newcx+pi_tclose300_r=1au_interpdist_ex.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/kowlyaabsrp_0p5deg_-3yr_wholeextended_newcx+pi_tclose300_r=1au_interpdist_ex.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value

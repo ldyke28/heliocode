@@ -27,7 +27,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = -4*oneyear # time to start backtracing
+finalt = 0*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5*10**(10) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
@@ -39,7 +39,7 @@ refdist = 70 # upwind reference distance for backtraced trajectories, in au
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 0.5 # angle with respect to upwind axis of target point
+theta = 275 # angle with respect to upwind axis of target point
 ibexrad = 1 # radial distance of target point from Sun
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -157,16 +157,24 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
 
 
 # Filter requirements.
-order = 6
-fs = .000002       # sample rate, Hz
-#fs = 1/(86400)
+order = 5
+#fs = .000002       # sample rate, Hz
+fs = 1/(86400)
 cutoff = 1/(1.577*10**8)  # desired cutoff frequency of the filter, Hz
+offset = np.mean(irradiance[0:10])
 
-filteredia = butter_lowpass_filter(irradiance, cutoff, fs, order)
+irradianceoffset = irradiance - offset
+
+filterediaoffset = butter_lowpass_filter(irradianceoffset, cutoff, fs, order)
+
+filteredia = filterediaoffset + offset
 
 tgrid = np.meshgrid(secondsnew, indexing='ij') # order will be z, y, x for this
 
-irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds], values=filteredia)
+fifthorderoffset = 2.5*oneyear
+firstorderoffset = .5*oneyear
+
+irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-fifthorderoffset], values=filteredia)
 
 
 #
@@ -733,7 +741,7 @@ if mode==3:
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
             #print("\n" + str(np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2)))
-            if np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2) < 5:
+            if np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2) < 10:
                 #print("\n skipped")
                 # skips calculating the trajectory if the initial velocity is within a certain distance in velocity space from the origin
                 farvx = np.append(farvx, [vxstart[i]])
@@ -748,7 +756,7 @@ if mode==3:
             origin = np.array([0,0,0])
             fea = np.array([fxea, fyea, 0])
             initialv = np.array([vxstart[i]/1000, vystart[j]/1000, vzstart/1000])
-            if np.linalg.norm(np.cross(fea-origin, origin-initialv))/np.linalg.norm(fea-origin) < 5 and np.abs(np.linalg.norm(fea-initialv)) < 50:
+            if np.linalg.norm(np.cross(fea-origin, origin-initialv))/np.linalg.norm(fea-origin) < 10 and np.abs(np.linalg.norm(fea-initialv)) < 50:
                 # skips calculating the trajectory if it is too close to the axis of exclusion
                 # checks distance to axis of exclusion, then checks if point is within 50 km/s of
                 # 50 km/s from the origin along the axis of exclusion
@@ -911,7 +919,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/filterfulltdrp_0p5deg_-4yr_whole_newcx+pi_tclose300_r=1au_interpdist.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/5thoffsetfilterfulltdrp_-17pi36_0yr_whole_newcx+pi_tclose300_r=1au_interpdist.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value

@@ -10,7 +10,7 @@ f = np.array([])
 filenum = 1
 
 #file = open("C:\Users\lucas\Downloads\cosexprp_pi32_1p5e8_indirect_cosexppi.txt", "r")
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper 2/Extra Plots Data/kowlyaabsrp_0p5deg_5yr_wholeextended_newcx+pi_tclose300_r=1au_interpdist.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/filterfulltdrp_0p5deg_-4yr_whole_newcx+pi_tclose300_r=1au_interpdist.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Paper Data/cosexpminrp_17pi36_t0_indirect_cosexppi_tclose200_r=1au.txt", delimiter=',')
 #file = np.loadtxt("C:/Users/lucas/Downloads/Data Files-20230406T214257Z-001/Data Files/lyaminrp_5pi6_0y_direct_cosexppi_tclose400_1.txt", delimiter=',')
 #file = np.loadtxt("/Users/ldyke/Downloads/drive-download-20221019T183112Z-001/cosexprp_pi32_1p5e8_indirect_cosexppi.txt", delimiter=',')

@@ -78,14 +78,33 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
 
 
 # Filter requirements.
-order = 6
-fs = .000002       # sample rate, Hz
-#fs = 1/(86400)
+order = 1
+#fs = .000002       # sample rate, Hz
+fs = 1/(86400)
 cutoff = 1/(1.577*10**8)  # desired cutoff frequency of the filter, Hz
+offset = np.mean(irradiance[0:10])
 
-filteredia = butter_lowpass_filter(irradiance, cutoff, fs, order)
+irradianceoffset = irradiance - offset
 
-plt.plot(seconds*secondstoyears, irradiance*wm2toph, alpha = 0.5)
-plt.plot(seconds*secondstoyears, filteredia*wm2toph, alpha=0.5)
-plt.ylim([3*10**(11),7.25*10**(11)])
+filterediaoffset = butter_lowpass_filter(irradianceoffset, cutoff, fs, order)
+
+filterediaoffset2 = butter_lowpass_filter(irradianceoffset, cutoff, fs, 5)
+
+filteredia = filterediaoffset + offset
+filteredia2 = filterediaoffset2 + offset
+
+
+
+plt.plot(seconds*secondstoyears-0.5, filteredia*wm2toph/(10**(11)), alpha = 0.7,color='b')
+plt.plot(seconds*secondstoyears - 2.5, filteredia2*wm2toph/(10**(11)), alpha=0.7, color='r')
+#plt.plot(seconds*secondstoyears, filteredia2*wm2toph, alpha=0.5)
+#plt.ylim([3*10**(11),7.25*10**(11)])
+plt.xlabel("Time (yrs)")
+plt.ylabel("10$^{11}$ Irradiance (ph cm$^{-2}$ s$^{-1}$)")
 plt.show()
+
+pspec, frequencies = plt.psd(irradiance, 256, fs)
+plt.show()
+
+powerintegral = scipy.integrate.simps(pspec, frequencies)
+print("Total integrated power spectrum gives: " + str(powerintegral))

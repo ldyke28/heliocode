@@ -5,7 +5,9 @@ import scipy
 from tqdm import tqdm
 import scipy.interpolate
 
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/maxwellian3d_testdata.txt", delimiter=',')
+#file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/maxwellian3d_testdata.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/-17pi36_5p5yr_lya_Federicodist_updatedmu_2000vres.txt", delimiter=',')
+#filelost = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/lostpoints_-17pi36_t0_lya_Federicodist_updatedmu_higherres.txt", delimiter=',')
 
 nH = 0.195 # hydrogen density in num/cm^3
 tempH = 7500 # LISM hydrogen temperature in K
@@ -30,14 +32,16 @@ yshiftfactor = -vsc*np.sin(thetarad + np.pi/2)
 vxstore = np.array([])
 vystore = np.array([])
 vzstore = np.array([])
-#fstore = np.array([])
+fstore = np.array([])
 particleflux = np.array([])
+
 
 for i in range(np.shape(file)[0]):
     vxstore = np.append(vxstore, file[i,0]*1000)
     vystore = np.append(vystore, file[i,1]*1000)
     vzstore = np.append(vzstore, file[i,2]*1000)
-    particleflux = np.append(particleflux, file[i,3])
+    #particleflux = np.append(particleflux, file[i,3])
+    fstore = np.append(fstore, file[i,3])
 
 vxkms = vxstore/1000
 vykms = vystore/1000
@@ -59,7 +63,7 @@ vyshift = vystore + yshiftfactor
 
 vsquaredshift =  vxshift**2 + vyshift**2 
 
-#particleflux = (vsquaredshift/1000)/(mH*6.242*10**(16)) * fstore # calculating particle flux at the device (https://link.springer.com/chapter/10.1007/978-3-030-82167-8_3 chapter 3.3)
+particleflux = (vsquaredshift/1000)/(mH*6.242*10**(16)) * fstore # calculating particle flux at the device (https://link.springer.com/chapter/10.1007/978-3-030-82167-8_3 chapter 3.3)
 # converting to cm^-2 s^-1 ster^-1 keV^-1
 
 # finding unique vz values and ordering them as they are in the original file
@@ -106,7 +110,7 @@ vxgrid, vygrid, vzgrid = np.meshgrid(newvx, newvy, newvz, indexing='ij')
 # interpolating the values of the PSD/VDF on the grid from the simulation
 interpvdf = scipy.interpolate.RegularGridInterpolator((newvx, newvy, newvz), pfreshape, bounds_error=False, fill_value=None)
 
-print(interpvdf([-31000,-4000, 5000]))
+#print(interpvdf([-31000,-4000, 5000]))
 
 testphi = np.linspace(0, 2*np.pi, 200)
 testtheta = np.linspace(-np.pi/2, np.pi/2, 100)
@@ -116,7 +120,7 @@ testvy = np.array([])
 testvz = np.array([])
 testpf = np.array([])
 #testvmag = np.array([10000, 20000, 30000, 40000])
-testvmag = np.arange(35000, 45000, 2000)
+testvmag = np.arange(000, 60000, 2000)
 #testvmag = np.array([10000])
 
 for i in tqdm(range(testphi.size)):
@@ -241,6 +245,7 @@ for k in tqdm(range(phi.size)):
         if checker == True:
             continue
 
+# dividing the total summed PSD in each bin by the number of points in that bin
 psdtracker = psdtracker/bincounter
 
 
@@ -258,7 +263,7 @@ Lon,Lat = np.meshgrid(adjphib,adjthetab)
 
 psdtracker = np.transpose(psdtracker) # transposing the PSD value array to work with the grid
 
-im = ax.pcolormesh(Lon,Lat,psdtracker, cmap='rainbow', norm=matplotlib.colors.LogNorm())
+im = ax.pcolormesh(Lon,Lat,psdtracker, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(4)))
 #im = ax.scatter(phi,theta,c=fstore, cmap='rainbow')
 #plt.scatter(phi, theta, c=fstore, cmap='rainbow', s=.01)
 #plt.xlabel("$\phi$")
