@@ -15,6 +15,11 @@ from scipy.signal import butter, lfilter, freqz
 # 3 = generate phase space diagram
 mode = 3
 
+
+
+
+# RELEVANT (FIXED) VARIABLES THROUGHOUT THE CODE
+#####################################################################################################################################
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
 msolar = 1.98847*10**30 # mass of the sun in kg
@@ -34,13 +39,29 @@ tstep = 10000 # general time resolution
 tstepclose = 300 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
-refdist = 70 # upwind reference distance for backtraced trajectories, in au
+refdist = 70 # reference distance for backtraced trajectories, in au
+
+theta = 275 # angle with respect to upwind axis of target point in degrees
+ibexrad = 1 # radial distance of target point from Sun
+
+vsolarwindms = 400000 # solar wind speed in m/s
+vsolarwindcms = vsolarwindms*100 # solar wind speed in cm/s
+nsw1au = 5 # solar wind density at 1 au in cm^-3
+
+r1 = 1*au # reference radius for ionization integration
+
+noncalcextent = 15 # radius in km/s around the axis of exclusion where we don't want to calculate trajectories (to save computational time)
+
+#####################################################################################################################################
+# ESTABLISHING INITIAL CONDITIONS FOR THE CODE
+#####################################################################################################################################
+
+
+
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 275 # angle with respect to upwind axis of target point
-ibexrad = 1 # radial distance of target point from Sun
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
 ibexpos = np.array([ibexx*au, ibexy*au, 0])
@@ -109,6 +130,9 @@ if mode==3:
 #
 #
 
+# FILTERING AND INTERPOLATING THE LASP IRRADIANCE DATA TO USE FOR THE RADIATION PRESSURE FORCE
+#####################################################################################################################################
+
 irradfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Time Dependent Irradiance Data/complya.csv", delimiter=',')
 
 day = irradfile[:,0]
@@ -176,6 +200,7 @@ firstorderoffset = .5*oneyear
 
 irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-fifthorderoffset], values=filteredia)
 
+#####################################################################################################################################
 
 #
 #
@@ -197,14 +222,9 @@ irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-fif
 #
 #
 #
-#datafilename1 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_001_H_RegAll.h5'
-#datafilename2 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_002_H_RegAll.h5'
-#datafilename3 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_003_H_RegAll.h5'
-#datafilename4 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_004_H_RegAll.h5'
-#datafilename5 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_005_H_RegAll.h5'
-#datafilename6 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_006_H_RegAll.h5'
-#datafilename7 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_007_H_RegAll.h5'
-#datafilename8 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_008_H_RegAll.h5'
+
+# IMPORTING AND INTERPOLATING BOUNDARY DISTRIBUTIONS FROM THE UAH GROUP'S FRAMEWORK
+#####################################################################################################################################
 
 datafilename1 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_001_H_RegAll.h5'
 datafilename2 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_002_H_RegAll.h5'
@@ -283,28 +303,31 @@ interp6 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf6)
 interp7 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf7)
 interp8 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf8)
 
+#####################################################################################################################################
 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
 
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
+# DEFINING FUNCTIONS TO HANDLE THE RADIATION PRESSURE FORCE AND TO INPUT TO THE odeint FUNCTION
+#####################################################################################################################################
 
 def lya_abs_update(t,x,y,z,vr):
     # taken from eq. 8 in https://articles.adsabs.harvard.edu/pdf/1995A%26A...296..248R
@@ -417,6 +440,9 @@ def Abs_dr_dt(x,t,rp):
     dx4 = (msolar*G/(r**3))*(sunpos[1]-x[1])*(1-radp)
     dx5 = (msolar*G/(r**3))*(sunpos[2]-x[2])*(1-radp)
     return [dx0, dx1, dx2, dx3, dx4, dx5]
+
+#####################################################################################################################################
+
 #
 #
 #
@@ -741,7 +767,7 @@ if mode==3:
             init = [xstart, ystart, zstart, vxstart[i], vystart[j], vzstart]
             # calculating trajectories for each initial condition in phase space given
             #print("\n" + str(np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2)))
-            if np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2) < 10:
+            if np.sqrt((vxstart[i]/1000)**2 + (vystart[j]/1000)**2) < noncalcextent:
                 #print("\n skipped")
                 # skips calculating the trajectory if the initial velocity is within a certain distance in velocity space from the origin
                 farvx = np.append(farvx, [vxstart[i]])
@@ -756,7 +782,7 @@ if mode==3:
             origin = np.array([0,0,0])
             fea = np.array([fxea, fyea, 0])
             initialv = np.array([vxstart[i]/1000, vystart[j]/1000, vzstart/1000])
-            if np.linalg.norm(np.cross(fea-origin, origin-initialv))/np.linalg.norm(fea-origin) < 10 and np.abs(np.linalg.norm(fea-initialv)) < 50:
+            if np.linalg.norm(np.cross(fea-origin, origin-initialv))/np.linalg.norm(fea-origin) < noncalcextent and np.abs(np.linalg.norm(fea-initialv)) < 50:
                 # skips calculating the trajectory if it is too close to the axis of exclusion
                 # checks distance to axis of exclusion, then checks if point is within 50 km/s of
                 # 50 km/s from the origin along the axis of exclusion
@@ -830,11 +856,6 @@ if mode==3:
                         anglepct = (endlongangle - 315)/45
                         initpsd = interp8(endvelcoords)*(1 - anglepct) + interp1(endvelcoords)*anglepct
 
-                    vsolarwindms = 400000 # solar wind speed in m/s
-                    vsolarwindcms = vsolarwindms*100 # solar wind speed in cm/s
-                    nsw1au = 5 # solar wind density at 1 au in cm^-3
-
-                    r1 = 1*au # reference radius
                     # radial distance to the Sun at all points throughout the trajectory
                     currentrad = np.sqrt((sunpos[0]-backtraj[0:kn+1,0])**2 + (sunpos[1]-backtraj[0:kn+1,1])**2 + (sunpos[2]-backtraj[0:kn+1,2])**2)
 
@@ -918,8 +939,10 @@ if mode==3:
 print('Finished')
 
 if mode==3:
+    # DATA WRITING AND PLOTTING CODE
+
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/5thoffsetfilterfulltdrp_-17pi36_0yr_whole_newcx+pi_tclose300_r=1au_interpdist.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/1stoffsetfilterfulltdrp_-17pi36_0yr_whole_newcx+pi_tclose300_r=1au_interpdist.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value
@@ -950,106 +973,6 @@ if mode==3:
     #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
     #plt.title('Target at (' + str(round(ibexpos[0]/au, 3)) + ' au, ' + str(round(ibexpos[1]/au, 3)) + ' au), Time Resolution Close to Target = ' + str(tstepclose) + ' s')
     #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
-    plt.show()
-    
-
-    # plotting a contour whose levels are values of the phase space density
-    """f = plt.figure()
-    f.set_figwidth(9)
-    f.set_figheight(6)
-    levels = [.001, .01, .1, .2, .3, .4, .5, .6, .7, .8, .9, .95, .98, 1.0]
-    plt.tricontour(farvx[:]/1000, farvy[:]/1000, maxwcolor[:], levels)
-    cb = plt.colorbar()
-    cb.set_label('f(r,v,t)')
-    plt.xlabel("vx at Target in km/s")
-    plt.ylabel("vy at Target in km/s")
-    #plt.suptitle('Phase Space population at x = 100 au reaching initial position at t = 5700000000 s')
-    plt.suptitle('Phase space population at target (t = 6.246e9 s) drawn from Maxwellian at 100 au centered on vx = -26 km/s')
-    #plt.title('Target (-.97au, .2au): vx range -51500 m/s to -30500 m/s, vy range -30000 m/s to 30000 m/s')
-    plt.title('Target at (.707 au, .707 au)')
-    #plt.title('Initial test distribution centered on vx = -41.5 km/s, vy = -1.4 km/s')
-    plt.show()"""
-
-
-    # section of code to calculate which trajectories could be observed by spacecraft - considers velocity shifts and viewing angle
-    vahw = 3.5 # half width of the total viewing angle width of the explorer probe in 2D
-    vahwr = vahw*np.pi/180 # same width expressed in radians
-    vsc = 30000 # velocity of spacecraft in m/s
-    vxshifted = np.array([]) # initializing arrays to store values
-    vyshifted = np.array([])
-    vxunshifted = np.array([])
-    vyunshifted = np.array([])
-    trackvangle = np.array([])
-    maxwcolorus = np.array([])
-    vsqshifted = np.array([])
-    thetarad = theta*np.pi/180 # expressing the value of theta in radians
-    # calculating the shift of the particle velocities into the spacecraft frame
-    vxshift = farvx - vsc*np.cos(thetarad - np.pi/2)
-    vyshift = farvy - vsc*np.sin(thetarad - np.pi/2)
-    vshifttotal = np.sqrt(vxshift**2 + vyshift**2)
-    vsquaredtotal = vxshift**2 + vyshift**2 # calculating total energies (v^2) associated with each trajectory in spacecraft frame
-    vangle = np.arccos(vxshift/vshifttotal) # calculating the new angle in which the velocity vector points for each trajectory
-    for i in range(farvx.size):
-        if vyshift[i] < 0:
-            # accounting for angles below the x axis, which will have a cosine equal to the ones mirrored across the x axis
-            vangle[i] = 2*np.pi - vangle[i]
-        if (thetarad + np.pi/2 - vahwr) < vangle[i] and (thetarad + np.pi/2 + vahwr) > vangle[i]:
-            # appending values to the list of observable velocity shifted trajectories
-            vxshifted = np.append(vxshifted, vxshift[i])
-            vyshifted = np.append(vyshifted, vyshift[i])
-            vxunshifted = np.append(vxunshifted, farvx[i])
-            vyunshifted = np.append(vyunshifted, farvy[i])
-            trackvangle = np.append(trackvangle, vangle[i])
-            maxwcolorus = np.append(maxwcolorus, maxwcolor[i])
-            vsqshifted = np.append(vsqshifted, vsquaredtotal[i])
-
-    
-    # plotting this set of trajectories
-    f2 = plt.figure()
-    f2.set_figwidth(10)
-    f2.set_figheight(6)
-    plt.scatter(vxunshifted[:]/1000, vyunshifted[:]/1000, c=maxwcolorus[:], marker='o', cmap='rainbow')
-    plt.rcParams.update({'font.size': fsize})
-    cb = plt.colorbar()
-    cb.set_label('Normalized Phase Space Density')
-    #plt.xlim([-25, 25])
-    #plt.ylim([-25, 25])
-    plt.xticks(fontsize=fsize)
-    plt.yticks(fontsize=fsize)
-    plt.xlabel("$v_x$ at Target in km/s", fontsize=fsize)
-    plt.ylabel("$v_y$ at Target in km/s", fontsize=fsize)
-    plt.show()
-
-    # calculating the actual kinetic energy of each trajectory at the target point in eV
-    totalke = .5 * (mH) * vsqshifted * 6.242*10**(18)
-
-    # plotting counts of energies for each observable trajectory
-    fig = plt.figure()
-    fig.set_figwidth(8)
-    fig.set_figheight(5)
-    # counts are weighted by value of the normalized phase space density
-    plt.hist(totalke, bins=100, weights=maxwcolorus)
-    plt.xlabel("Particle Energy at Target Point in eV")
-    plt.ylabel("Weighted Counts")
-    plt.show()
-
-
-    erangehigh = 10 # establishing boundaries for acceptable energies of particles in eV so we can probe specific energy regions
-    erangelow = 1
-    keselection = np.array([])
-    maxwcolorselect = np.array([])
-    vangleselect = np.array([])
-    for i in range(totalke.size):
-        if erangelow < totalke[i] < erangehigh:
-            # preserving trajectories in the appropriate energy region
-            keselection = np.append(keselection, totalke[i])
-            maxwcolorselect = np.append(maxwcolorselect, maxwcolorus[i])
-            vangleselect = np.append(vangleselect, trackvangle[i])
-    # plotting trajectories in said energy range as a set of points on the unit circle according to where
-    # the spacecraft sees they come from
-    plt.scatter(-np.cos(vangleselect), -np.sin(vangleselect), c=maxwcolorselect, marker='o', cmap='rainbow', s=3, alpha=.5)
-    plt.xlim([-1.1,1.1])
-    plt.ylim([-1.1,1.1])
     plt.show()
 
     overallvrmax = max(vrmax)

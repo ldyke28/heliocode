@@ -17,9 +17,9 @@ rank = comm.Get_rank() # obtaining the rank of each node to split the workload l
 warnings.filterwarnings("error", category=Warning)
 
 # Opening the file to read in the input data
-file = open("3Dinputfile.txt", "r")
+file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Cluster Run Supplements/3Dinputfile.txt", "r")
 
-#####################################################################################################################################
+
 # RELEVANT (FIXED) VARIABLES THROUGHOUT THE CODE
 #####################################################################################################################################
 # Value for 1 au (astronomical unit) in meters
@@ -99,7 +99,7 @@ file.close()
 #####################################################################################################################################
 
 
-irradfile = np.loadtxt("complya.csv", delimiter=',')
+irradfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Time Dependent Irradiance Data/complya.csv", delimiter=',')
 
 day = irradfile[:,0]
 irradiance = irradfile[:,1]
@@ -170,14 +170,14 @@ irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-fir
 # IMPORTING AND INTERPOLATING BOUNDARY DISTRIBUTIONS FROM THE UAH GROUP'S FRAMEWORK
 #####################################################################################################################################
 
-datafilename1 = 'VDF3D_HE013Ksw_PRB_Eclip256_R070_001_H_RegAll.h5'
-datafilename2 = 'VDF3D_HE013Ksw_PRB_Eclip256_R070_002_H_RegAll.h5'
-datafilename3 = 'VDF3D_HE013Ksw_PRB_Eclip256_R070_003_H_RegAll.h5'
-datafilename4 = 'VDF3D_HE013Ksw_PRB_Eclip256_R070_004_H_RegAll.h5'
-datafilename5 = 'VDF3D_HE013Ksw_PRB_Eclip256_R070_005_H_RegAll.h5'
-datafilename6 = 'VDF3D_HE013Ksw_PRB_Eclip256_R070_006_H_RegAll.h5'
-datafilename7 = 'VDF3D_HE013Ksw_PRB_Eclip256_R070_007_H_RegAll.h5'
-datafilename8 = 'VDF3D_HE013Ksw_PRB_Eclip256_R070_008_H_RegAll.h5'
+datafilename1 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_001_H_RegAll.h5'
+datafilename2 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_002_H_RegAll.h5'
+datafilename3 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_003_H_RegAll.h5'
+datafilename4 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_004_H_RegAll.h5'
+datafilename5 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_005_H_RegAll.h5'
+datafilename6 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_006_H_RegAll.h5'
+datafilename7 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_007_H_RegAll.h5'
+datafilename8 = 'C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R070_008_H_RegAll.h5'
 
 
 with h5py.File(datafilename1, "r") as f:
@@ -491,7 +491,7 @@ def lya_abs(t,x,y,z,vr):
         else:
             ttemp = ttemp + 1.392*10**(9)
     tdependence = irradianceinterp([ttemp])[0]*latdep/Itotavg
-    #print(irradianceinterp([ttemp]))
+    print(irradianceinterp([ttemp]))
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
     # scalefactor should match divisor in first term of addfactor
     scalefactor = .333
@@ -514,7 +514,7 @@ def lya_abs(t,x,y,z,vr):
     F_K = A_K * np.power(1 + np.square((vr/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
 
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
-    #print(scalefactor*(F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval))
+    print(scalefactor*(F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval))
     return scalefactor*(F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval)
 
 
@@ -605,7 +605,6 @@ for m in range(nprocs-1):
                 print(str(rank) + ", " + str(vystart[j]) + ", " + str(time.time() - start))
                 for l in range(vzstart.size):
                     init = [xstart, ystart, zstart, vxstartn[i], vystart[j], vzstart[l]]
-                    #print(init)
                     try:
                         # Main code in try block
                         # If an ODEintWarning is raised, point will be set aside for testing later on
@@ -642,7 +641,6 @@ for m in range(nprocs-1):
                         # Code not using try/except to try and retain all points for plotting purposes
                         # calculating trajectories for each initial condition in phase space given
                         init = [xstart, ystart, zstart, vxstartn[i], vystart[j], vzstart[l]]
-                        #print(init)
                         backtraj = odeint(Var_dr_dt, init, t, args=(lya_abs,))
                         btr = np.sqrt((backtraj[:,0]-sunpos[0])**2 + (backtraj[:,1]-sunpos[1])**2 + (backtraj[:,2]-sunpos[2])**2)
                         if any(btr <= .00465*au):
@@ -756,7 +754,7 @@ for m in range(nprocs-1):
                                 btintegrand = PIrate2/currentvr*(r1/currentrad)**2*(.85*(np.sin(latangle))**2 + (np.cos(latangle))**2) + + cxirate/currentvr*(r1/currentrad)**2
 
                                 # calculation of attenuation factor
-                                attfact = scipy.integrate.simpson(btintegrand, x=currentrad)
+                                attfact = scipy.integrate.simps(btintegrand, x=currentrad)
                                 # calculating value of phase space density based on the value at the crossing of x = 100 au
                                 attenval = np.exp(-np.abs(attfact))*initpsd[0]
                                 

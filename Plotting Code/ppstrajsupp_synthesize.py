@@ -5,9 +5,42 @@ import scipy
 from tqdm import tqdm
 import scipy.interpolate
 
-#file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/maxwellian3d_testdata.txt", delimiter=',')
 file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/-17pi36_0yr_lya_Federicodist_datamu_2000vres.txt", delimiter=',')
-#filelost = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/lostpoints_-17pi36_t0_lya_Federicodist_updatedmu_higherres.txt", delimiter=',')
+suppfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/lostpoints_-17pi36_0yr_lya_Federicodist_datamu_2000vres_revised.txt", delimiter=',')
+
+vx1 = np.array([])
+vy1 = np.array([])
+vz1 = np.array([])
+f1 = np.array([])
+vx2 = np.array([])
+vy2 = np.array([])
+vz2 = np.array([])
+f2 = np.array([])
+
+for i in range(np.shape(file)[0]):
+    vx1 = np.append(vx1, file[i,0])
+    vy1 = np.append(vy1, file[i,1])
+    vz1 = np.append(vz1, file[i,2])
+    f1 = np.append(f1, file[i,3])
+
+for i in range(np.shape(suppfile)[0]):
+    vx2 = np.append(vx2, suppfile[i,0])
+    vy2 = np.append(vy2, suppfile[i,1])
+    vz2 = np.append(vz2, suppfile[i,2])
+    f2 = np.append(f2, suppfile[i,3])
+
+# lost points need to be added back after having been re-run
+# this part of the code overwrites any 0 values assigned to lost points in the original file
+for i in range(vx2.size):
+    for j in range(vx1.size):
+        if vx1[j] == vx2[i] and vy1[j] == vy2[i] and vz1[j] == vz2[i]:
+            f1[j] = f2[i]
+
+for i in range(f1.size):
+    if f1[i] == -1:
+        # points in Sun are set to -1 - this will not work for integration/interpolation, so we revert them to 0 here
+        f1[i] = 0
+
 
 #############################################################################################################
 # RELEVANT VARIABLES/PARAMETERS
@@ -16,24 +49,25 @@ file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluste
 nH = 0.195 # hydrogen density in num/cm^3
 tempH = 7500 # LISM hydrogen temperature in K
 mH = 1.6736*10**(-27) # mass of hydrogen in kg
-vthn = np.sqrt(2*1.381*10**(-29)*tempH/mH)
+vthn = np.sqrt(2*1.381*10**(-29)*tempH/mH) # thermal velocity of LISM H
 
-theta = 275
+theta = 275 # angle with respect to the upwind axis of the target point
 vsc = 30000 # velocity of spacecraft in m/s
 thetarad = theta*np.pi/180 # expressing the value of theta in radians
 # calculating the shift of the particle velocities into the spacecraft frame
 xshiftfactor = -vsc*np.cos(thetarad + np.pi/2)
 yshiftfactor = -vsc*np.sin(thetarad + np.pi/2)
 
-# defining the bin width in degrees and radians
+# defining the spacecraft bin width in degrees and radians
 ibexvaw = 6
 ibexvawr = ibexvaw*np.pi/180
 
 # set of velocity magnitudes to make shells of points
-testvmag = np.arange(000, 60000, 2000)
+testvmag = np.arange(000, 90000, 2000)
 
 #############################################################################################################
 
+# initializing arrays to store velocity component/PSD/differential flux values
 vxstore = np.array([])
 vystore = np.array([])
 vzstore = np.array([])
@@ -41,38 +75,25 @@ fstore = np.array([])
 particleflux = np.array([])
 
 
-for i in range(np.shape(file)[0]):
-    vxstore = np.append(vxstore, file[i,0]*1000)
-    vystore = np.append(vystore, file[i,1]*1000)
-    vzstore = np.append(vzstore, file[i,2]*1000)
+for i in range(vx1.size):
+    # adding the values from the files to arrays
+    vxstore = np.append(vxstore, vx1[i]*1000)
+    vystore = np.append(vystore, vy1[i]*1000)
+    vzstore = np.append(vzstore, vz1[i]*1000)
     #particleflux = np.append(particleflux, file[i,3])
-    fstore = np.append(fstore, file[i,3])
+    fstore = np.append(fstore, f1[i])
 
-for i in range(fstore.size):
-    if fstore[i] == -1:
-        # points in Sun are set to -1 - this will not work for integration, so we revert them to 0 here
-        fstore[i] = 0
-
-
+# storing the velocity values in km/s
 vxkms = vxstore/1000
 vykms = vystore/1000
 vzkms = vzstore/1000
-
-"""for i in tqdm(range(vxarray.size)):
-    for j in tqdm(range(vyarray.size)):
-        for k in range(vzarray.size):
-            vxstore = np.append(vxstore, [vxarray[i]])
-            vystore = np.append(vystore, [vyarray[j]])
-            vzstore = np.append(vzstore, [vzarray[k]])
-            # calculating PSD values based on a Maxwellian centered on the ISM flow speed
-            fstore = np.append(fstore, nH*(1/(np.sqrt(np.pi)*vthn))**3*np.exp(-((vxkms[i]+26)**2 + (vykms[j])**2 + (vzkms[k])**2)/(10.195)**2))
-            #fstore = np.append(fstore, [np.exp(-((vxkms[i]+26)**2 + (vykms[j])**2 + (vzkms[k])**2)/((10.195)**2))])"""
 
 # shifting the velocities to calculate flux in the spacecraft frame
 vxshift = vxstore + xshiftfactor
 vyshift = vystore + yshiftfactor
 
-vsquaredshift =  vxshift**2 + vyshift**2 
+# calculating the velocity squared of the particles after the shift into spacecraft frame
+vsquaredshift =  vxshift**2 + vyshift**2 + vzstore**2
 
 particleflux = (vsquaredshift/1000)/(mH*6.242*10**(16)) * fstore # calculating particle flux at the device (https://link.springer.com/chapter/10.1007/978-3-030-82167-8_3 chapter 3.3)
 # converting to cm^-2 s^-1 ster^-1 keV^-1
@@ -86,9 +107,6 @@ for i in range(vxstore.size):
         vzshape = i+1
         break
 
-#print(newvz)
-#print(vzshape)
-
 # same with vy
 vyshape = 0
 newvy = np.array([])
@@ -97,17 +115,12 @@ for i in range(int(vxstore.size/vzshape)):
         vyshape = i
         break
     newvy = np.append(newvy, [vystore[i*vzshape]])
-    
-#print(newvy)
-#print(vyshape)
 
-# same with vz
+# same with vx
 vxshape = int(vxstore.size/vyshape/vzshape)
 newvx = np.array([])
 for i in range(vxshape):
     newvx = np.append(newvx, [vxstore[vyshape*vzshape*i]])
-
-#print(newvx)
 
 # reshaping the array of flux values to be three-dimensional on the grid of vx, vy, and vz final conditions
 pfreshape = np.zeros((vxshape, vyshape, vzshape))
@@ -116,22 +129,22 @@ for i in range(vxshape):
         for k in range(vzshape):
             pfreshape[i][j][k] = particleflux[vyshape*vzshape*i + vzshape*j + k]
 
-
+# creating a grid using these new values
 vxgrid, vygrid, vzgrid = np.meshgrid(newvx, newvy, newvz, indexing='ij')
 # interpolating the values of the PSD/VDF on the grid from the simulation
 interpvdf = scipy.interpolate.RegularGridInterpolator((newvx, newvy, newvz), pfreshape, bounds_error=False, fill_value=None)
 
 #print(interpvdf([-31000,-4000, 5000]))
 
+# setting an array of values for azimuthal/polar angles for sampling points
 testphi = np.linspace(0, 2*np.pi, 200)
 testtheta = np.linspace(-np.pi/2, np.pi/2, 100)
 
+# initializing arrays to store values of points on shells used for processing
 testvx = np.array([])
 testvy = np.array([])
 testvz = np.array([])
 testpf = np.array([])
-#testvmag = np.array([10000, 20000, 30000, 40000])
-#testvmag = np.array([10000])
 
 for i in tqdm(range(testphi.size)):
     for j in range(testtheta.size):
@@ -143,10 +156,9 @@ for i in tqdm(range(testphi.size)):
             testvx = np.append(testvx, currentvx)
             testvy = np.append(testvy, currentvy)
             testvz = np.append(testvz, currentvz)
-            # calculates the particle flux using the shifted values of the velocity components
             testpf = np.append(testpf, interpvdf([currentvx, currentvy, currentvz]))
 
-
+# plotting the set of these points in 3D
 fig3d = plt.figure()
 fig3d.set_figwidth(10)
 fig3d.set_figheight(7)
@@ -158,47 +170,41 @@ ax3d.set_ylabel("$v_y$ at Target Point (km/s)")
 ax3d.set_zlabel("$v_z$ at Target Point (km/s)")
 plt.show()
 
-vxkms2 = vxstore/1000
-vykms2 = vystore/1000
-vzkms2 = vzstore/1000
-
-for i in range(vxstore.size):
-    # normalizing the velocity components so the velocities all have a magnitude of 1 km/s
-    vmag = np.sqrt(vxkms2[i]**2 + vykms2[i]**2 + vzkms2[i]**2)
-    vxkms2[i] = vxkms2[i]/vmag
-    vykms2[i] = vykms2[i]/vmag
-    vzkms2[i] = vzkms2[i]/vmag
-
-    vxstore[i] = vxkms2[i]*1000
-    vystore[i] = vykms2[i]*1000
-    vzstore[i] = vzkms2[i]*1000
-
+# converting the points to km/s
 testvx = testvx/1000
 testvy = testvy/1000
 testvz = testvz/1000
 
-testvxshifted = (testvx - vxshift)/1000
-testvyshifted = (testvy - vyshift)/1000
+shiftorigin = True
+
+if shiftorigin == True:
+    # gives the option to shift the origin in velocity space when calculating angles
+    # this allows us to view the mollweide from the inertial frame or the spacecraft frame
+    testvx = (testvx + xshiftfactor/1000)
+    testvy = (testvy + yshiftfactor/1000)
+
+#testvxshifted = testvx
+#testvyshifted = testvy
 
 # initializing arrays to store the azimuthal/polar angles
 phi = np.zeros(testvx.size)
 theta = np.zeros(testvx.size)
 
 # calculating the magnitude of the velocities in the vx-vy plane
-# need to account for the shift when identifying the angle(?)
-radxy = np.sqrt(testvxshifted**2 + testvyshifted**2)
+radxy = np.sqrt(testvx**2 + testvy**2)
 
 #flipping the signs for all velocities to get the directions from which they are seen as coming in
 testvx = -testvx
 testvy = -testvy
 testvz = -testvz
 
-vmags = np.sqrt(testvxshifted**2 + testvyshifted**2 + testvz**2)
+# calculating velocity magnitudes for each point
+vmags = np.sqrt(testvx**2 + testvy**2 + testvz**2)
 
-for i in range(testvxshifted.size):
+for i in range(testvx.size):
     # calculating the azimuthal and polar angles for each point
     # need to include the shift because we're looking from the spacecraft frame
-    phi[i] = np.arccos(testvxshifted/radxy[i])
+    phi[i] = np.arccos(testvx[i]/radxy[i])
     if testvy[i] < 0:
         phi[i] = -phi[i]
     theta[i] = np.arcsin(testvz[i]/vmags[i])
@@ -223,7 +229,7 @@ for k in tqdm(range(phi.size)):
                 bincounter[i,j] += 1
                 checker = True
         if checker == True:
-            continue
+            break
 
 # dividing the total summed PSD in each bin by the number of points in that bin
 psdtracker = psdtracker/bincounter
