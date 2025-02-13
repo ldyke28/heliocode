@@ -52,12 +52,24 @@ r1 = 1*au # reference radius for ionization integration
 
 noncalcextent = 15 # radius in km/s around the axis of exclusion where we don't want to calculate trajectories (to save computational time)
 
+# path to the file to which output is written
+fpath = "C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/1stoffsetfilterfulltdrp_-17pi36_0yr_whole_newcx+pi_tclose300_r=1au_interpdist.txt"
+
 #####################################################################################################################################
 # ESTABLISHING INITIAL CONDITIONS FOR THE CODE
 #####################################################################################################################################
 
-
-
+# Multiple sets of initial vx/vy conditions for convenience
+# vx/vy initial conditions are sampled on a grid with chosen resolution
+#vxstart = np.arange(-36300, -29200, 20)
+#vystart = np.arange(-6600, -4600, 20)
+#vxstart = np.arange(-25000, 25000, 300)
+#vystart = np.arange(-25000, 25000, 300)
+#vxstart = np.arange(-60000, 40000, 300)
+#vystart = np.arange(-35000, 50000, 300)
+vxstart = np.arange(-50000, 50000, 500)
+vystart = np.arange(-45000, 45000, 500)
+vzstart = 0
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
@@ -86,18 +98,6 @@ tscale = int(.7*ttotal/tstep)
 xstart = ibexpos[0]
 ystart = ibexpos[1]
 zstart = ibexpos[2]
-
-# Multiple sets of initial vx/vy conditions for convenience
-# vx/vy initial conditions are sampled on a grid with chosen resolution
-#vxstart = np.arange(-36300, -29200, 20)
-#vystart = np.arange(-6600, -4600, 20)
-#vxstart = np.arange(-25000, 25000, 300)
-#vystart = np.arange(-25000, 25000, 300)
-#vxstart = np.arange(-60000, 40000, 300)
-#vystart = np.arange(-35000, 50000, 300)
-vxstart = np.arange(-50000, 50000, 500)
-vystart = np.arange(-45000, 45000, 500)
-vzstart = 0
 
 if mode==3:
     startt = finalt
@@ -942,7 +942,7 @@ if mode==3:
     # DATA WRITING AND PLOTTING CODE
 
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/1stoffsetfilterfulltdrp_-17pi36_0yr_whole_newcx+pi_tclose300_r=1au_interpdist.txt", 'w')
+    file = open(fpath, 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value

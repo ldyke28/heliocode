@@ -23,6 +23,8 @@ for i in range(np.shape(inputfile)[0]):
         vystart = np.append(vystart, [inputfile[i,1]])
         vzstart = np.append(vzstart, [inputfile[i,2]])
 
+tstepclose = 800 # time resolution for close regime
+
 
 # Value for 1 au (astronomical unit) in meters
 au = 1.496*10**11
@@ -41,7 +43,6 @@ finalt = 5*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -50000000000 # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
-tstepclose = 1000 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 115

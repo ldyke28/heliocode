@@ -5,8 +5,8 @@ import scipy
 from tqdm import tqdm
 import scipy.interpolate
 
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/-17pi36_0yr_lya_Federicodist_datamu_2000vres.txt", delimiter=',')
-suppfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/lostpoints_-17pi36_0yr_lya_Federicodist_datamu_2000vres_revised.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/-17pi36_0yr_lya_Federicodist_datamu_4000vres.txt", delimiter=',')
+suppfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/lostpoints_-17pi36_0yr_lya_Federicodist_datamu_4000vres_revised.txt", delimiter=',')
 
 vx1 = np.array([])
 vy1 = np.array([])
@@ -63,7 +63,20 @@ ibexvaw = 6
 ibexvawr = ibexvaw*np.pi/180
 
 # set of velocity magnitudes to make shells of points
-testvmag = np.arange(000, 90000, 2000)
+testvmag = np.arange(30000, 90000, 5000)
+
+vxlower = min(vx1)*1000
+vxupper = max(vx1)*1000
+vylower = min(vy1)*1000
+vyupper = max(vy1)*1000
+vzlower = min(vz1)*1000
+vzupper = max(vz1)*1000
+
+# deciding whether the flux should be calculated in the spacecraft frame (True) or the inertial frame (False)
+shiftflux = True
+# deciding if the view of the Mollweide should be in the spacecraft frame (True) or the inertial frame (False)
+shiftorigin = True
+
 
 #############################################################################################################
 
@@ -92,10 +105,15 @@ vzkms = vzstore/1000
 vxshift = vxstore + xshiftfactor
 vyshift = vystore + yshiftfactor
 
+# calculating the velocity squared of the particles in the inertial frame
+vsquared = vxstore**2 + vystore**2 + vzstore**2
 # calculating the velocity squared of the particles after the shift into spacecraft frame
 vsquaredshift =  vxshift**2 + vyshift**2 + vzstore**2
 
-particleflux = (vsquaredshift/1000)/(mH*6.242*10**(16)) * fstore # calculating particle flux at the device (https://link.springer.com/chapter/10.1007/978-3-030-82167-8_3 chapter 3.3)
+if shiftflux:
+    particleflux = (vsquaredshift/1000)/(mH*6.242*10**(16)) * fstore # calculating particle flux at the device (https://link.springer.com/chapter/10.1007/978-3-030-82167-8_3 chapter 3.3)
+else:
+    particleflux = (vsquared/1000)/(mH*6.242*10**(16)) * fstore
 # converting to cm^-2 s^-1 ster^-1 keV^-1
 
 # finding unique vz values and ordering them as they are in the original file
@@ -150,13 +168,18 @@ for i in tqdm(range(testphi.size)):
     for j in range(testtheta.size):
         for k in range(testvmag.size):
             # calculating vx, vy, vz values while shifting the center into the spacecraft frame
-            currentvx = testvmag[k]*np.cos(testphi[i])*np.cos(testtheta[j]) + xshiftfactor
-            currentvy = testvmag[k]*np.sin(testphi[i])*np.cos(testtheta[j]) + yshiftfactor
+            # need to subtract the shift factor when moving the origin (whereas it's added to vectors to shift them)
+            currentvx = testvmag[k]*np.cos(testphi[i])*np.cos(testtheta[j]) - xshiftfactor
+            currentvy = testvmag[k]*np.sin(testphi[i])*np.cos(testtheta[j]) - yshiftfactor
             currentvz = testvmag[k]*np.sin(testtheta[j])
             testvx = np.append(testvx, currentvx)
             testvy = np.append(testvy, currentvy)
             testvz = np.append(testvz, currentvz)
-            testpf = np.append(testpf, interpvdf([currentvx, currentvy, currentvz]))
+            #if vxupper >= currentvx:
+            if vxlower <= currentvx <= vxupper and vylower <= currentvy <= vyupper and vzlower <= currentvz <= vzupper:
+                testpf = np.append(testpf, interpvdf([currentvx, currentvy, currentvz]))
+            else:
+                testpf = np.append(testpf, [0])
 
 # plotting the set of these points in 3D
 fig3d = plt.figure()
@@ -174,8 +197,6 @@ plt.show()
 testvx = testvx/1000
 testvy = testvy/1000
 testvz = testvz/1000
-
-shiftorigin = True
 
 if shiftorigin == True:
     # gives the option to shift the origin in velocity space when calculating angles
