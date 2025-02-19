@@ -8,7 +8,7 @@ from tqdm import tqdm
 import h5py
 from scipy.signal import butter, lfilter, freqz
 
-inputfilename = "C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/lostpoints_-17pi36_0yr_lya_Federicodist_datamu_4000vres"
+inputfilename = "C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/lostpoints_-17pi36_0yr_lya_Federicodist_datamu_fixed_3000vres"
 
 inputfile = np.loadtxt(inputfilename + ".txt", delimiter=',')
 
@@ -23,7 +23,7 @@ for i in range(np.shape(inputfile)[0]):
         vystart = np.append(vystart, [inputfile[i,1]])
         vzstart = np.append(vzstart, [inputfile[i,2]])
 
-tstepclose = 800 # time resolution for close regime
+tstepclose = 1200 # time resolution for close regime
 
 
 # Value for 1 au (astronomical unit) in meters

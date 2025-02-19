@@ -5,8 +5,8 @@ import scipy
 from tqdm import tqdm
 import scipy.interpolate
 
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/-17pi36_0yr_lya_Federicodist_datamu_4000vres.txt", delimiter=',')
-suppfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/lostpoints_-17pi36_0yr_lya_Federicodist_datamu_4000vres_revised.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/-17pi36_0yr_lya_Federicodist_datamu_fixed_3000vres.txt", delimiter=',')
+suppfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/lostpoints_-17pi36_0yr_lya_Federicodist_datamu_fixed_3000vres_revised.txt", delimiter=',')
 
 vx1 = np.array([])
 vy1 = np.array([])
@@ -17,6 +17,7 @@ vy2 = np.array([])
 vz2 = np.array([])
 f2 = np.array([])
 
+# unpacking data from both files
 for i in range(np.shape(file)[0]):
     vx1 = np.append(vx1, file[i,0])
     vy1 = np.append(vy1, file[i,1])
@@ -273,7 +274,50 @@ psdtracker = np.transpose(psdtracker) # transposing the PSD value array to work 
 im = ax.pcolormesh(Lon,Lat,psdtracker, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(4)))
 #im = ax.scatter(phi,theta,c=fstore, cmap='rainbow')
 #plt.scatter(phi, theta, c=fstore, cmap='rainbow', s=.01)
-#plt.xlabel("$\phi$")
-#plt.ylabel("theta")
-fig.colorbar(im, ax=ax)
+plt.xlabel("Heliolongitude Angle $\phi$")
+plt.ylabel("Heliolatitude Angle θ")
+cb = fig.colorbar(im, ax=ax)
+cb.set_label('Differential Flux at Detector')
+plt.show()
+
+lookdir1 = thetarad + np.pi/2
+lookdir2 = thetarad - np.pi/2
+
+if lookdir1 > np.pi:
+    lookdir1 = lookdir1 - 2*np.pi
+if lookdir2 < -np.pi:
+    lookdir2 = lookdir2 + 2*np.pi
+
+# at some point - center bin around look direction angle?
+
+# need to transpose back to the original shape, then back again for the Mollweide
+psdtracker = np.transpose(psdtracker)
+
+for i in range(phibounds.size-1):
+    for j in range(thetabounds.size-1):
+        if not (phibounds[i] <= lookdir1 <= phibounds[i+1] or phibounds[i] <= lookdir2 <= phibounds[i+1]):
+            # if the look direction line does not lie in the bin, zero the value
+            psdtracker[i,j] = 0
+
+fig = plt.figure()
+# plotting the cells/their values on an all-sky map using a mollweide projection
+ax = fig.add_subplot(111, projection='mollweide')
+arr = np.random.rand(180, 360)
+
+# defining a grid for the midpoints of the cells
+adjphib = np.linspace(-np.pi+ibexvawr, np.pi-ibexvawr, int(360/ibexvaw))
+adjthetab = np.linspace(-np.pi/2+ibexvawr, np.pi/2-ibexvawr, int(180/ibexvaw))
+
+# making a grid from the above
+Lon,Lat = np.meshgrid(adjphib,adjthetab)
+
+psdtracker = np.transpose(psdtracker) # transposing the PSD value array to work with the grid
+
+im = ax.pcolormesh(Lon,Lat,psdtracker, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(4)))
+#im = ax.scatter(phi,theta,c=fstore, cmap='rainbow')
+#plt.scatter(phi, theta, c=fstore, cmap='rainbow', s=.01)
+plt.xlabel("Heliolongitude Angle $\phi$")
+plt.ylabel("Heliolatitude Angle θ")
+cb = fig.colorbar(im, ax=ax)
+cb.set_label('Differential Flux at Detector')
 plt.show()

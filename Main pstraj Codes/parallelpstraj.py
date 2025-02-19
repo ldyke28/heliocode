@@ -46,7 +46,7 @@ refdist = 70 # reference distance in au for the boundary surface
 theta = float(file.readline().strip()) # angle with respect to upwind axis of target point
 ibexrad = 1 # radial distance of target point from Sun
 
-xdiv = float(file.readline().strip())
+xdiv = int(file.readline().strip())
 
 vsolarwindms = 400000 # solar wind speed in m/s
 vsolarwindcms = vsolarwindms*100 # solar wind speed in cm/s
@@ -588,8 +588,8 @@ assert itemsize == MPI.FLOAT.Get_size()
 data = np.ndarray(buffer=buf, dtype='f', shape=(size,5))
 
 # Initializing arrays to determine where to slice initial conditions for vx/vy
-boundsx = np.zeros(xdiv, dtype=int)
-boundsy = np.zeros(ydiv, dtype=int)
+boundsx = np.zeros(int(xdiv), dtype=int)
+boundsy = np.zeros(int(ydiv), dtype=int)
 
 # Setting the location of these bounds by dividing the total number of initial vx conditions as evenly as possible
 for q in range(xdiv-1):
@@ -607,8 +607,8 @@ dirlosscounttotal = np.zeros(1)
 
 # Initializing array to collect problematic points to test afterward
 lostpoints = np.array([0,0,0])
-for n in range(ydiv):
-    for m in range(xdiv):
+for n in range(ydiv-1):
+    for m in range(xdiv-1):
         if rank == n*xdiv + m + 1:
             vxstartn = vxstart[boundsx[m]:(boundsx[m+1]+1)]
             vystartn = vystart[boundsy[n]:(boundsy[n+1]+1)]
