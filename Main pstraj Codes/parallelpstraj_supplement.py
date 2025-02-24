@@ -8,7 +8,7 @@ from tqdm import tqdm
 import h5py
 from scipy.signal import butter, lfilter, freqz
 
-inputfilename = "C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/lostpoints_-17pi36_0yr_lya_Federicodist_datamu_fixed_3000vres"
+inputfilename = "C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/lostpoints_-17pi36_5p5yr_lya_Federicodist_datamu_fixed_3500vres"
 
 inputfile = np.loadtxt(inputfilename + ".txt", delimiter=',')
 

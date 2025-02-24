@@ -5,8 +5,38 @@ import scipy
 from tqdm import tqdm
 import scipy.interpolate
 
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/-17pi36_0yr_lya_Federicodist_datamu_fixed_3000vres.txt", delimiter=',')
-suppfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/lostpoints_-17pi36_0yr_lya_Federicodist_datamu_fixed_3000vres_revised.txt", delimiter=',')
+#####################################################################################################################################
+# CODE INTRODUCTION
+#####################################################################################################################################
+
+"""
+This code is intended to use the 3D data from the cluster that did not throw the odeint error as well as the data obtained from
+re-calculating any points lost to this error to create an interpolated grid of PSD data within the simulation region. This data is
+used to make an all-sky map of the differential flux for the given dataset. Here are the processes the code completes:
+
+1. The data from both files is unpacked, and any values of (vx, vy, vz) for which the original file has a 0 and the lost points file
+has a value sees the 0 in the array of the data from the original file be replaced by the corresponding lost points file data
+2. Variables are established - THE TARGET POINT ANGLE MUST BE INPUT MANUALLY - and there is an option to shift the flux calculation/
+the Mollweide view into the spacecraft frame
+3. The differential flux is calculated from the PSD values, and the grid is reshaped so the data can be interpolated across the
+simulation region
+4. Centering around the origin in the spacecraft frame, shells of points at various velocity magnitudes are given in phase space,
+equally spaced angularly. These points have their value of the flux calculated if they are within the original simulation bounds, but
+are otherwise set to 0
+5. Those points are plotted
+6. The corresponding look angle relative to the spacecraft is calculated for each of the points, such that the direction from which
+they came can be determined
+7. The points are all sorted into bins the width of the IBEX viewing angle, with their flux value averaged in each bin
+8. The points are plotted on the Mollweide projection, to mimic how IBEX plots these values
+9. Another version of the plot is constructed by only considering points that are within the IBEX viewing angle of the current IBEX
+look direction, to further mimic what iBEX could observe
+"""
+
+#####################################################################################################################################
+
+
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/-17pi36_5p5yr_lya_Federicodist_datamu_fixed_3500vres.txt", delimiter=',')
+suppfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/lostpoints_-17pi36_5p5yr_lya_Federicodist_datamu_fixed_3500vres_revised.txt", delimiter=',')
 
 vx1 = np.array([])
 vy1 = np.array([])
@@ -271,7 +301,9 @@ Lon,Lat = np.meshgrid(adjphib,adjthetab)
 
 psdtracker = np.transpose(psdtracker) # transposing the PSD value array to work with the grid
 
+
 im = ax.pcolormesh(Lon,Lat,psdtracker, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(4)))
+plt.grid()
 #im = ax.scatter(phi,theta,c=fstore, cmap='rainbow')
 #plt.scatter(phi, theta, c=fstore, cmap='rainbow', s=.01)
 plt.xlabel("Heliolongitude Angle $\phi$")
@@ -283,21 +315,41 @@ plt.show()
 lookdir1 = thetarad + np.pi/2
 lookdir2 = thetarad - np.pi/2
 
-if lookdir1 > np.pi:
-    lookdir1 = lookdir1 - 2*np.pi
-if lookdir2 < -np.pi:
-    lookdir2 = lookdir2 + 2*np.pi
+lookdir1up = lookdir1 + ibexvawr/2
+lookdir1low = lookdir1 - ibexvawr/2
+lookdir2up = lookdir2 + ibexvawr/2
+lookdir2low = lookdir2 - ibexvawr/2
+
+if lookdir1up > np.pi:
+    lookdir1up = lookdir1up - 2*np.pi
+if lookdir1low > np.pi:
+    lookdir1low = lookdir1low - 2*np.pi
+if lookdir2up < np.pi:
+    lookdir2up = lookdir2up + 2*np.pi
+if lookdir2low < -np.pi:
+    lookdir2low = lookdir2low + 2*np.pi
 
 # at some point - center bin around look direction angle?
 
-# need to transpose back to the original shape, then back again for the Mollweide
-psdtracker = np.transpose(psdtracker)
+# new array to track PSD when only considering trajectories within the viewing angle of the look directions
+psdtrackerld = np.zeros((phibounds.size-1, thetabounds.size-1))
+bincounterld = np.zeros((phibounds.size-1, thetabounds.size-1))
 
-for i in range(phibounds.size-1):
-    for j in range(thetabounds.size-1):
-        if not (phibounds[i] <= lookdir1 <= phibounds[i+1] or phibounds[i] <= lookdir2 <= phibounds[i+1]):
-            # if the look direction line does not lie in the bin, zero the value
-            psdtracker[i,j] = 0
+for k in tqdm(range(phi.size)):
+    checker = False
+    for i in range(phibounds.size-1):
+        for j in range(thetabounds.size-1):
+            if phibounds[i] <= phi[k] < phibounds[i+1] and thetabounds[j] <= theta[k] < thetabounds[j+1]:
+                if (lookdir1low < phi[k] < lookdir1up or lookdir2low < phi[k] < lookdir2up):
+                    # only adds the PSD value if the point is within half viewing angle of the look direction
+                    psdtrackerld[i,j] += testpf[k]
+                    bincounterld[i,j] += 1
+                checker = True
+        if checker == True:
+            break
+
+# normalizing by bin count
+psdtrackerld = psdtrackerld/bincounterld
 
 fig = plt.figure()
 # plotting the cells/their values on an all-sky map using a mollweide projection
@@ -311,9 +363,11 @@ adjthetab = np.linspace(-np.pi/2+ibexvawr, np.pi/2-ibexvawr, int(180/ibexvaw))
 # making a grid from the above
 Lon,Lat = np.meshgrid(adjphib,adjthetab)
 
-psdtracker = np.transpose(psdtracker) # transposing the PSD value array to work with the grid
+psdtrackerld = np.transpose(psdtrackerld) # transposing the PSD value array to work with the grid
 
-im = ax.pcolormesh(Lon,Lat,psdtracker, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(4)))
+
+im = ax.pcolormesh(Lon,Lat,psdtrackerld, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(4)))
+plt.grid()
 #im = ax.scatter(phi,theta,c=fstore, cmap='rainbow')
 #plt.scatter(phi, theta, c=fstore, cmap='rainbow', s=.01)
 plt.xlabel("Heliolongitude Angle $\phi$")

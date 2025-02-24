@@ -8,7 +8,39 @@ from tqdm import tqdm
 import h5py
 from scipy.signal import butter, lfilter, freqz
 
-# add another sine function to the noise function so the fluctuations vary in magnitude
+#####################################################################################################################################
+# CODE INTRODUCTION
+#####################################################################################################################################
+
+"""
+This is the serial version of the code that runs in 2D, which has been updated and much of the old, no longer used fluff removed. 
+It is a trajectory calculating code that considers the motion of ISN H according to the equations of motion in the heliosphere, which 
+involves gravity and a radiation pressure force that is dependent on the time in the solar cycle, the position of the particle 
+relative to the Sun, and its velocity. Here are the processes the code completes:
+
+1. Define relevant fixed values used in the calculation, and define initial conditions for the specific run
+2. Filters and interpolates the LASP solar irradiance data throughout multiple solar cycles to use in the calculation of the 
+radiation pressure force
+3. Imports the distributions on the boundary surface, which will determine the value of the PSD for particles reaching the boundary
+
+FOR MODE 2 (individual orbit plotting code):
+4. Calculates the individual trajectory, calculating the ionization losses from charge exchange and photoionization for it, using the
+boundary distributions to inform the initial value of the PSD
+5. Plots the trajectory in 2D in the simulation plane within a range in phase space that is controlled manually
+
+FOR MODE 3 (phase space plotting):
+4. Calculates each trajectory, calculating the ionization losses from charge exchange and photoionization for them, using the
+boundary distributions to inform each initial value of the PSD
+5. Saves the trajectory data to a file in the form of (vx, vy, PSD)
+6. Plots the points as a scatter plot in 2D phase space colored by the value of the attenuated PSD
+"""
+
+#####################################################################################################################################
+
+
+
+
+
 
 # MODE LIST
 # 2 = plot an individual trajectory traced backward from point of interest

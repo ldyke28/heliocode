@@ -8,6 +8,36 @@ import h5py
 from scipy.signal import butter, lfilter, freqz
 import time
 
+#####################################################################################################################################
+# CODE INTRODUCTION
+#####################################################################################################################################
+
+"""
+This is the parallel version of the code that is run in 3D. It is a trajectory calculating code that considers the motion of ISN H
+according to the equations of motion in the heliosphere, which involves gravity and a radiation pressure force that is dependent on
+the time in the solar cycle, the position of the particle relative to the Sun, and its velocity. Here are the processes the code
+completes:
+
+1. Import the variable initial conditions from a file with a set of fixed initial variables
+2. Filters and interpolates the LASP solar irradiance data throughout multiple solar cycles to use in the calculation of the 
+radiation pressure force
+3. Imports the distributions on the boundary surface, which will determine the value of the PSD for particles reaching the boundary
+4. Defines the necessary radiation pressure force function(s) and the diffeq function that odeint needs to solve the motion
+5. Implements the parallelization scheme by splitting up the initial conditions in vx/vy
+6. Runs the odeint code, checking if the code throws any odeint warnings through the try/except block - if the warning is thrown, the
+trajectory is saved with a PSD value of later to be recovered and re-run later
+7. Once the trajectory is immediately run, the code checks if the particle enters the Sun or doesn't reach the boundary, in which
+case the PSD value is set to 0
+8. During the process of running, the ionization losses are calculated and applied to the PSD value, which is determined initially
+(before attenuation) based on the corresponding linearly interpolated value on the boundary
+9. The code collects all of the data, which has been saved to a shared array on the process of rank 0, and saves it all to a file in 
+the form of (vx, vy, vz, PSD), getting rid of any and all points (which at this point, should be none) that are all 0's
+"""
+
+#####################################################################################################################################
+
+
+
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank() # obtaining the rank of each node to split the workload later
 
@@ -54,7 +84,7 @@ nsw1au = 5 # solar wind density at 1 au in cm^-3
 
 r1 = 1*au # reference radius for ionization integration
 
-noncalcextent = 20 # radius in km/s around the axis of exclusion where we don't want to calculate trajectories (to save computational time)
+noncalcextent = 16 # radius in km/s around the axis of exclusion where we don't want to calculate trajectories (to save computational time)
 
 start = time.time()
 
