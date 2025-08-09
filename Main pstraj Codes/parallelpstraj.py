@@ -179,7 +179,7 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
 
 
 # Filter requirements.
-order = 1
+order = 5
 #fs = .000002       # sample rate, Hz
 fs = 1/(86400)
 cutoff = 1/(1.577*10**8)  # desired cutoff frequency of the filter, Hz
@@ -195,8 +195,9 @@ tgrid = np.meshgrid(secondsnew, indexing='ij') # order will be z, y, x for this
 
 fifthorderoffset = 2.5*oneyear
 firstorderoffset = .5*oneyear
+fifthordertwocyclesagooffset = 2.5*oneyear - 22.4*oneyear
 
-irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-firstorderoffset], values=filteredia)
+irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-fifthordertwocyclesagooffset], values=filteredia)
 
 #####################################################################################################################################
 # IMPORTING AND INTERPOLATING BOUNDARY DISTRIBUTIONS FROM THE UAH GROUP'S FRAMEWORK
@@ -518,7 +519,7 @@ def lya_abs(t,x,y,z,vr):
     ttemp = t
     tbounded = False
     while not tbounded:
-        if ttemp >= -1.392*10**(9):
+        if ttemp >= -32.408*oneyear:
             tbounded = True
         else:
             ttemp = ttemp + 1.392*10**(9)

@@ -64,7 +64,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 0*oneyear # time to start backtracing
+finalt = 5.5*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -5*10**(10) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
@@ -73,7 +73,7 @@ tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 70 # reference distance for backtraced trajectories, in au
 
-theta = 275 # angle with respect to upwind axis of target point in degrees
+theta = 225 # angle with respect to upwind axis of target point in degrees
 ibexrad = 1 # radial distance of target point from Sun
 
 vsolarwindms = 400000 # solar wind speed in m/s
@@ -85,7 +85,7 @@ r1 = 1*au # reference radius for ionization integration
 noncalcextent = 15 # radius in km/s around the axis of exclusion where we don't want to calculate trajectories (to save computational time)
 
 # path to the file to which output is written
-fpath = "C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/1stoffsetfilterfulltdrp_-17pi36_0yr_whole_newcx+pi_tclose300_r=1au_interpdist.txt"
+fpath = "C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/1stoffsetfilterfulltdrp_-3pi4_5p5yr_whole_newcx+pi_tclose300_r=1au_interpdist_ex.txt"
 
 #####################################################################################################################################
 # ESTABLISHING INITIAL CONDITIONS FOR THE CODE
@@ -197,8 +197,9 @@ for i in range(seconds.size):
         irradianceavg = np.append(irradianceavg, [oldirradianceavg[i]])
         secondsnew = np.append(secondsnew, [seconds[i]])
 
-secondsnew = secondsnew - 1.9*10**9
-seconds = seconds - 1.9*10**9
+datatimeoffset = 1.955*10**9
+secondsnew = secondsnew - datatimeoffset
+seconds = seconds - datatimeoffset
 secondstoyears = 1/(86400*365)
 
 wm2toph = 6.12*10**(13)
@@ -213,7 +214,7 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
 
 
 # Filter requirements.
-order = 5
+order = 1
 #fs = .000002       # sample rate, Hz
 fs = 1/(86400)
 cutoff = 1/(1.577*10**8)  # desired cutoff frequency of the filter, Hz
@@ -230,7 +231,7 @@ tgrid = np.meshgrid(secondsnew, indexing='ij') # order will be z, y, x for this
 fifthorderoffset = 2.5*oneyear
 firstorderoffset = .5*oneyear
 
-irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-fifthorderoffset], values=filteredia)
+irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-firstorderoffset], values=filteredia)
 
 #####################################################################################################################################
 
@@ -413,7 +414,7 @@ def lya_abs_update(t,x,y,z,vr):
 
     # time dependent portion of the radiation pressure force function
     #tdependence = .85 - np.e/(np.e + 1/np.e)*.33 + .33/(np.e + 1/np.e) * np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi)) + addfactor
-    tdependence = .95 + .5/(np.e**2 + 1) + .5/(np.e + 1/np.e)*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
+    #tdependence = .95 + .5/(np.e**2 + 1) + .5/(np.e + 1/np.e)*np.cos(omegat - np.pi)*np.exp(np.cos(omegat - np.pi))
 
     # flattening factor for heliolatitude dependence of radiation pressure force
     alya = .8
@@ -440,16 +441,16 @@ def lya_abs_update(t,x,y,z,vr):
     dm = -0.344*(1 - 0.828*tdependence)
     del_R = 32.349*(1 - 0.049*tdependence)
     b_bkg = 0.035*(1 + 0.184*tdependence)
-    a_bkg = 0.411**(-4) *(1 - 1.333*tdependence)
+    a_bkg = 0.411*10**(-4) *(1 - 1.333*tdependence)
     #print(a_bkg)
-    r_E = 0.6
+    r_E = 1
     r2 = 1
     F_R = A_R / (del_R * np.sqrt(2 * np.pi)) *np.exp(-(np.square((vr/1000) - (m_K + dm))) / (2*(del_R ** 2)))
-    F_bkg = np.add(a_bkg*(vr/1000)*0.000001,b_bkg)
-    F_K = A_K * np.power(1 + np.square((vr/1000) - m_K) / (2 * K * ((del_K) ** 2)), -K - 1)
+    F_bkg = a_bkg*(vr/1000) + b_bkg
+    F_K = A_K * (1 + ((vr/1000) - m_K)**2 / (2 * K * ((del_K) ** 2)))**(-K-1)
 
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
-    return scalefactor*(F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval)
+    return (F_K-F_R+F_bkg)/(r_E**2/(r2**2))#*(1 - absval)
 
 
 # odeint documentation: https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.odeint.html

@@ -18,11 +18,22 @@ import pandas as pd
 #f = np.array([4.87*10**(-7), 5.88*10**(-7), 1.11*10**(-6), 1.56*10**(-6), 1.73*10**(-6), 1.79*10**(-6), 1.81*10**(-6), 1.79*10**(-6), 1.58*10**(-6), 1.14*10**(-6), 1.01*10**(-6), 2.02*10**(-7)])
 
 # Paper 2 bulk velocities (approximation)
-vxarray = np.array([-24.093, -24.580, -26.877, -28.507, -28.976, -29.059, -29.076, -28.926, -27.940, -25.680, -25.023, -22.037])
-vyarray = np.array([2.594, 3.250, 6.279, 8.159, 8.612, 8.673, 8.676, 8.413, 6.989, 3.969, 3.117, 0.311])
-f = np.array([6.93*10**(-8), 8.42*10**(-8), 1.77*10**(-7), 2.98*10**(-7), 3.25*10**(-7), 3.35*10**(-7), 3.38*10**(-7), 3.31*10**(-7), 2.86*10**(-7), 1.95*10**(-7), 1.64*10**(-7), 2.09*10**(-8)])
+#vxarray = np.array([-24.093, -24.580, -26.877, -28.507, -28.976, -29.059, -29.076, -28.926, -27.940, -25.680, -25.023, -22.037])
+#vyarray = np.array([2.594, 3.250, 6.279, 8.159, 8.612, 8.673, 8.676, 8.413, 6.989, 3.969, 3.117, 0.311])
+#f = np.array([6.93*10**(-8), 8.42*10**(-8), 1.77*10**(-7), 2.98*10**(-7), 3.25*10**(-7), 3.35*10**(-7), 3.38*10**(-7), 3.31*10**(-7), 2.86*10**(-7), 1.95*10**(-7), 1.64*10**(-7), 2.09*10**(-8)])
 
-labels = np.array(["-4 yr", "-3.824 yr", "-3 yr", "-2 yr", "-1 yr", "0 yr", "1 yr", "2 yr", "3 yr", "3.824 yr", "4 yr", "5.5 yr"])
+# 3D Time Sequence (downwind) approximate bulk velocities
+vxarray = np.array([-21.813, -22.019, -21.869, -22.658, -22.866, -23.036, -23.109, -23.083, -22.707, -21.843])
+vyarray = np.array([15.397, 16.051, 16.569, 17.889, 18.667, 19.458, 19.845, 19.176, 18.271, 17.019])
+vzarray = np.array([-5.148, -4.786, -5.605, -4.819, -4.826, -4.778, -4.842, -4.899, -4.833, -4.793])
+
+# 3D Time Sequence (downwind, fifth order filter) approximate bulk velocities
+vxarray = np.array([-21.496, -21.939, -22.493, -22.757, -22.960, -23.076, -23.206, -23.109, -22.745, -21.798])
+vyarray = np.array([15.354, 16.165, 17.262, 18.303, 19.029, 19.579, 19.680, 19.245, 17.986, 16.727])
+vzarray = np.array([-5.172, -4.726, -4.777, -4.848, -4.834, -4.818, -4.799, -4.833, -4.883, -4.770])
+
+#labels = np.array(["-4 yr", "-3.824 yr", "-3 yr", "-2 yr", "-1 yr", "0 yr", "1 yr", "2 yr", "3 yr", "3.824 yr", "4 yr", "5.5 yr"])
+labels = np.array(["-4 yr", "-3 yr", "-2 yr", "-1 yr", "0 yr", "1 yr", "2 yr", "3 yr", "4 yr", "5.5 yr"])
 
 def get_text_positions(x_data, y_data, txt_width, txt_height):
     a = zip(y_data, x_data)
@@ -60,15 +71,33 @@ def text_plotter(x_data, y_data, labels, text_positions, axis,txt_width,txt_heig
                        head_width=txt_width, head_length=txt_height*0.5, 
                        zorder=0,length_includes_head=True)
 
-fsize = 16
+"""fsize = 16
 fig = plt.figure(figsize=(10,8))
 ax = fig.add_subplot(111)
 plt.plot(vxarray, vyarray, zorder=1)
 for i in range(vxarray.size-1):
     veclength = np.sqrt((vxarray[i+1] - vxarray[i])**2 + (vyarray[i+1] - vyarray[i])**2)
     #plt.arrow((vxarray[i+1] + vxarray[i])/2, (vyarray[i+1] + vyarray[i])/2, (vxarray[i+1] - vxarray[i])/veclength*.000001, (vyarray[i+1] - vyarray[i])/veclength*.000001, shape='full', lw=0, length_includes_head=False, head_width=.2)
-plt.scatter(vxarray[:], vyarray[:], c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(), zorder=2)
-#plt.scatter(vxarray[:], vyarray[:], marker='o', zorder=2)
+#plt.scatter(vxarray[:], vyarray[:], c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(), zorder=2)
+plt.scatter(vxarray[:], vyarray[:], marker='o', zorder=2)"""
+
+fsize = 16
+fig = plt.figure(figsize=(10,8))
+ax = fig.add_subplot(projection='3d')
+ax.plot(vxarray, vyarray, vzarray, zorder=1)
+#for i in range(vxarray.size-1):
+#    veclength = np.sqrt((vxarray[i+1] - vxarray[i])**2 + (vyarray[i+1] - vyarray[i])**2)
+    #plt.arrow((vxarray[i+1] + vxarray[i])/2, (vyarray[i+1] + vyarray[i])/2, (vxarray[i+1] - vxarray[i])/veclength*.000001, (vyarray[i+1] - vyarray[i])/veclength*.000001, shape='full', lw=0, length_includes_head=False, head_width=.2)
+#plt.scatter(vxarray[:], vyarray[:], c=f[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(), zorder=2)
+ax.scatter(vxarray[:], vyarray[:], vzarray[:], marker='o', zorder=2, color='black', s=10)
+for i in range(vxarray.size):
+    ax.text(vxarray[i],vyarray[i],vzarray[i], labels[i], size=10, zorder=1, color='k')
+
+ax.set_xlabel("$v_x$", fontsize=fsize)
+ax.set_ylabel("$v_y$", fontsize=fsize)
+ax.set_zlabel("$v_z$", fontsize=fsize)
+ax.set_title("Approximate Bulk Velocity Throughout the Solar Cycle (km/s)")
+plt.show()
 
 """#set the bbox for the text. Increase txt_width for wider text.
 txt_height = 0.04*(plt.ylim()[1] - plt.ylim()[0])

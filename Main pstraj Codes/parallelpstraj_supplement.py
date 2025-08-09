@@ -8,7 +8,19 @@ from tqdm import tqdm
 import h5py
 from scipy.signal import butter, lfilter, freqz
 
-inputfilename = "C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/3ddata/lostpoints_-17pi36_5p5yr_lya_Federicodist_datamu_fixed_3500vres"
+#####################################################################################################################################
+# CODE INTRODUCTION
+#####################################################################################################################################
+
+"""
+This code re-calculates any points that were lose to the odeint warning in running on the cluster. The processes of the code are the
+same as pstraj_timedepupdate, but the initial conditions are determined by the set of (vx, vy, vz) values as given in the lost points
+file from which the code imports data.
+"""
+
+#####################################################################################################################################
+
+inputfilename = "C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/lostpoints_305deg_ibexshift_lya_Federicodist_datamu_order5_22yrsearlier_3500vres"
 
 inputfile = np.loadtxt(inputfilename + ".txt", delimiter=',')
 
