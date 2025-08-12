@@ -36,7 +36,7 @@ look direction, to further mimic what iBEX could observe
 
 #####################################################################################################################################
 
-fname = "-17pi36_t0_lya_Federicodist_datamu_order5_22yrsearlier_3500vres"
+fname = "293deg_ibexshift_lya_Federicodist_datamu_order5_22yrsearlier_3500vres"
 
 file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/" + fname + ".txt", delimiter=',')
 suppfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/lostpoints_" + fname + "_revised.txt", delimiter=',')
@@ -87,7 +87,7 @@ tempH = 7500 # LISM hydrogen temperature in K
 mH = 1.6736*10**(-27) # mass of hydrogen in kg
 vthn = np.sqrt(2*1.381*10**(-29)*tempH/mH) # thermal velocity of LISM H
 
-theta = 305 # angle with respect to the upwind axis of the target point
+theta = 293 # angle with respect to the upwind axis of the target point
 vsc = 30000 # velocity of spacecraft in m/s
 thetarad = theta*np.pi/180 # expressing the value of theta in radians
 # calculating the shift of the particle velocities into the spacecraft frame
@@ -347,6 +347,15 @@ if lookdir2up < -np.pi:
 if lookdir2low < -np.pi:
     lookdir2low = lookdir2low + 2*np.pi
 
+if lookdir2up > np.pi:
+    lookdir2up = lookdir2up - 2*np.pi
+if lookdir2low > np.pi:
+    lookdir2low = lookdir2low - 2*np.pi
+if lookdir1up < -np.pi:
+    lookdir1up = lookdir1up + 2*np.pi
+if lookdir1low < -np.pi:
+    lookdir1low = lookdir1low + 2*np.pi
+
 # creating arrays to plot boundary lines at the viewing angle limits
 ld1lowmarkers = lookdir1low*np.ones((thetabounds.size))
 ld1highmarkers = lookdir1up*np.ones((thetabounds.size))
@@ -382,6 +391,7 @@ bincounterld = np.zeros((phibounds.size-1, thetabounds.size-1))
 phitrackerld = np.array([])
 thetatrackerld = np.array([])
 psdfiletrackerld = np.array([])
+
 
 for k in tqdm(range(phi.size)):
     checker = False

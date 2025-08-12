@@ -56,7 +56,13 @@ file7 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Clust
 file8 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/287deg_ibexshift_lya_Federicodist_datamu_order5_22yrsearlier_3500vres_ibexview.txt", delimiter=',')
 file9 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/293deg_ibexshift_lya_Federicodist_datamu_order5_22yrsearlier_3500vres_ibexview.txt", delimiter=',')
 file10 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/299deg_ibexshift_lya_Federicodist_datamu_order5_22yrsearlier_3500vres_ibexview.txt", delimiter=',')
-#file11 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/305deg_ibexshift_lya_Federicodist_datamu_order5_22yrsearlier_3500vres_ibexview.txt", delimiter=',')
+file11 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/305deg_ibexshift_lya_Federicodist_datamu_order5_22yrsearlier_3500vres_ibexview.txt", delimiter=',')
+file12 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/239deg_ibexshift_lya_Federicodist_datamu_order5_22yrsearlier_3500vres_ibexview.txt", delimiter=',')
+file13 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/311deg_ibexshift_lya_Federicodist_datamu_order5_22yrsearlier_3500vres_ibexview.txt", delimiter=',')
+file14 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/233deg_ibexshift_lya_Federicodist_datamu_order5_22yrsearlier_3500vres_ibexview.txt", delimiter=',')
+file15 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/227deg_ibexshift_lya_Federicodist_datamu_order5_22yrsearlier_3500vres_ibexview.txt", delimiter=',')
+
+
 
 phi = np.array([])
 theta = np.array([])
@@ -113,10 +119,30 @@ for i in range(np.shape(file10)[0]):
     theta = np.append(theta, file10[i,1])
     flux = np.append(flux, file10[i,2])
 
-"""for i in range(np.shape(file11)[0]):
+for i in range(np.shape(file11)[0]):
     phi = np.append(phi, file11[i,0])
     theta = np.append(theta, file11[i,1])
-    flux = np.append(flux, file11[i,2])"""
+    flux = np.append(flux, file11[i,2])
+
+for i in range(np.shape(file12)[0]):
+    phi = np.append(phi, file12[i,0])
+    theta = np.append(theta, file12[i,1])
+    flux = np.append(flux, file12[i,2])
+
+for i in range(np.shape(file13)[0]):
+    phi = np.append(phi, file13[i,0])
+    theta = np.append(theta, file13[i,1])
+    flux = np.append(flux, file13[i,2])
+
+for i in range(np.shape(file14)[0]):
+    phi = np.append(phi, file14[i,0])
+    theta = np.append(theta, file14[i,1])
+    flux = np.append(flux, file14[i,2])
+
+for i in range(np.shape(file15)[0]):
+    phi = np.append(phi, file15[i,0])
+    theta = np.append(theta, file15[i,1])
+    flux = np.append(flux, file15[i,2])
 
 # creating grid points in angle space
 phibounds = np.linspace(-np.pi, np.pi, int(360/ibexvaw+1))
@@ -159,7 +185,7 @@ Lon,Lat = np.meshgrid(adjphib,adjthetab)
 
 psdtracker = np.transpose(psdtracker) # transposing the PSD value array to work with the grid
 
-im = ax.pcolormesh(Lon,Lat,psdtracker, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(1),vmax=10**(6)))
+im = ax.pcolormesh(Lon,Lat,psdtracker, cmap='rainbow')#, norm=matplotlib.colors.LogNorm(vmin=10**(1),vmax=10**(6)))
 ax.plot()
 plt.grid()
 #im = ax.scatter(phi,theta,c=fstore, cmap='rainbow')

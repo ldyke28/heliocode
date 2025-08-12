@@ -13,16 +13,16 @@ from scipy.signal import butter, lfilter, freqz
 #####################################################################################################################################
 
 """
-This code re-calculates any points that were lose to the odeint warning in running on the cluster. The processes of the code are the
+This code re-calculates any points that were lost to the odeint warning in running on the cluster. The processes of the code are the
 same as pstraj_timedepupdate, but the initial conditions are determined by the set of (vx, vy, vz) values as given in the lost points
 file from which the code imports data.
 """
 
 #####################################################################################################################################
 
-inputfilename = "C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/lostpoints_305deg_ibexshift_lya_Federicodist_datamu_order5_22yrsearlier_3500vres"
-
+inputfilename = "C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/lostpoints_227deg_ibexshift_lya_Federicodist_datamu_order5_22yrsearlier_3500vres"
 inputfile = np.loadtxt(inputfilename + ".txt", delimiter=',')
+theta = 227 # angle with respect to upwind axis of target point
 
 # Set of initial conditions in velocity space
 # vx/vy initial conditions are sampled on a grid with chosen resolution
@@ -62,7 +62,6 @@ refdist = 115
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
 sunpos = np.array([0,0,0])
-theta = 275 # angle with respect to upwind axis of target point
 ibexrad = 1 # radial distance of target point from Sun
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
