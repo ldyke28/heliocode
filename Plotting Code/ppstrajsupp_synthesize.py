@@ -6,6 +6,7 @@ from tqdm import tqdm
 import scipy.interpolate
 import scipy.integrate
 import scipy.stats
+import cartopy.crs as ccrs
 
 #####################################################################################################################################
 # CODE INTRODUCTION
@@ -36,10 +37,13 @@ look direction, to further mimic what iBEX could observe
 
 #####################################################################################################################################
 
-fname = "293deg_ibexshift_lya_Federicodist_datamu_order5_22yrsearlier_3500vres"
+fname = "300deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres"
+theta = 300 # angle with respect to the upwind axis of the target point
 
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/" + fname + ".txt", delimiter=',')
-suppfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/lostpoints_" + fname + "_revised.txt", delimiter=',')
+#file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/" + fname + ".txt", delimiter=',')
+#suppfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/lostpoints_" + fname + "_revised.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Meetings, Conferences, etc/AGU 2025/SimData/" + fname + ".txt", delimiter=',')
+suppfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Meetings, Conferences, etc/AGU 2025/SimData/lostpoints_" + fname + "_revised.txt", delimiter=',')
 
 vx1 = np.array([])
 vy1 = np.array([])
@@ -75,19 +79,21 @@ for i in range(f1.size):
         # points in Sun are set to -1 - this will not work for integration/interpolation, so we revert them to 0 here
         f1[i] = 0
 
-
+#print(np.max(f1))
+#print(np.max(f2))
 #############################################################################################################
 # RELEVANT VARIABLES/PARAMETERS
 #############################################################################################################
 
 # one year divided by 60 (6 degree shift for IBEX) - 525909.09090833333 s
 
-nH = 0.195 # hydrogen density in num/cm^3
+nH = 0.195 # hydrogen density in num/cm^3 (MS-FLUKSS)
+#nH = 0.11 # hydrogen density in num/cm^3 (Rahmanifard analytic BC's)
 tempH = 7500 # LISM hydrogen temperature in K
 mH = 1.6736*10**(-27) # mass of hydrogen in kg
 vthn = np.sqrt(2*1.381*10**(-29)*tempH/mH) # thermal velocity of LISM H
 
-theta = 293 # angle with respect to the upwind axis of the target point
+
 vsc = 30000 # velocity of spacecraft in m/s
 thetarad = theta*np.pi/180 # expressing the value of theta in radians
 # calculating the shift of the particle velocities into the spacecraft frame
@@ -101,6 +107,7 @@ ibexvahwr = ibexvawr/2
 
 # set of velocity magnitudes to make shells of points
 # CHANGE THIS FOR DIFFERENT TARGET POINT FOR BETTER ACCURACY
+#testvmag = np.arange(25000, 100000, 5000)
 testvmag = np.arange(25000, 100000, 5000)
 
 vxlower = min(vx1)*1000
@@ -252,6 +259,28 @@ ax3d.set_zlabel("$v_z$ at Target Point (km/s)")
 cb.set_label('Differential Flux at Detector (cm$^-2$ s$^-1$ sr$^-1$ keV$^-1$)')
 plt.show()
 
+###################################################
+# Calculating point of maximum PSD/flux
+fluxmax = np.max(testpf)
+fluxmaxloc = np.argmax(testpf)
+fluxmaxvx = -testvx[fluxmaxloc]
+fluxmaxvy = -testvy[fluxmaxloc]
+fluxmaxvz = -testvz[fluxmaxloc]
+fluxmaxradxy = np.sqrt(fluxmaxvx**2 + fluxmaxvy**2)
+fluxmaxvmag = np.sqrt(fluxmaxvx**2 + fluxmaxvy**2 + fluxmaxvz**2)
+fluxmaxphi = np.arccos(fluxmaxvx/fluxmaxradxy)
+if fluxmaxvy < 0:
+    fluxmaxphi = -fluxmaxphi
+fluxmaxtheta = np.arcsin(fluxmaxvz/fluxmaxvmag)
+fluxmaxphi = fluxmaxphi * 180/np.pi
+fluxmaxtheta = fluxmaxtheta * 180/np.pi
+
+print(fluxmaxloc)
+print("(" + str(fluxmaxvx) + ", " + str(fluxmaxvy) + ", " + str(fluxmaxvz) + ")")
+print(str(fluxmaxphi) + ", " + str(fluxmaxtheta) + ", " + str(fluxmax))
+###################################################
+
+
 # converting the points to km/s
 testvx = testvx/1000
 testvy = testvy/1000
@@ -297,6 +326,10 @@ thetabounds = np.linspace(-np.pi/2, np.pi/2, int(180/ibexvaw+1))
 psdtracker = np.zeros((phibounds.size-1, thetabounds.size-1))
 bincounter = np.zeros((phibounds.size-1, thetabounds.size-1))
 
+phifiletracker = np.array([])
+thetafiletracker = np.array([])
+psdfiletracker = np.array([])
+
 # finds which cell each velocity point lies in
 for k in tqdm(range(phi.size)):
     checker = False
@@ -307,6 +340,9 @@ for k in tqdm(range(phi.size)):
                 #psdtracker[i,j] += particleflux[k]
                 psdtracker[i,j] += testpf[k]
                 bincounter[i,j] += 1
+                phifiletracker = np.append(phifiletracker, phi[k])
+                thetafiletracker = np.append(thetafiletracker, theta[k])
+                psdfiletracker = np.append(psdfiletracker, testpf[k])
                 checker = True
         if checker == True:
             break
@@ -314,15 +350,29 @@ for k in tqdm(range(phi.size)):
 # dividing the total summed PSD in each bin by the number of points in that bin
 psdtracker = psdtracker/bincounter
 
+# writing data to a file - need to change each time or it will overwrite previous file
+file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/" + fname + "_post.txt", 'w')
+for i in range(psdfiletracker.size):
+    # writes vx, vy, and attenuated NPSD value
+    file.write(str(phifiletracker[i]) + ',' + str(thetafiletracker[i]) + ',' + str(psdfiletracker[i]) + ',' + str(vmags[i]) + '\n')
+file.close()
 
-fig = plt.figure()
-# plotting the cells/their values on an all-sky map using a mollweide projection
-ax = fig.add_subplot(111, projection='mollweide')
-arr = np.random.rand(180, 360)
+# Calculating the bin containing the max PSD average - plotted as green dot
+psdtrackermax = np.argmax(psdtracker)
+ptmindex = np.unravel_index(psdtracker.argmax(), psdtracker.shape)
+ptmphi = phibounds[ptmindex[0]]+.5*(phibounds[1]-phibounds[0])
+ptmtheta = thetabounds[ptmindex[1]]+.5*(thetabounds[1]-thetabounds[0])
+ptmphi = ptmphi*180/np.pi
+ptmtheta = ptmtheta*180/np.pi
+
+
 
 # defining a grid for the midpoints of the cells
-adjphib = np.linspace(-np.pi+ibexvawr, np.pi-ibexvawr, int(360/ibexvaw))
-adjthetab = np.linspace(-np.pi/2+ibexvawr, np.pi/2-ibexvawr, int(180/ibexvaw))
+#adjphib = np.linspace(-np.pi+ibexvawr, np.pi-ibexvawr, int(360/ibexvaw))
+#adjthetab = np.linspace(-np.pi/2+ibexvawr, np.pi/2-ibexvawr, int(180/ibexvaw))
+adjphib = np.linspace(-180, 180, int(360/ibexvaw+1))
+adjthetab = np.linspace(-90, 90, int(180/ibexvaw+1))
+
 
 # making a grid from the above
 Lon,Lat = np.meshgrid(adjphib,adjthetab)
@@ -332,6 +382,11 @@ psdtracker = np.transpose(psdtracker) # transposing the PSD value array to work 
 # calculating the upper and lower bounds for the IBEX viewing angle in each direction
 lookdir1 = thetarad + np.pi/2
 lookdir2 = thetarad - np.pi/2
+
+# defining the spacecraft bin width in degrees and radians
+ibexvaw = 30
+ibexvawr = ibexvaw*np.pi/180
+ibexvahwr = ibexvawr/2
 
 lookdir1up = lookdir1 + ibexvawr/2
 lookdir1low = lookdir1 - ibexvawr/2
@@ -356,6 +411,11 @@ if lookdir1up < -np.pi:
 if lookdir1low < -np.pi:
     lookdir1low = lookdir1low + 2*np.pi
 
+lookdir1up = lookdir1up * 180/np.pi
+lookdir1low = lookdir1low * 180/np.pi
+lookdir2up = lookdir2up * 180/np.pi
+lookdir2low = lookdir2low * 180/np.pi
+
 # creating arrays to plot boundary lines at the viewing angle limits
 ld1lowmarkers = lookdir1low*np.ones((thetabounds.size))
 ld1highmarkers = lookdir1up*np.ones((thetabounds.size))
@@ -365,22 +425,61 @@ thetatracker = np.zeros(theta.size)
 for i in range(theta.size):
     thetatracker[i] = theta[i]
 
-im = ax.pcolormesh(Lon,Lat,psdtracker, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(1),vmax=10**(6)))
+
+"""fig = plt.figure()
+# plotting the cells/their values on an all-sky map using a mollweide projection
+ax = fig.add_subplot(111, projection='mollweide')
+arr = np.random.rand(180, 360)"""
+
+pole_lat = 90-5.3
+pole_lon = 0
+cent_lon = 180
+rotated_pole2 = ccrs.RotatedPole( pole_latitude = pole_lat, 
+                                pole_longitude = pole_lon,
+                                central_rotated_longitude = cent_lon)
+# Create plot figure and axes
+ax = plt.axes(projection=ccrs.Mollweide())
+
+# Plot the graticule
+im = ax.pcolormesh(Lon,Lat,psdtracker, cmap='rainbow', transform=rotated_pole2, norm=matplotlib.colors.LogNorm(vmin=10**(1),vmax=10**(6)))
+#im = ax.pcolormesh(Lon,Lat,psdtracker, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(1),vmax=10**(6)))
+ax.gridlines(crs=rotated_pole2, draw_labels=False, 
+             xlocs=range(-165,165,30), 
+             ylocs=range(-90,90,15)) #draw_labels=True NOT allowed
+
+eclipticzero = -105
+lonlats = [ [15,0, '-120$^{\circ}$'], [eclipticzero,45, '45$^{\circ}$'], [eclipticzero,90, '90$^{\circ}$'], [eclipticzero,-45, '-45$^{\circ}$'],
+            [-15,0, '-90$^{\circ}$'], [eclipticzero,0, '0$^{\circ}$'], [165,0, '90$^{\circ}$'], [eclipticzero,15, '15$^{\circ}$'],
+            [eclipticzero,30, '30$^{\circ}$'], [eclipticzero,75, '75$^{\circ}$'], [eclipticzero,60, '60$^{\circ}$'], [eclipticzero,-15, '-15$^{\circ}$'],
+            [eclipticzero,-30, '-30$^{\circ}$'], [eclipticzero,-60, '-60$^{\circ}$'], [eclipticzero,-75, '-75$^{\circ}$'], [-75,0, '-30$^{\circ}$'], [-45,0, '-60$^{\circ}$'],
+            [45,0, '-150$^{\circ}$'], [75,0, '180$^{\circ}$'], [105,0, '150$^{\circ}$'], [135,0, '120$^{\circ}$'], [-135,0, '30$^{\circ}$'], [-165,0, '60$^{\circ}$']]
+fig = plt.figure(figsize=(8,6))
+for ea in lonlats:
+    ax.text(ea[0], ea[1], ea[2], fontsize=8, fontweight='ultralight', color="k", transform=rotated_pole2)
+
+thetaboundsdeg = thetabounds * 180/np.pi
+
 #im = ax.pcolormesh(Lon,Lat,psdtracker, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-15)))
-ax.plot(ld1lowmarkers, thetabounds, color='black', alpha=0.5)
-ax.plot(ld1highmarkers, thetabounds, color='black', alpha=0.5)
-ax.plot(ld2lowmarkers, thetabounds, color='black', alpha=0.5)
-ax.plot(ld2highmarkers, thetabounds, color='black', alpha=0.5)
-plt.grid()
+ax.plot(ld1lowmarkers, thetaboundsdeg, color='black', alpha=0.5, transform=rotated_pole2)
+ax.plot(ld1highmarkers, thetaboundsdeg, color='black', alpha=0.5, transform=rotated_pole2)
+ax.plot(ld2lowmarkers, thetaboundsdeg, color='black', alpha=0.5, transform=rotated_pole2)
+ax.plot(ld2highmarkers, thetaboundsdeg, color='black', alpha=0.5, transform=rotated_pole2)
+
+ax.scatter(fluxmaxphi, fluxmaxtheta, c='k', transform=rotated_pole2)
+ax.scatter(ptmphi, ptmtheta, c='g', transform=rotated_pole2)
+
+ax.set_global()
+
 #im = ax.scatter(phi,theta,c=fstore, cmap='rainbow')
 #plt.scatter(phi, theta, c=fstore, cmap='rainbow', s=.01)
+#plt.grid()
 plt.xlabel("Heliolongitude Angle $\phi$")
 plt.ylabel("Heliolatitude Angle θ")
-cb = fig.colorbar(im, ax=ax)
+cb = fig.colorbar(im, ax=ax, fraction=0.026, pad=0.04)
 cb.set_label('Differential Flux at Detector (cm$^-2$ s$^-1$ sr$^-1$ keV$^-1$)')
 plt.show()
 
-
+##########################################################################################################################
 
 # at some point - center bin around look direction angle?
 
@@ -392,6 +491,11 @@ phitrackerld = np.array([])
 thetatrackerld = np.array([])
 psdfiletrackerld = np.array([])
 
+
+lookdir1up = lookdir1up / (180/np.pi)
+lookdir1low = lookdir1low / (180/np.pi)
+lookdir2up = lookdir2up / (180/np.pi)
+lookdir2low = lookdir2low / (180/np.pi)
 
 for k in tqdm(range(phi.size)):
     checker = False
@@ -412,7 +516,7 @@ for k in tqdm(range(phi.size)):
 # normalizing by bin count
 psdtrackerld = psdtrackerld/bincounterld
 
-fig = plt.figure()
+"""fig = plt.figure()
 # plotting the cells/their values on an all-sky map using a mollweide projection
 ax = fig.add_subplot(111, projection='mollweide')
 arr = np.random.rand(180, 360)
@@ -424,20 +528,43 @@ adjthetab = np.linspace(-np.pi/2+ibexvawr, np.pi/2-ibexvawr, int(180/ibexvaw))
 # making a grid from the above
 Lon,Lat = np.meshgrid(adjphib,adjthetab)
 
-psdtrackerld = np.transpose(psdtrackerld) # transposing the PSD value array to work with the grid
+psdtrackerld = np.transpose(psdtrackerld) # transposing the PSD value array to work with the grid"""
 
 # writing data to a file - need to change each time or it will overwrite previous file
 file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/" + fname + "_ibexview.txt", 'w')
 for i in range(psdfiletrackerld.size):
     # writes vx, vy, and attenuated NPSD value
-    file.write(str(phitrackerld[i]) + ',' + str(thetatrackerld[i]) + ',' + str(psdfiletrackerld[i]) + '\n')
+    file.write(str(phitrackerld[i]) + ',' + str(thetatrackerld[i]) + ',' + str(psdfiletrackerld[i]) + ',' + str(vmags[i]) + '\n')
 file.close()
 
-im = ax.pcolormesh(Lon,Lat,psdtrackerld, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(1),vmax=10**(6)))
+"""im = ax.pcolormesh(Lon,Lat,psdtrackerld, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(1),vmax=10**(6)))
 ax.plot()
 plt.grid()
 #im = ax.scatter(phi,theta,c=fstore, cmap='rainbow')
 #plt.scatter(phi, theta, c=fstore, cmap='rainbow', s=.01)
+plt.xlabel("Heliolongitude Angle $\phi$")
+plt.ylabel("Heliolatitude Angle θ")
+cb = fig.colorbar(im, ax=ax)
+cb.set_label('Differential Flux at Detector (cm$^-2$ s$^-1$ sr$^-1$ keV$^-1$)')
+plt.show()"""
+
+
+psdtrackerld = np.transpose(psdtrackerld) # transposing the PSD value array to work with the grid
+
+fig = plt.figure()
+# Create plot figure and axes
+ax = plt.axes(projection=ccrs.Mollweide())
+
+# Plot the graticule
+im = ax.pcolormesh(Lon,Lat,psdtrackerld, cmap='rainbow', transform=rotated_pole2)
+ax.gridlines(crs=rotated_pole2, draw_labels=False, 
+             xlocs=range(-165,165,30), 
+             ylocs=range(-90,90,15)) #draw_labels=True NOT allowed
+for ea in lonlats:
+    ax.text(ea[0], ea[1], ea[2], fontsize=8, fontweight='ultralight', color="k", transform=rotated_pole2)
+
+#ax.set_global()
+
 plt.xlabel("Heliolongitude Angle $\phi$")
 plt.ylabel("Heliolatitude Angle θ")
 cb = fig.colorbar(im, ax=ax)
@@ -615,7 +742,7 @@ pftrackeresa1 = pftrackeresa1/bincounteresa1
 pftrackeresa2 = pftrackeresa2/bincounteresa2
 pftrackeresa3 = pftrackeresa3/bincounteresa3
 
-fig = plt.figure()
+"""fig = plt.figure()
 # plotting the cells/their values on an all-sky map using a mollweide projection
 ax = fig.add_subplot(111, projection='mollweide')
 arr = np.random.rand(180, 360)
@@ -625,17 +752,48 @@ adjphib = np.linspace(-np.pi+ibexvawr, np.pi-ibexvawr, int(360/ibexvaw))
 adjthetab = np.linspace(-np.pi/2+ibexvawr, np.pi/2-ibexvawr, int(180/ibexvaw))
 
 # making a grid from the above
-Lon,Lat = np.meshgrid(adjphib,adjthetab)
+Lon,Lat = np.meshgrid(adjphib,adjthetab)"""
 
 pftrackeresa1 = np.transpose(pftrackeresa1) # transposing the PSD value array to work with the grid
 pftrackeresa2 = np.transpose(pftrackeresa2)
 pftrackeresa3 = np.transpose(pftrackeresa3)
 
-im = ax.pcolormesh(Lon,Lat,pftrackeresa1, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(1),vmax=10**(7)))
-ax.plot()
-plt.grid()
-#im = ax.scatter(phi,theta,c=fstore, cmap='rainbow')
-#plt.scatter(phi, theta, c=fstore, cmap='rainbow', s=.01)
+fig = plt.figure()
+# Create plot figure and axes
+ax = plt.axes(projection=ccrs.Mollweide())
+
+# Plot the graticule
+im = ax.pcolormesh(Lon,Lat,pftrackeresa1, cmap='rainbow', transform=rotated_pole2, norm=matplotlib.colors.LogNorm(vmin=10**(1),vmax=10**(7)))
+ax.gridlines(crs=rotated_pole2, draw_labels=False, 
+             xlocs=range(-180,180,30), 
+             ylocs=range(-90,90,15)) #draw_labels=True NOT allowed
+for ea in lonlats:
+    ax.text(ea[0], ea[1], ea[2], fontsize=8, fontweight='ultralight', color="k", transform=rotated_pole2)
+
+ax.set_global()
+
+plt.xlabel("Heliolongitude Angle $\phi$")
+plt.ylabel("Heliolatitude Angle θ")
+cb = fig.colorbar(im, ax=ax)
+cb.set_label('Differential Flux at Detector (cm$^-2$ s$^-1$ sr$^-1$ keV$^-1$)')
+plt.show()
+
+
+
+fig = plt.figure()
+# Create plot figure and axes
+ax = plt.axes(projection=ccrs.Mollweide())
+
+# Plot the graticule
+im = ax.pcolormesh(Lon,Lat,pftrackeresa2, cmap='rainbow', transform=rotated_pole2, norm=matplotlib.colors.LogNorm(vmin=10**(1),vmax=10**(7)))
+ax.gridlines(crs=rotated_pole2, draw_labels=False, 
+             xlocs=range(-180,180,30), 
+             ylocs=range(-90,90,15)) #draw_labels=True NOT allowed
+for ea in lonlats:
+    ax.text(ea[0], ea[1], ea[2], fontsize=8, fontweight='ultralight', color="k", transform=rotated_pole2)
+
+ax.set_global()
+
 plt.xlabel("Heliolongitude Angle $\phi$")
 plt.ylabel("Heliolatitude Angle θ")
 cb = fig.colorbar(im, ax=ax)
@@ -643,29 +801,19 @@ cb.set_label('Differential Flux at Detector (cm$^-2$ s$^-1$ sr$^-1$ keV$^-1$)')
 plt.show()
 
 fig = plt.figure()
-# plotting the cells/their values on an all-sky map using a mollweide projection
-ax = fig.add_subplot(111, projection='mollweide')
-arr = np.random.rand(180, 360)
-im = ax.pcolormesh(Lon,Lat,pftrackeresa2, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(1),vmax=10**(7)))
-ax.plot()
-plt.grid()
-#im = ax.scatter(phi,theta,c=fstore, cmap='rainbow')
-#plt.scatter(phi, theta, c=fstore, cmap='rainbow', s=.01)
-plt.xlabel("Heliolongitude Angle $\phi$")
-plt.ylabel("Heliolatitude Angle θ")
-cb = fig.colorbar(im, ax=ax)
-cb.set_label('Differential Flux at Detector (cm$^-2$ s$^-1$ sr$^-1$ keV$^-1$)')
-plt.show()
+# Create plot figure and axes
+ax = plt.axes(projection=ccrs.Mollweide())
 
-fig = plt.figure()
-# plotting the cells/their values on an all-sky map using a mollweide projection
-ax = fig.add_subplot(111, projection='mollweide')
-arr = np.random.rand(180, 360)
-im = ax.pcolormesh(Lon,Lat,pftrackeresa3, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(1),vmax=10**(7)))
-ax.plot()
-plt.grid()
-#im = ax.scatter(phi,theta,c=fstore, cmap='rainbow')
-#plt.scatter(phi, theta, c=fstore, cmap='rainbow', s=.01)
+# Plot the graticule
+im = ax.pcolormesh(Lon,Lat,pftrackeresa3, cmap='rainbow', transform=rotated_pole2, norm=matplotlib.colors.LogNorm(vmin=10**(1),vmax=10**(7)))
+ax.gridlines(crs=rotated_pole2, draw_labels=False, 
+             xlocs=range(-180,180,30), 
+             ylocs=range(-90,90,15)) #draw_labels=True NOT allowed
+for ea in lonlats:
+    ax.text(ea[0], ea[1], ea[2], fontsize=8, fontweight='ultralight', color="k", transform=rotated_pole2)
+
+ax.set_global()
+
 plt.xlabel("Heliolongitude Angle $\phi$")
 plt.ylabel("Heliolatitude Angle θ")
 cb = fig.colorbar(im, ax=ax)
@@ -679,49 +827,61 @@ crtrackeresa2 = pftrackeresa2*geometricfactor*(esas[2]-esas[1])
 crtrackeresa3 = pftrackeresa3*geometricfactor*(esas[3]-esas[2])
 
 fig = plt.figure()
-# plotting the cells/their values on an all-sky map using a mollweide projection
-ax = fig.add_subplot(111, projection='mollweide')
-arr = np.random.rand(180, 360)
-im = ax.pcolormesh(Lon,Lat,crtrackeresa1, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-5),vmax=10**(1)))
-#im = ax.pcolormesh(Lon,Lat,crtrackeresa1, cmap='rainbow', norm=matplotlib.colors.LogNorm())
-ax.plot()
-plt.grid()
-#im = ax.scatter(phi,theta,c=fstore, cmap='rainbow')
-#plt.scatter(phi, theta, c=fstore, cmap='rainbow', s=.01)
+# Create plot figure and axes
+ax = plt.axes(projection=ccrs.Mollweide())
+
+# Plot the graticule
+im = ax.pcolormesh(Lon,Lat,crtrackeresa1, cmap='rainbow', transform=rotated_pole2, norm=matplotlib.colors.LogNorm(vmin=10**(-5),vmax=10**(1)))
+ax.gridlines(crs=rotated_pole2, draw_labels=False, 
+             xlocs=range(-180,180,30), 
+             ylocs=range(-90,90,15)) #draw_labels=True NOT allowed
+for ea in lonlats:
+    ax.text(ea[0], ea[1], ea[2], fontsize=8, fontweight='ultralight', color="k", transform=rotated_pole2)
+
+ax.set_global()
+
 plt.xlabel("Heliolongitude Angle $\phi$")
 plt.ylabel("Heliolatitude Angle θ")
 cb = fig.colorbar(im, ax=ax)
-cb.set_label('Average Count Rates at Detector')
+cb.set_label('Average Count Rates at Detector (s$^-1$)')
 plt.show()
 
 fig = plt.figure()
-# plotting the cells/their values on an all-sky map using a mollweide projection
-ax = fig.add_subplot(111, projection='mollweide')
-arr = np.random.rand(180, 360)
-im = ax.pcolormesh(Lon,Lat,crtrackeresa2, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-5),vmax=10**(1)))
-#im = ax.pcolormesh(Lon,Lat,crtrackeresa2, cmap='rainbow', norm=matplotlib.colors.LogNorm())
-ax.plot()
-plt.grid()
-#im = ax.scatter(phi,theta,c=fstore, cmap='rainbow')
-#plt.scatter(phi, theta, c=fstore, cmap='rainbow', s=.01)
+# Create plot figure and axes
+ax = plt.axes(projection=ccrs.Mollweide())
+
+# Plot the graticule
+im = ax.pcolormesh(Lon,Lat,crtrackeresa2, cmap='rainbow', transform=rotated_pole2, norm=matplotlib.colors.LogNorm(vmin=10**(-5),vmax=10**(1)))
+ax.gridlines(crs=rotated_pole2, draw_labels=False, 
+             xlocs=range(-180,180,30), 
+             ylocs=range(-90,90,15)) #draw_labels=True NOT allowed
+for ea in lonlats:
+    ax.text(ea[0], ea[1], ea[2], fontsize=8, fontweight='ultralight', color="k", transform=rotated_pole2)
+
+ax.set_global()
+
 plt.xlabel("Heliolongitude Angle $\phi$")
 plt.ylabel("Heliolatitude Angle θ")
 cb = fig.colorbar(im, ax=ax)
-cb.set_label('Average Count Rates at Detector')
+cb.set_label('Average Count Rates at Detector (s$^-1$)')
 plt.show()
 
 fig = plt.figure()
-# plotting the cells/their values on an all-sky map using a mollweide projection
-ax = fig.add_subplot(111, projection='mollweide')
-arr = np.random.rand(180, 360)
-im = ax.pcolormesh(Lon,Lat,crtrackeresa3, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-5),vmax=10**(1)))
-#im = ax.pcolormesh(Lon,Lat,crtrackeresa3, cmap='rainbow', norm=matplotlib.colors.LogNorm())
-ax.plot()
-plt.grid()
-#im = ax.scatter(phi,theta,c=fstore, cmap='rainbow')
-#plt.scatter(phi, theta, c=fstore, cmap='rainbow', s=.01)
+# Create plot figure and axes
+ax = plt.axes(projection=ccrs.Mollweide())
+
+# Plot the graticule
+im = ax.pcolormesh(Lon,Lat,crtrackeresa3, cmap='rainbow', transform=rotated_pole2, norm=matplotlib.colors.LogNorm(vmin=10**(-5),vmax=10**(1)))
+ax.gridlines(crs=rotated_pole2, draw_labels=False, 
+             xlocs=range(-180,180,30), 
+             ylocs=range(-90,90,15)) #draw_labels=True NOT allowed
+for ea in lonlats:
+    ax.text(ea[0], ea[1], ea[2], fontsize=8, fontweight='ultralight', color="k", transform=rotated_pole2)
+
+ax.set_global()
+
 plt.xlabel("Heliolongitude Angle $\phi$")
 plt.ylabel("Heliolatitude Angle θ")
 cb = fig.colorbar(im, ax=ax)
-cb.set_label('Average Count Rates at Detector')
+cb.set_label('Average Count Rates at Detector (s$^-1$)')
 plt.show()

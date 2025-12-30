@@ -20,13 +20,9 @@ file from which the code imports data.
 
 #####################################################################################################################################
 
-inputfilename = "C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Meetings, Conferences, etc/AGU 2025/SimData/lostpoints_312deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres"
+inputfilename = "C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/lostpoints_37pi36_t0_lya_Federicodist_datamu_order5_updatedir_analyticbc_3500vres"
 inputfile = np.loadtxt(inputfilename + ".txt", delimiter=',')
-theta = 312 # angle with respect to upwind axis of target point
-oneyear = 3.15545454545*10**7
-# 120749800 for first force free
-# 226250200 for second force free
-finalt = 22/60*oneyear # time to start backtracing
+theta = 227 # angle with respect to upwind axis of target point
 
 # Set of initial conditions in velocity space
 # vx/vy initial conditions are sampled on a grid with chosen resolution
@@ -50,13 +46,18 @@ mH = 1.6736*10**(-27) # mass of hydrogen in kg
 # one year in s = 3.156e7 s (Julian year, average length of a year)
 # 11 Julian years = 3.471e8 s
 # Note to self: solar maximum in April 2014
+oneyear = 3.15545454545*10**7
 
+
+# 120749800 for first force free
+# 226250200 for second force free
+finalt = 5*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -50000000000 # time in the past to which the code should backtrace
-tstep = 1000 # general time resolution
+tstep = 10000 # general time resolution
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
-refdist = 100
+refdist = 115
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
@@ -233,14 +234,9 @@ fifthorderoffset = 2.5*oneyear
 firstorderoffset = .5*oneyear
 fifthordertwocyclesagooffset = 2.5*oneyear - 22.4*oneyear
 
-desiredoffset = fifthorderoffset
+secondsoffset = seconds-fifthorderoffset
 
-secondsoffset = seconds-desiredoffset
-
-#loopoffset = -32.408
-loopoffset = -54.80
-
-irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-desiredoffset], values=filteredia)
+irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-fifthorderoffset], values=filteredia)
 
 #####################################################################################################################################
 
@@ -323,7 +319,7 @@ def lya_abs(t,x,y,z,vr):
     ttemp = t
     tbounded = False
     while not tbounded:
-        if ttemp >= loopoffset*oneyear:
+        if ttemp >= -32.408*oneyear:
             tbounded = True
         else:
             ttemp = ttemp + 1.392*10**(9)
@@ -530,36 +526,21 @@ for i in tqdm(range(vxstart.size)): # displays progress bars for both loops to m
             # function for the photoionization rate at each point in time
             #PIrate2 = 10**(-7)*(1 + .7/(np.e + 1/np.e)*(np.cos(omt - np.pi)*np.exp(np.cos(omt - np.pi)) + 1/np.e))
             #PIrate2 = 1.21163*10**(-7) # time average of above
-            ttemp = t[0:kn+1]
-            tbounded = False
-            for ind2 in range(ttemp.size):
-                tbounded = False
-                while not tbounded:
-                    if ttemp[ind2] >= loopoffset*oneyear:
-                        tbounded = True
-                    else:
-                        ttemp[ind2] = ttemp[ind2] + 1.392*10**(9)
             PIrate2 = np.zeros(t[0:kn+1].size)
             for ind1 in range(t[0:kn+1].size):
-                PIrate2[ind1] = (filteredia[np.abs(secondsoffset - ttemp[ind1]).argmin()]*wm2toph/(10**(11)))**(1.49929) / (7.25503 * 10**(7))
-            
+                print((filteredia[np.abs(secondsoffset - t[ind1]).argmin()]*wm2toph/(10**(11)))**(1.49929) / (7.25503 * 10**(7)))
+                PIrate2[ind1] = (filteredia[np.abs(secondsoffset - t[ind1]).argmin()]*10**(3))**(1.49929) / (7.25503 * 10**(7))
             # calculating the component of the radial unit vector in each direction at each point in time
             nrvecx = (-sunpos[0]+backtraj[0:kn+1,0])/currentrad
             nrvecy = (-sunpos[1]+backtraj[0:kn+1,1])/currentrad
             nrvecz = (-sunpos[2]+backtraj[0:kn+1,2])/currentrad
             # calculating the magnitude of v_r at each point in time
             currentvr = backtraj[0:kn+1,3]*nrvecx[0:kn+1] + backtraj[0:kn+1,4]*nrvecy[0:kn+1] + backtraj[0:kn+1,5]*nrvecz[0:kn+1]
-            xecliptic = backtraj[0:kn+1,0]*np.cos(eclipticangle) + backtraj[0:kn+1,2]*np.sin(eclipticangle)
-            yecliptic = backtraj[0:kn+1,1]
-            zecliptic = -backtraj[0:kn+1,0]*np.sin(eclipticangle) + backtraj[0:kn+1,2]*np.cos(eclipticangle)
-            cradecl = np.sqrt((sunpos[0]-xecliptic)**2 + (sunpos[1]-yecliptic)**2 + (sunpos[2]-zecliptic)**2)
-            # calculation of heliographic latitude angle (polar angle)
-            belowxy = zecliptic < 0
-            zmask = 2*(belowxy-.5)
-            latangleecl = np.pi/2 + zmask*np.arcsin(np.abs(zecliptic - sunpos[2])/currentrad[:])
-
-            # integrand for the photoionization losses, with photoionization adjusted based on heliographic latitude angle
-            btintegrand = PIrate2/currentvr*(r1/currentrad)**2*(.85*(np.sin(latangleecl))**2 + (np.cos(latangleecl))**2) + + cxirate/currentvr*(r1/currentrad)**2
+            # calculating maximum and minimum radial velocities throughout the whole trajectory
+            vrmax = np.append(vrmax, max(currentvr))
+            vrmin = np.append(vrmin, min(currentvr))
+            # integrand for the photoionization and charge exchange ionization losses
+            btintegrand = PIrate2/currentvr*(r1/currentrad)**2 + cxirate/currentvr*(r1/currentrad)**2
 
             # calculation of heliographic latitude angle (polar angle)
             #belowxy = backtraj[0:kn+1,2] < 0
@@ -592,13 +573,3 @@ for i in tqdm(range(vxstart.size)): # displays progress bars for both loops to m
             fart = np.append(fart, [0])
             # sets the value of the NPSD to 0 to indicate the trajectory isn't viable
             maxwcolor = np.append(maxwcolor, [0])
-                
-
-
-# writing data to a file - need to change each time or it will overwrite previous file
-file = open(inputfilename + "_revised.txt", 'w')
-#file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
-for i in range(farvx.size):
-    # writes vx, vy, and attenuated NPSD value
-    file.write(str(farvx[i]/1000) + ',' + str(farvy[i]/1000) + ',' + str(farvz[i]/1000) + ',' + str(maxwcolor[i]) + '\n')
-file.close()

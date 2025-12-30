@@ -25,11 +25,11 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 5.5*oneyear # time to start backtracing
+finalt = -0.75*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -1*10**(12) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
-tstepclose = 20 # time resolution for close regime
+tstepclose = 300 # time resolution for close regime
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 100 # upwind reference distance for backtraced trajectories, in au
@@ -39,7 +39,7 @@ refdist = 100 # upwind reference distance for backtraced trajectories, in au
 # https://ibex.princeton.edu/sites/g/files/toruqf1596/files/moebius_et_al_2012.pdf
 # above gives angle of ecliptic relative to ISM flow
 sunpos = np.array([0,0,0])
-theta = 275 # angle with respect to upwind axis of target point
+theta = 150 # angle with respect to upwind axis of target point
 ibexrad = 1 # radial distance of target point from Sun
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -88,10 +88,10 @@ zstart = ibexpos[2]
 # vx/vy initial conditions are sampled on a grid with chosen resolution
 #vxstart = np.arange(-5000, 5000, 50)
 #vystart = np.arange(-10000, 10000, 100)
-#vxstart = np.arange(-25000, 25000, 300)
-#vystart = np.arange(-25000, 25000, 300)
-vxstart = np.arange(-26500, -25500, 20)
-vystart = np.arange(-5500, -4500, 20)
+vxstart = np.arange(-25000, 25000, 300)
+vystart = np.arange(-25000, 25000, 300)
+#vxstart = np.arange(-26500, -25500, 20)
+#vystart = np.arange(-5500, -4500, 20)
 #vxstart = np.arange(-10000, -5000, 30)
 #vystart = np.arange(-10000, -5000, 30)
 vzstart = 0
@@ -809,7 +809,7 @@ if mode==3:
 
                         # velocity squared at each point in time for the trajectory
                         currentvsq = np.square(backtraj[0:kn+1,3]) + np.square(backtraj[0:kn+1,4]) + np.square(backtraj[0:kn+1,5])
-                        # thermal velocity (temperature taken from Federico's given temperature)
+                        """# thermal velocity (temperature taken from Federico's given temperature)
                         vth = np.sqrt(2 * 1.381*10**(-23) * 7500 / (1.672*10**(-27)))
                         # omega for the relative velocity
                         omegavs = np.abs(np.sqrt(currentvsq) - vsolarwindms)/vth
@@ -829,8 +829,9 @@ if mode==3:
 
                         #nsw = nsw1au * (r1/currentrad)**2 # assuming r^2 falloff for density (Sokol et al. 2019)
 
-                        cxirate = nsw1au * currentvrel*100 * cxcrosssection
+                        cxirate = nsw1au * currentvrel*100 * cxcrosssection"""
 
+                        cxirate = 5*10**(-7)
                         # omega*t for each time point in the trajectory
                         omt = 2*np.pi/(3.47*10**(8))*t[0:kn+1]
                         # function for the photoionization rate at each point in time
@@ -850,7 +851,7 @@ if mode==3:
                         # integrand for the photoionization and charge exchange ionization losses
                         btintegrand = PIrate2/currentvr*(r1/currentrad)**2 + cxirate/currentvr*(r1/currentrad)**2
                         # calculation of attenuation factor
-                        attfact = scipy.integrate.simps(btintegrand, currentrad)
+                        attfact = scipy.integrate.simpson(btintegrand, x=currentrad)
                         # retaining variables corresponding to vx, vy, t at the target point
                         farvx = np.append(farvx, [backtraj[0,3]])
                         farvy = np.append(farvy, [backtraj[0,4]])
@@ -871,7 +872,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_-17pi36_5p5yrs_directcore_cosexp+cxpi_tclose20_r=1au.txt", 'w')
+    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_-p75_center_cosexp+cxpi_tclose300_r=1au.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value

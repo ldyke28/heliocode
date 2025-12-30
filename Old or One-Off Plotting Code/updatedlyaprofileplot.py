@@ -113,19 +113,20 @@ filteredia = filterediaoffset + offset
 
 tgrid = np.meshgrid(secondsnew, indexing='ij') # order will be z, y, x for this
 
-fifthorderoffset = 2.5*oneyear  - 5.5*oneyear#- 22.4*oneyear
+fifthorderoffset = 2.5*oneyear #- 22.4*oneyear
 firstorderoffset = .5*oneyear
 
 irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-fifthorderoffset], values=filteredia)
 #irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds+29.5*oneyear], values=irradiance)
+#irradianceinterp = scipy.interpolate.interp1d(seconds-fifthorderoffset, filteredia, fill_value='extrapolate')
 
-#tcheck = np.arange(-1*10**9, 1*10**8, 1*10**4)
-#interpcheck = np.zeros(tcheck.size)
-#for i in range(tcheck.size):
-#    interpcheck[i] = irradianceinterp([tcheck[i]])
+tcheck = np.arange(-1*10**9, 6*10**8, 1*10**4)
+interpcheck = np.zeros(tcheck.size)
+for i in range(tcheck.size):
+    interpcheck[i] = irradianceinterp([tcheck[i]])
 
-plt.plot((seconds-fifthorderoffset)*secondstoyears, filteredia*wm2toph/(10**(11)), alpha = 0.7,color='b')
-#plt.plot((tcheck)*secondstoyears, interpcheck*wm2toph/(10**(11)), alpha = 0.7,color='y')
+#plt.plot((seconds-fifthorderoffset)*secondstoyears, filteredia*wm2toph/(10**(11)), alpha = 0.7,color='b')
+plt.plot((tcheck)*secondstoyears, interpcheck*wm2toph/(10**(11)), alpha = 0.7,color='k')
 plt.plot((seconds)*secondstoyears, irradiance*wm2toph/(10**(11)), alpha=0.7, color='r')
 plt.ylim([3,7.5])
 plt.xlabel("Time (yrs)")

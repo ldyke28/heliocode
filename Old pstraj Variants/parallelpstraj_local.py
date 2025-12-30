@@ -73,9 +73,11 @@ ibexpos = np.array([ibexx*au, ibexy*au, 0])
 
 
 # Initial Conditions for orbit starting at point of interest for backtracing
-xstart = ibexpos[0]
+# Adjusting these so they lie in the ecliptic, 5.3 degrees off of the ISM flow vector
+eclipticangle = 5.3 *np.pi/180
+xstart = ibexpos[0]*np.cos(eclipticangle) + ibexpos[2]*np.sin(eclipticangle)
 ystart = ibexpos[1]
-zstart = ibexpos[2]
+zstart = -ibexpos[0]*np.sin(eclipticangle) + ibexpos[2]*np.cos(eclipticangle)
 
 # Set of initial conditions in velocity space
 # vx/vy initial conditions are sampled on a grid with chosen resolution

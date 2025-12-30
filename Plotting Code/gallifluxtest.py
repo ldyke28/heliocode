@@ -4,7 +4,10 @@ import matplotlib
 import scipy
 from tqdm import tqdm
 import scipy.interpolate
+import scipy.integrate
+import scipy.stats
 import cartopy.crs as ccrs
+
 
 #############################################################################################################
 # RELEVANT VARIABLES/PARAMETERS
@@ -17,9 +20,9 @@ tempH = 7500 # LISM hydrogen temperature in K
 mH = 1.6736*10**(-27) # mass of hydrogen in kg
 vthn = np.sqrt(2*1.381*10**(-29)*tempH/mH) # thermal velocity of LISM H
 
-thetavar = 293 # angle with respect to the upwind axis of the target point
+theta = 275 # angle with respect to the upwind axis of the target point
 vsc = 30000 # velocity of spacecraft in m/s
-thetarad = thetavar*np.pi/180 # expressing the value of theta in radians
+thetarad = theta*np.pi/180 # expressing the value of theta in radians
 # calculating the shift of the particle velocities into the spacecraft frame
 xshiftfactor = -vsc*np.cos(thetarad + np.pi/2)
 yshiftfactor = -vsc*np.sin(thetarad + np.pi/2)
@@ -47,233 +50,59 @@ def eVtov(esaenergy):
 
 #############################################################################################################
 
-file1 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/228deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres_ibexview.txt", delimiter=',')
-file2 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/234deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres_ibexview.txt", delimiter=',')
-file3 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/240deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres_ibexview.txt", delimiter=',')
-file4 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/246deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres_ibexview.txt", delimiter=',')
-file5 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/252deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres_ibexview.txt", delimiter=',')
-file6 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/258deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres_ibexview.txt", delimiter=',')
-file7 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/264deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres_ibexview.txt", delimiter=',')
-file8 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/270deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres_ibexview.txt", delimiter=',')
-file9 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/276deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres_ibexview.txt", delimiter=',')
-file10 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/282deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres_ibexview.txt", delimiter=',')
-file11 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/288deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres_ibexview.txt", delimiter=',')
-file12 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/294deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres_ibexview.txt", delimiter=',')
-file13 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/300deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres_ibexview.txt", delimiter=',')
-file14 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/306deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres_ibexview.txt", delimiter=',')
-file15 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/312deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres_ibexview.txt", delimiter=',')
+"""file1 = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/-17pi36_5p5yr_lya_Federicodist_datamu_fixed_3500vres_post.txt", delimiter=',')
 
+print("1")
 
-
-phi = np.array([])
-theta = np.array([])
-flux = np.array([])
-vmag = np.array([])
+phi1 = np.array([])
+theta1 = np.array([])
+flux1 = np.array([])
+vmag1 = np.array([])
 
 # unpacking data from both files
-for i in range(np.shape(file1)[0]):
-    phi = np.append(phi, file1[i,0])
-    theta = np.append(theta, file1[i,1])
-    flux = np.append(flux, file1[i,2])
-    vmag = np.append(vmag, file1[i,3])
+for i in tqdm(range(np.shape(file1)[0])):
+    phi1 = np.append(phi1, file1[i,0])
+    theta1 = np.append(theta1, file1[i,1])
+    flux1 = np.append(flux1, file1[i,2])
+    vmag1 = np.append(vmag1, file1[i,3])
 
-for i in range(np.shape(file2)[0]):
-    phi = np.append(phi, file2[i,0])
-    theta = np.append(theta, file2[i,1])
-    flux = np.append(flux, file2[i,2])
-    vmag = np.append(vmag, file2[i,3])
-
-for i in range(np.shape(file3)[0]):
-    phi = np.append(phi, file3[i,0])
-    theta = np.append(theta, file3[i,1])
-    flux = np.append(flux, file3[i,2])
-    vmag = np.append(vmag, file3[i,3])
-
-for i in range(np.shape(file4)[0]):
-    phi = np.append(phi, file4[i,0])
-    theta = np.append(theta, file4[i,1])
-    flux = np.append(flux, file4[i,2])
-    vmag = np.append(vmag, file4[i,3])
-
-for i in range(np.shape(file5)[0]):
-    phi = np.append(phi, file5[i,0])
-    theta = np.append(theta, file5[i,1])
-    flux = np.append(flux, file5[i,2])
-    vmag = np.append(vmag, file5[i,3])
-
-for i in range(np.shape(file6)[0]):
-    phi = np.append(phi, file6[i,0])
-    theta = np.append(theta, file6[i,1])
-    flux = np.append(flux, file6[i,2])
-    vmag = np.append(vmag, file6[i,3])
-
-for i in range(np.shape(file7)[0]):
-    phi = np.append(phi, file7[i,0])
-    theta = np.append(theta, file7[i,1])
-    flux = np.append(flux, file7[i,2])
-    vmag = np.append(vmag, file7[i,3])
-
-for i in range(np.shape(file8)[0]):
-    phi = np.append(phi, file8[i,0])
-    theta = np.append(theta, file8[i,1])
-    flux = np.append(flux, file8[i,2])
-    vmag = np.append(vmag, file8[i,3])
-
-for i in range(np.shape(file9)[0]):
-    phi = np.append(phi, file9[i,0])
-    theta = np.append(theta, file9[i,1])
-    flux = np.append(flux, file9[i,2])
-    vmag = np.append(vmag, file9[i,3])
-
-for i in range(np.shape(file10)[0]):
-    phi = np.append(phi, file10[i,0])
-    theta = np.append(theta, file10[i,1])
-    flux = np.append(flux, file10[i,2])
-    vmag = np.append(vmag, file10[i,3])
-
-for i in range(np.shape(file11)[0]):
-    phi = np.append(phi, file11[i,0])
-    theta = np.append(theta, file11[i,1])
-    flux = np.append(flux, file11[i,2])
-    vmag = np.append(vmag, file11[i,3])
-
-for i in range(np.shape(file12)[0]):
-    phi = np.append(phi, file12[i,0])
-    theta = np.append(theta, file12[i,1])
-    flux = np.append(flux, file12[i,2])
-    vmag = np.append(vmag, file12[i,3])
-
-for i in range(np.shape(file13)[0]):
-    phi = np.append(phi, file13[i,0])
-    theta = np.append(theta, file13[i,1])
-    flux = np.append(flux, file13[i,2])
-    vmag = np.append(vmag, file13[i,3])
-
-for i in range(np.shape(file14)[0]):
-    phi = np.append(phi, file14[i,0])
-    theta = np.append(theta, file14[i,1])
-    flux = np.append(flux, file14[i,2])
-    vmag = np.append(vmag, file14[i,3])
-
-for i in range(np.shape(file15)[0]):
-    phi = np.append(phi, file15[i,0])
-    theta = np.append(theta, file15[i,1])
-    flux = np.append(flux, file15[i,2])
-    vmag = np.append(vmag, file15[i,3])
-
-#phi = -phi
 
 # creating grid points in angle space
 phibounds = np.linspace(-np.pi, np.pi, int(360/ibexvaw+1))
 thetabounds = np.linspace(-np.pi/2, np.pi/2, int(180/ibexvaw+1))
 
 # creating an array to track the PSD value at the center of the cells made by the grid points
-psdtracker = np.zeros((phibounds.size-1, thetabounds.size-1))
-bincounter = np.zeros((phibounds.size-1, thetabounds.size-1))
+psdtracker1 = np.zeros((phibounds.size-1, thetabounds.size-1))
+bincounter1 = np.zeros((phibounds.size-1, thetabounds.size-1))
 
-
+print("2")
 
 # finds which cell each velocity point lies in
-"""for k in tqdm(range(phi.size)):
+for k in tqdm(range(phi1.size)):
     checker = False
     for i in range(phibounds.size-1):
         for j in range(thetabounds.size-1):
-            if phibounds[i] <= phi[k] < phibounds[i+1] and thetabounds[j] <= theta[k] < thetabounds[j+1]:
+            if phibounds[i] <= phi1[k] < phibounds[i+1] and thetabounds[j] <= theta1[k] < thetabounds[j+1]:
                 # adding the value of the PSD to the associated value for the cell and exiting the loop
                 #psdtracker[i,j] += particleflux[k]
-                psdtracker[i,j] += flux[k]
-                bincounter[i,j] += 1
+                psdtracker1[i,j] += flux1[k]
+                bincounter1[i,j] += 1
                 checker = True
         if checker == True:
             break
 
 # dividing the total summed PSD in each bin by the number of points in that bin
-psdtracker = psdtracker/bincounter"""
-"""fig = plt.figure()
-# plotting the cells/their values on an all-sky map using a mollweide projection
-ax = fig.add_subplot(111, projection='mollweide')
-arr = np.random.rand(180, 360)
+psdtracker1 = psdtracker1/bincounter1
 
-# defining a grid for the midpoints of the cells
-adjphib = np.linspace(-np.pi+ibexvawr, np.pi-ibexvawr, int(360/ibexvaw))
-adjthetab = np.linspace(-np.pi/2+ibexvawr, np.pi/2-ibexvawr, int(180/ibexvaw))
+psdtracker1 = np.transpose(psdtracker1)
 
-# making a grid from the above
-Lon,Lat = np.meshgrid(adjphib,adjthetab)
-
-psdtracker = np.transpose(psdtracker) # transposing the PSD value array to work with the grid
-
-im = ax.pcolormesh(Lon,Lat,psdtracker, cmap='rainbow')#, norm=matplotlib.colors.LogNorm(vmin=10**(1),vmax=10**(6)))
-ax.plot()
-plt.grid()
-#im = ax.scatter(phi,theta,c=fstore, cmap='rainbow')
-#plt.scatter(phi, theta, c=fstore, cmap='rainbow', s=.01)
-plt.xlabel("Heliolongitude Angle $\phi$")
-plt.ylabel("Heliolatitude Angle θ")
-cb = fig.colorbar(im, ax=ax)
-cb.set_label('Differential Flux at Detector')
-plt.show()"""
-
-
-# arrays to track flux values and bin counts in each ESA range
-pftrackeresa1 = np.zeros((phibounds.size-1, thetabounds.size-1))
-bincounteresa1 = np.zeros((phibounds.size-1, thetabounds.size-1))
-pftrackeresa2 = np.zeros((phibounds.size-1, thetabounds.size-1))
-bincounteresa2 = np.zeros((phibounds.size-1, thetabounds.size-1))
-pftrackeresa3 = np.zeros((phibounds.size-1, thetabounds.size-1))
-bincounteresa3 = np.zeros((phibounds.size-1, thetabounds.size-1))
-
-# converting each ESA boundary to m/s to compare with velocities
-esa1lowv = eVtov(esas[0]*1000)
-esa12 = eVtov(esas[1]*1000)
-esa23 = eVtov(esas[2]*1000)
-esa3upb = eVtov(esas[3]*1000)
-
-geometricfactor = 1.41*10**(-5) # geometric factor in cm^2 sr for IBEX-Lo, after https://iopscience.iop.org/article/10.3847/1538-4365/adcd5c/pdf
-
-print(esa1lowv)
-print(esa3upb)
-
-vmagskms = vmag*1000
-
-# checking which bin and in which ESA range each point falls
-for k in tqdm(range(phi.size)):
-    checker = False
-    for i in range(phibounds.size-1):
-        for j in range(thetabounds.size-1):
-            if phibounds[i] <= phi[k] < phibounds[i+1] and thetabounds[j] <= theta[k] < thetabounds[j+1]:
-                if esa1lowv < vmagskms[k] < esa12:
-                    pftrackeresa1[i,j] += flux[k]
-                    bincounteresa1[i,j] += 1
-                elif esa12 < vmagskms[k] < esa23:
-                    pftrackeresa2[i,j] += flux[k]
-                    bincounteresa2[i,j] += 1
-                elif esa23 < vmagskms[k] < esa3upb:
-                    pftrackeresa3[i,j] += flux[k]
-                    bincounteresa3[i,j] += 1
-                psdtracker[i,j] += flux[k]
-                bincounter[i,j] += 1
-                checker = True
-        if checker == True:
-            break
-
-# normalizing by bin count
-pftrackeresa1 = pftrackeresa1/bincounteresa1
-pftrackeresa2 = pftrackeresa2/bincounteresa2
-pftrackeresa3 = pftrackeresa3/bincounteresa3
-psdtracker = psdtracker/bincounter
 
 # defining a grid for the midpoints of the cells
 adjphib = np.linspace(-180, 180, int(360/ibexvaw+1))
 adjthetab = np.linspace(-90, 90, int(180/ibexvaw+1))
 
 # making a grid from the above
-Lon,Lat = np.meshgrid(adjphib,adjthetab)
-
-pftrackeresa1 = np.transpose(pftrackeresa1) # transposing the PSD value array to work with the grid
-pftrackeresa2 = np.transpose(pftrackeresa2)
-pftrackeresa3 = np.transpose(pftrackeresa3)
-psdtracker = np.transpose(psdtracker)
+Lon,Lat = np.meshgrid(adjphib,adjthetab)"""
 
 # defining a grid for the midpoints of the cells
 adjphibg = np.array([189.7,197.4,203.5,211.2,218.9,226.9,234.7,242.4,250.0,257.0,264.7,273.1,280.7,288.2,295.7,303.1,310.5,318.1,325.6,332.8])
@@ -366,73 +195,32 @@ Long10, Latg10 = np.meshgrid(adjphibg10,adjthetabg10)
 pole_lat = 90-5.3
 pole_lon = 0
 cent_lon = 180
-cent_displ = 0
-eclipticzero = -105
 rotated_pole2 = ccrs.RotatedPole( pole_latitude = pole_lat, 
                                 pole_longitude = pole_lon,
                                 central_rotated_longitude = cent_lon)
+eclipticzero = -105
 lonlats = [ [15,0, '-120$^{\circ}$'], [eclipticzero,45, '45$^{\circ}$'], [eclipticzero,90, '90$^{\circ}$'], [eclipticzero,-45, '-45$^{\circ}$'],
             [-15,0, '-90$^{\circ}$'], [eclipticzero,0, '0$^{\circ}$'], [165,0, '90$^{\circ}$'], [eclipticzero,15, '15$^{\circ}$'],
             [eclipticzero,30, '30$^{\circ}$'], [eclipticzero,75, '75$^{\circ}$'], [eclipticzero,60, '60$^{\circ}$'], [eclipticzero,-15, '-15$^{\circ}$'],
             [eclipticzero,-30, '-30$^{\circ}$'], [eclipticzero,-60, '-60$^{\circ}$'], [eclipticzero,-75, '-75$^{\circ}$'], [-75,0, '-30$^{\circ}$'], [-45,0, '-60$^{\circ}$'],
             [45,0, '-150$^{\circ}$'], [75,0, '180$^{\circ}$'], [105,0, '150$^{\circ}$'], [135,0, '120$^{\circ}$'], [-135,0, '30$^{\circ}$'], [-165,0, '60$^{\circ}$']]
-fig = plt.figure(figsize=(8,6))
+fig = plt.figure(figsize=(9,6))
 # Create plot figure and axes
 ax = plt.axes(projection=ccrs.Mollweide())
 
 # Plot the graticule
-im2 = ax.pcolormesh(Long10,Latg10,galliflux102, cmap='rainbow', transform=rotated_pole2, alpha=0.5)
-im = ax.pcolormesh(Lon,Lat,psdtracker, cmap='rainbow', transform=rotated_pole2, alpha=0.5)
+im = ax.pcolormesh(Long10,Latg10,galliflux102, cmap='rainbow', transform=rotated_pole2, vmin=0,vmax=1.25*10**(5))
+#im2 = ax.pcolormesh(Lon,Lat,psdtracker1, cmap='berlin', transform=rotated_pole2, vmin=0,vmax=10**(6), alpha=0.2)
 ax.gridlines(crs=rotated_pole2, draw_labels=False, 
-             xlocs=range(-165,165,30), 
+             xlocs=range(-165,165,30),
              ylocs=range(-90,90,15)) #draw_labels=True NOT allowed
 for ea in lonlats:
-    ax.text(ea[0], ea[1], ea[2], fontsize=10, fontweight='ultralight', color="k", transform=rotated_pole2)
+    ax.text(ea[0], ea[1], ea[2], fontsize=8, fontweight='ultralight', color="k", transform=rotated_pole2)
 
 ax.set_global()
 
 plt.xlabel("Heliolongitude Angle $\phi$")
 plt.ylabel("Heliolatitude Angle θ")
 cb = fig.colorbar(im, ax=ax, fraction=0.026, pad=0.04)
-cb.set_label('Intensity at Detector (cm$^{-2}$ s$^{-1}$ sr$^{-1}$)')
-plt.show()
-
-fig = plt.figure(figsize=(8,6))
-# Create plot figure and axes
-ax = plt.axes(projection=ccrs.Mollweide())
-
-# Plot the graticule
-im = ax.pcolormesh(Lon,Lat,pftrackeresa2*(esas[2]-esas[1]), cmap='rainbow', transform=rotated_pole2)
-ax.gridlines(crs=rotated_pole2, draw_labels=False, 
-             xlocs=range(-165,165,30), 
-             ylocs=range(-90,90,15)) #draw_labels=True NOT allowed
-for ea in lonlats:
-    ax.text(ea[0], ea[1], ea[2], fontsize=10, fontweight='ultralight', color="k", transform=rotated_pole2)
-
-ax.set_global()
-
-plt.xlabel("Heliolongitude Angle $\phi$")
-plt.ylabel("Heliolatitude Angle θ")
-cb = fig.colorbar(im, ax=ax, fraction=0.026, pad=0.04)
-cb.set_label('Intensity at Detector (cm$^{-2}$ s$^{-1}$ sr$^{-1}$)')
-plt.show()
-
-fig = plt.figure(figsize=(8,6))
-# Create plot figure and axes
-ax = plt.axes(projection=ccrs.Mollweide())
-
-# Plot the graticule
-im = ax.pcolormesh(Lon,Lat,pftrackeresa3*(esas[3]-esas[2]), cmap='rainbow', transform=rotated_pole2)
-ax.gridlines(crs=rotated_pole2, draw_labels=False, 
-             xlocs=range(-165,165,30), 
-             ylocs=range(-90,90,15)) #draw_labels=True NOT allowed
-for ea in lonlats:
-    ax.text(ea[0], ea[1], ea[2], fontsize=10, fontweight='ultralight', color="k", transform=rotated_pole2)
-
-ax.set_global()
-
-plt.xlabel("Heliolongitude Angle $\phi$")
-plt.ylabel("Heliolatitude Angle θ")
-cb = fig.colorbar(im, ax=ax, fraction=0.026, pad=0.04)
-cb.set_label('Intensity at Detector (cm$^{-2}$ s$^{-1}$ sr$^{-1}$)')
+cb.set_label('Difference in Differential Flux at Detector (cm$^-2$ s$^-1$ sr$^-1$ keV$^-1$)')
 plt.show()
