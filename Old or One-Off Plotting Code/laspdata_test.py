@@ -26,7 +26,7 @@ tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 70 # upwind reference distance for backtraced trajectories, in au
 
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Time Dependent Irradiance Data/complya.csv", delimiter=',')
+file = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Time Dependent Irradiance Data/complya.csv", delimiter=',')
 
 day = file[:,0]
 irradiance = file[:,1]

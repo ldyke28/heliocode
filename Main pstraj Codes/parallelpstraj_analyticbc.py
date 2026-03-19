@@ -208,7 +208,7 @@ secondsoffset = seconds-desiredoffset
 #loopoffset = -32.408
 loopoffset = -54.80
 
-irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-desiredoffset], values=filteredia)
+irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-desiredoffset], values=irradiance)
 
 #####################################################################################################################################
 # DEFINING ANALYTIC FUNCTIONS TO USE TO CALCULATE PSD ON THE BOUNDARY

@@ -202,7 +202,10 @@ fifthordertwocyclesagooffset = 2.5*oneyear - 22.4*oneyear
 
 secondsoffset = seconds-fifthorderoffset
 
-irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-fifthorderoffset], values=filteredia)
+#loopoffset = -32.408
+loopoffset = -54.80
+
+irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[secondsoffset], values=filteredia)
 
 #####################################################################################################################################
 # IMPORTING AND INTERPOLATING BOUNDARY DISTRIBUTIONS FROM THE UAH GROUP'S FRAMEWORK
@@ -371,7 +374,7 @@ def lya_abs(t,x,y,z,vr):
     # for recent solar cycle: -54.80
     # for 22 years ago: -32.408
     while not tbounded:
-        if ttemp >= -54.80*oneyear:
+        if ttemp >= loopoffset*oneyear:
             tbounded = True
         else:
             ttemp = ttemp + 1.392*10**(9)
@@ -628,7 +631,7 @@ for n in range(ydiv-1):
                                     for ind2 in range(ttemp.size):
                                         tbounded = False
                                         while not tbounded:
-                                            if ttemp[ind2] >= -32.408*oneyear:
+                                            if ttemp[ind2] >= loopoffset*oneyear:
                                                 tbounded = True
                                             else:
                                                 ttemp[ind2] = ttemp[ind2] + 1.392*10**(9)

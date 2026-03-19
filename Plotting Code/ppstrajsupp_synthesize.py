@@ -37,13 +37,13 @@ look direction, to further mimic what iBEX could observe
 
 #####################################################################################################################################
 
-fname = "300deg_ibexshifted_lya_Federicodist_datamu_newpi_moreoutput_3500vres"
-theta = 300 # angle with respect to the upwind axis of the target point
+fname = "312deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres"
+theta = 312 # angle with respect to the upwind axis of the target point
 
-#file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/" + fname + ".txt", delimiter=',')
-#suppfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/lostpoints_" + fname + "_revised.txt", delimiter=',')
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Meetings, Conferences, etc/AGU 2025/SimData/" + fname + ".txt", delimiter=',')
-suppfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Meetings, Conferences, etc/AGU 2025/SimData/lostpoints_" + fname + "_revised.txt", delimiter=',')
+#file = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/" + fname + ".txt", delimiter=',')
+#suppfile = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/lostpoints_" + fname + "_revised.txt", delimiter=',')
+file = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/" + fname + ".txt", delimiter=',')
+suppfile = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/lostpoints_" + fname + "_revised.txt", delimiter=',')
 
 vx1 = np.array([])
 vy1 = np.array([])
@@ -108,7 +108,9 @@ ibexvahwr = ibexvawr/2
 # set of velocity magnitudes to make shells of points
 # CHANGE THIS FOR DIFFERENT TARGET POINT FOR BETTER ACCURACY
 #testvmag = np.arange(25000, 100000, 5000)
-testvmag = np.arange(25000, 100000, 5000)
+testvmag = np.arange(20000, 80000, 2000)
+# minimum vmag to allow, to prevent very low PSD value points from being included
+minvmag = 22
 
 vxlower = min(vx1)*1000
 vxupper = max(vx1)*1000
@@ -215,8 +217,10 @@ interpvdfpsds = scipy.interpolate.RegularGridInterpolator((newvx, newvy, newvz),
 #print(interpvdf([-31000,-4000, 5000]))
 
 # setting an array of values for azimuthal/polar angles for sampling points
-testphi = np.linspace(0, 2*np.pi, 200)
+#testphi = np.linspace(0, 2*np.pi, 200)
 testtheta = np.linspace(-np.pi/2, np.pi/2, 100)
+testphi = np.linspace(thetarad-np.pi/2-ibexvahwr, thetarad-np.pi/2+ibexvahwr, 15)
+
 
 # initializing arrays to store values of points on shells used for processing
 testvx = np.array([])
@@ -232,14 +236,16 @@ for i in tqdm(range(testphi.size)):
             currentvx = testvmag[k]*np.cos(testphi[i])*np.cos(testtheta[j]) - xshiftfactor
             currentvy = testvmag[k]*np.sin(testphi[i])*np.cos(testtheta[j]) - yshiftfactor
             currentvz = testvmag[k]*np.sin(testtheta[j])
-            testvx = np.append(testvx, currentvx)
-            testvy = np.append(testvy, currentvy)
-            testvz = np.append(testvz, currentvz)
-            #if vxupper >= currentvx:
-            if vxlower <= currentvx <= vxupper and vylower <= currentvy <= vyupper and vzlower <= currentvz <= vzupper:
-                testpf = np.append(testpf, interpvdf([currentvx, currentvy, currentvz]))
-            else:
-                testpf = np.append(testpf, [0])
+            currentvmag = np.sqrt(currentvx**2 + currentvy**2 + currentvz**2)
+            if currentvmag >= minvmag*1000:
+                testvx = np.append(testvx, currentvx)
+                testvy = np.append(testvy, currentvy)
+                testvz = np.append(testvz, currentvz)
+                #if vxupper >= currentvx:
+                if vxlower <= currentvx <= vxupper and vylower <= currentvy <= vyupper and vzlower <= currentvz <= vzupper:
+                    testpf = np.append(testpf, interpvdf([currentvx, currentvy, currentvz]))
+                else:
+                    testpf = np.append(testpf, [0])
 
 # storing the values in arrays to be interpolated later
 integralvx = newvx
@@ -319,8 +325,10 @@ for i in range(testvx.size):
     theta[i] = np.arcsin(testvz[i]/vmags[i])
 
 # creating grid points in angle space
-phibounds = np.linspace(-np.pi, np.pi, int(360/ibexvaw+1))
-thetabounds = np.linspace(-np.pi/2, np.pi/2, int(180/ibexvaw+1))
+#phibounds = np.linspace(-np.pi, np.pi, int(360/ibexvaw+1))
+#thetabounds = np.linspace(-np.pi/2, np.pi/2, int(180/ibexvaw+1))
+phibounds = np.linspace(-np.pi, np.pi, int(360/6+1))
+thetabounds = np.linspace(-np.pi/2, np.pi/2, int(180/6+1))
 
 # creating an array to track the PSD value at the center of the cells made by the grid points
 psdtracker = np.zeros((phibounds.size-1, thetabounds.size-1))
@@ -351,7 +359,7 @@ for k in tqdm(range(phi.size)):
 psdtracker = psdtracker/bincounter
 
 # writing data to a file - need to change each time or it will overwrite previous file
-file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/" + fname + "_post.txt", 'w')
+file = open("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/" + fname + "_post.txt", 'w')
 for i in range(psdfiletracker.size):
     # writes vx, vy, and attenuated NPSD value
     file.write(str(phifiletracker[i]) + ',' + str(thetafiletracker[i]) + ',' + str(psdfiletracker[i]) + ',' + str(vmags[i]) + '\n')
@@ -370,8 +378,10 @@ ptmtheta = ptmtheta*180/np.pi
 # defining a grid for the midpoints of the cells
 #adjphib = np.linspace(-np.pi+ibexvawr, np.pi-ibexvawr, int(360/ibexvaw))
 #adjthetab = np.linspace(-np.pi/2+ibexvawr, np.pi/2-ibexvawr, int(180/ibexvaw))
-adjphib = np.linspace(-180, 180, int(360/ibexvaw+1))
-adjthetab = np.linspace(-90, 90, int(180/ibexvaw+1))
+#adjphib = np.linspace(-180, 180, int(360/ibexvaw+1))
+#adjthetab = np.linspace(-90, 90, int(180/ibexvaw+1))
+adjphib = np.linspace(-180, 180, int(360/6+1))
+adjthetab = np.linspace(-90, 90, int(180/6+1))
 
 
 # making a grid from the above
@@ -384,7 +394,7 @@ lookdir1 = thetarad + np.pi/2
 lookdir2 = thetarad - np.pi/2
 
 # defining the spacecraft bin width in degrees and radians
-ibexvaw = 30
+ibexvaw = 6
 ibexvawr = ibexvaw*np.pi/180
 ibexvahwr = ibexvawr/2
 
@@ -531,7 +541,7 @@ Lon,Lat = np.meshgrid(adjphib,adjthetab)
 psdtrackerld = np.transpose(psdtrackerld) # transposing the PSD value array to work with the grid"""
 
 # writing data to a file - need to change each time or it will overwrite previous file
-file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/" + fname + "_ibexview.txt", 'w')
+file = open("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/" + fname + "_ibexview.txt", 'w')
 for i in range(psdfiletrackerld.size):
     # writes vx, vy, and attenuated NPSD value
     file.write(str(phitrackerld[i]) + ',' + str(thetatrackerld[i]) + ',' + str(psdfiletrackerld[i]) + ',' + str(vmags[i]) + '\n')
@@ -674,7 +684,7 @@ gridvzpsd = np.zeros((vxreggrid.size, vyreggrid.size, vzreggrid.size))
 for i in range(vxreggrid.size):
     for j in range(vyreggrid.size):
         for k in range(vzreggrid.size):
-            currentpsd = interpvdfpsds([vxreggrid[i], vyreggrid[j], vzreggrid[k]])
+            currentpsd = interpvdfpsds([vxreggrid[i], vyreggrid[j], vzreggrid[k]])[0]
             if currentpsd < 0:
                 currentpsd = 0
             gridpsds[i,j,k] = currentpsd

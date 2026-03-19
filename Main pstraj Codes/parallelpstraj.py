@@ -199,12 +199,12 @@ fifthorderoffset = 2.5*oneyear
 firstorderoffset = .5*oneyear
 fifthordertwocyclesagooffset = 2.5*oneyear - 22.4*oneyear
 
-desiredoffset = fifthordertwocyclesagooffset
+desiredoffset = fifthorderoffset
 
 secondsoffset = seconds-desiredoffset
 
-loopoffset = -32.408
-#loopoffset = -54.80
+#loopoffset = -32.408
+loopoffset = -54.80
 
 irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-desiredoffset], values=filteredia)
 

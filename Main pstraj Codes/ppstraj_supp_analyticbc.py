@@ -20,14 +20,13 @@ file from which the code imports data.
 
 #####################################################################################################################################
 
-inputfilename = "C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/lostpoints_312deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres"
+inputfilename = "C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/lostpoints_312deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres"
 inputfile = np.loadtxt(inputfilename + ".txt", delimiter=',')
 theta = 312 # angle with respect to upwind axis of target point
 oneyear = 3.15545454545*10**7
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = (23/60)*oneyear # time to start backtracing
-refdist = 70
+finalt = 22/60*oneyear # time to start backtracing
 
 # Set of initial conditions in velocity space
 # vx/vy initial conditions are sampled on a grid with chosen resolution
@@ -51,13 +50,14 @@ mH = 1.6736*10**(-27) # mass of hydrogen in kg
 # one year in s = 3.156e7 s (Julian year, average length of a year)
 # 11 Julian years = 3.471e8 s
 # Note to self: solar maximum in April 2014
+kB = 1.381*10**(-23) # Boltzmann consant in SI units
 
 #6.36674976e9 force free for cosexprp
 initialt = -50000000000 # time in the past to which the code should backtrace
 tstep = 1000 # general time resolution
 tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
-
+refdist = 100
 
 # Location of the sun in [x,y,z] - usually this will be at 0, but this makes it flexible just in case
 # Second line is location of the point of interest in the same format (which is, generally, where we want IBEX to be)
@@ -85,83 +85,161 @@ tfar = np.arange(tmid, lastt, -tstepfar) # low resolution time array (far regime
 t = np.concatenate((tclose, tfar))
 
 
-datafilename1 = 'C:/Users/lukeb/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_001_H_RegAll.h5'
-datafilename2 = 'C:/Users/lukeb/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_002_H_RegAll.h5'
-datafilename3 = 'C:/Users/lukeb/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_003_H_RegAll.h5'
-datafilename4 = 'C:/Users/lukeb/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_004_H_RegAll.h5'
-datafilename5 = 'C:/Users/lukeb/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_005_H_RegAll.h5'
-datafilename6 = 'C:/Users/lukeb/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_006_H_RegAll.h5'
-datafilename7 = 'C:/Users/lukeb/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_007_H_RegAll.h5'
-datafilename8 = 'C:/Users/lukeb/Documents/Dartmouth/HSResearch/Collaborations/FedericoVDF/VDF3D_HE013Ksw_PRB_Eclip256_R115_008_H_RegAll.h5'
+#####################################################################################################################################
+# DEFINING ANALYTIC FUNCTIONS TO USE TO CALCULATE PSD ON THE BOUNDARY
+#####################################################################################################################################
 
+# primary population defined by mix of symmetric/asymmetric kappa distributions
 
-with h5py.File(datafilename1, "r") as f:
-    # Print all root level object names (aka keys) 
-    # these can be group or dataset names 
-    print("Keys: %s" % f.keys())
-    # get first object name/key; may or may NOT be a group
-    a_group_key = list(f.keys())[0]
+# rotating so x-y plane is equivalent to B-v plane
+thetabv = np.arctan(29.52/24.52)
+# hydrogen density at infinity according to Rahmanifard et al. 2023 (below link)
+nHinf = .11
 
-    # get the object type for a_group_key: usually group or dataset
-    print(type(f[a_group_key])) 
+# defining relevant parameters for calculation of these distributions (taking angular scattering into account)
+# form from https://iopscience.iop.org/article/10.3847/2041-8213/abf436/pdf
+# parameters from https://iopscience.iop.org/article/10.3847/1538-4357/ad0be1/pdf
+# 1 and 2 refer to slow/fast populations per Swaczyna et al. 2023
+upar = 26.29
+T1par = 7910
+kappa1par = 18.7
+T2par = 7213
+kappa2par = np.inf
 
-    # If a_group_key is a group name, 
-    # this gets the object names in the group and returns as a list
-    data = list(f[a_group_key])
+# in the paper, first perpendicular direction is y, second perpendicular direction is z
+puperpy = -0.03
+pT1perpy = 8670
+pkappa1perpy = 86
+pT2perpy = 8515
+pkappa2perpy = np.inf
 
-    # If a_group_key is a dataset name, 
-    # this gets the dataset values and returns as a list
-    data = list(f[a_group_key])
-    # preferred methods to get dataset values:
-    ds_obj = f[a_group_key]      # returns as a h5py dataset object
-    ds_arr = f[a_group_key][()]  # returns as a numpy array
+puperpz = 0
+pT1perpz = 8280
+pkappa1perpz = np.inf
+pT2perpz = pT1perpz
+pkappa2perpz = pkappa1perpz
 
-    print(list(f.keys()))
-    dsvdf1 = f['VDF3D'] # returns h5py dataset object
-    arrvdf1 = f['VDF3D'][()] # returns np.array of values
-    #print(arrvdf[128,128,128])
-    xloc = f['vx_grid'][()]
-    yloc = f['vy_grid'][()]
-    zloc = f['vz_grid'][()]
+# speed scales (in km/s)
+pthetapar1 = np.sqrt(2*kB*T1par/mH)/1000
+pthetapar2 = np.sqrt(2*kB*T2par/mH)/1000
+pthetaperpy1 = np.sqrt(2*kB*pT1perpy/mH)/1000
+pthetaperpy2 = np.sqrt(2*kB*pT2perpy/mH)/1000
+pthetaperpz1 = np.sqrt(2*kB*pT1perpz/mH)/1000
+pthetaperpz2 = np.sqrt(2*kB*pT2perpz/mH)/1000
 
-with h5py.File(datafilename2, "r") as f:
-    dsvdf2 = f['VDF3D'] # returns h5py dataset object
-    arrvdf2 = f['VDF3D'][()] # returns np.array of values
+#units?
+# adjusting per equation 3.12 of https://ui.adsabs.harvard.edu/abs/2013SSRv..175..183L/abstract
+# taking d = 1, kappa = kappa0 + 3/2
+def psdprim(vx, vy, vz):
+    vyp = vy
+    vzp = vz
+    vy = vyp*np.cos(thetabv) - vzp*np.sin(thetabv)
+    vz = vyp*np.sin(thetabv) + vzp*np.cos(thetabv)
+    vx = -vx/1000
+    vy = -vy/1000
+    vz = -vz/1000
+    fperpy1 = np.sqrt(1/(np.pi * pthetaperpy1**2)) * (scipy.special.gamma(pkappa1perpy)/(np.sqrt(pkappa1perpy - 1.5)*scipy.special.gamma((pkappa1perpy - 0.5)))) * \
+        (1 + 1/(pkappa1perpy - 1.5) * vy**2/pthetaperpy1**2)**(-pkappa1perpy)
+    #fperpy2 = np.sqrt(1/(np.pi * pthetaperpy2**2)) * (scipy.special.gamma(pkappa2perpy)/(np.sqrt(pkappa2perpy - 1.5)*scipy.special.gamma((pkappa2perpy - 0.5)))) * \
+    #    (1 + 1/(pkappa2perpy - 1.5) * vy**2/pthetaperpy1**2)**(-pkappa2perpy)
+    fperpy2 = np.sqrt(1/(np.pi * pthetaperpy2**2)) * \
+        np.exp(-vy**2/pthetaperpy2**2)
+    #fperpz1 = np.sqrt(1/(np.pi * pthetaperpz1**2)) * (scipy.special.gamma(pkappa1perpz)/(np.sqrt(pkappa1perpz - 1.5)*scipy.special.gamma((pkappa1perpz - 0.5)))) * \
+    #    (1 + 1/(pkappa1perpz - 1.5) * vz**2/pthetaperpz1**2)**(-pkappa1perpz)
+    fperpz1 = np.sqrt(1/(np.pi * pthetaperpz1**2)) * \
+        np.exp(-vz**2/pthetaperpz1**2)
+    #fperpz2 = np.sqrt(1/(np.pi * pthetaperpz2**2)) * (scipy.special.gamma(pkappa2perpz)/(np.sqrt(pkappa2perpz - 1.5)*scipy.special.gamma((pkappa2perpz - 0.5)))) * \
+    #    (1 + 1/(pkappa2perpz - 1.5) * vz**2/pthetaperpz2**2)**(-pkappa2perpz)
+    fperpz2 = np.sqrt(1/(np.pi * pthetaperpz2**2)) * \
+        np.exp(-vz**2/pthetaperpz2**2)
 
-with h5py.File(datafilename3, "r") as f:
-    dsvdf3 = f['VDF3D'] # returns h5py dataset object
-    arrvdf3 = f['VDF3D'][()] # returns np.array of values
+    # assuming symmetrical speed scale parameters in sunward/antisunward directions
+    fpar1 = (pthetapar1 * np.sqrt(np.pi*(kappa1par - 1.5)) * scipy.special.gamma(kappa1par - 0.5)/scipy.special.gamma(kappa1par))**(-1) * \
+        (1 + 1/(kappa1par - 1.5) * (vx - upar)**2/pthetapar1**2)**(-kappa1par)
+    fpar2 = (pthetapar2 * np.sqrt(np.pi))**(-1) * \
+        np.exp(-(vx - upar)**2/pthetapar2**2)
+    #fpar2 = (pthetapar2 * np.sqrt(np.pi*(kappa2par - 1.5)) * scipy.special.gamma(kappa2par - 0.5)/scipy.special.gamma(kappa2par))**(-1) * \
+    #    (1 + 1/(kappa2par - 1.5) * (vx - upar)**2/pthetapar2**2)**(-kappa2par)
 
-with h5py.File(datafilename4, "r") as f:
-    dsvdf4 = f['VDF3D'] # returns h5py dataset object
-    arrvdf4 = f['VDF3D'][()] # returns np.array of values
+    #print(fpar1)
+    #print(fperpy1)
+    #print(fperpz1)
+    #print(fpar2)
+    #print(fperpy2)
+    #print(fperpz2)
+    nHratio = 0.224
+    return nHinf * nHratio * (fpar1 + fpar2) * (fperpy1 + fperpy2) * (fperpz1 + fperpz2)
 
-with h5py.File(datafilename5, "r") as f:
-    dsvdf5 = f['VDF3D'] # returns h5py dataset object
-    arrvdf5 = f['VDF3D'][()] # returns np.array of values
+# for secondaries - parallel is composition of four Maxwellians, perpendicular is kappa distributions 16.8
+weightpar1 = 0.096
+upar1 = 28.24
+Tpar1 = 1570
+weightpar2 = 0.302
+upar2 = 21.16
+Tpar2 = 3730
+weightpar3 = 0.498
+upar3 = 13.47
+Tpar3 = 7950
+weightpar4 = 0.104
+upar4 = 9.73
+Tpar4 = 13030
 
-with h5py.File(datafilename6, "r") as f:
-    dsvdf6 = f['VDF3D'] # returns h5py dataset object
-    arrvdf6 = f['VDF3D'][()] # returns np.array of values
+superpy = 16.48
+sT1perpy = 12540
+skappa1perpy = 18
+sT2perpy = 11580
+skappa2perpy = 16
 
-with h5py.File(datafilename7, "r") as f:
-    dsvdf7 = f['VDF3D'] # returns h5py dataset object
-    arrvdf7 = f['VDF3D'][()] # returns np.array of values
+superpz = 16.8
+sT1perpz = 9970
+skappa1perpz = 12
+sT2perpz = sT1perpz
+skappa2perpz = skappa1perpz
 
-with h5py.File(datafilename8, "r") as f:
-    dsvdf8 = f['VDF3D'] # returns h5py dataset object
-    arrvdf8 = f['VDF3D'][()] # returns np.array of values
+# speed scales (in km/s)
+sthetaperpy1 = np.sqrt(2*kB*sT1perpy/mH)/1000
+sthetaperpy2 = np.sqrt(2*kB*sT2perpy/mH)/1000
+sthetaperpz1 = np.sqrt(2*kB*sT1perpz/mH)/1000
+sthetaperpz2 = np.sqrt(2*kB*sT2perpz/mH)/1000
 
-zgrid, ygrid, xgrid = np.meshgrid(zloc, yloc, xloc, indexing='ij') # order will be z, y, x for this
+def psdsec(vx, vy, vz):
+    vyp = vy
+    vzp = vz
+    vy = vyp*np.cos(thetabv) - vzp*np.sin(thetabv)
+    vz = vyp*np.sin(thetabv) + vzp*np.cos(thetabv)
+    vx = -vx/1000
+    vy = -vy/1000
+    vz = -vz/1000
+    fpar1 = 1/(2*np.pi*kB*Tpar1/mH)**(0.5) * np.exp(-((vx - upar1)**2)*1000000/(2*np.pi*kB*Tpar1/mH))
+    fpar2 = 1/(2*np.pi*kB*Tpar2/mH)**(0.5) * np.exp(-((vx - upar2)**2)*1000000/(2*np.pi*kB*Tpar2/mH))
+    fpar3 = 1/(2*np.pi*kB*Tpar3/mH)**(0.5) * np.exp(-((vx - upar3)**2)*1000000/(2*np.pi*kB*Tpar3/mH))
+    fpar4 = 1/(2*np.pi*kB*Tpar4/mH)**(0.5) * np.exp(-((vx - upar4)**2)*1000000/(2*np.pi*kB*Tpar4/mH))
 
-interp1 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf1)
-interp2 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf2)
-interp3 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf3)
-interp4 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf4)
-interp5 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf5)
-interp6 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf6)
-interp7 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf7)
-interp8 = scipy.interpolate.RegularGridInterpolator((zloc, yloc, xloc), arrvdf8)
+    fperpy1 = np.sqrt(1/(np.pi * sthetaperpy1**2)) * (scipy.special.gamma(skappa1perpy)/(np.sqrt(skappa1perpy - 1.5)*scipy.special.gamma((skappa1perpy - 0.5)))) * \
+        (1 + 1/(skappa1perpy - 1.5) * vy**2/sthetaperpy1**2)**(-skappa1perpy)
+    fperpy2 = np.sqrt(1/(np.pi * sthetaperpy2**2)) * (scipy.special.gamma(skappa2perpy)/(np.sqrt(skappa2perpy - 1.5)*scipy.special.gamma((skappa2perpy - 0.5)))) * \
+        (1 + 1/(skappa2perpy - 1.5) * vy**2/sthetaperpy1**2)**(-skappa2perpy)
+    fperpz1 = np.sqrt(1/(np.pi * sthetaperpz1**2)) * (scipy.special.gamma(skappa1perpz)/(np.sqrt(skappa1perpz - 1.5)*scipy.special.gamma((skappa1perpz - 0.5)))) * \
+        (1 + 1/(skappa1perpz - 1.5) * vz**2/sthetaperpz1**2)**(-skappa1perpz)
+    fperpz2 = np.sqrt(1/(np.pi * sthetaperpz2**2)) * (scipy.special.gamma(skappa2perpz)/(np.sqrt(skappa2perpz - 1.5)*scipy.special.gamma((skappa2perpz - 0.5)))) * \
+        (1 + 1/(skappa2perpz - 1.5) * vz**2/sthetaperpz2**2)**(-skappa2perpz)
+    
+    #print(fpar1)
+    #print(fpar2)
+    #print(fpar3)
+    #print(fpar4)
+    #print(fperpy1)
+    #print(fperpy2)
+    #print(fperpz1)
+    #print(fperpz2)
+    nHratio = 0.224
+    return nHinf * nHratio * (weightpar1*fpar1 + weightpar2*fpar2 + weightpar3*fpar3 + weightpar4*fpar4) * (fperpy1 + fperpy2) * (fperpz1 + fperpz2)
+
+def psdprimsec(vx, vy, vz):
+    #print(psdprim(vx,vy,vz))
+    #print(psdsec(vx,vy,vz))
+    return psdprim(vx, vy, vz) + psdsec(vx, vy, vz)
+    #return psdprim(vx, vy, vz)
 
 #####################################################################################################################################
 # FILTERING AND INTERPOLATING THE LASP IRRADIANCE DATA TO USE FOR THE RADIATION PRESSURE FORCE
@@ -465,31 +543,8 @@ for i in tqdm(range(vxstart.size)): # displays progress bars for both loops to m
             endlongangle = ymask + np.arccos((backtraj[kn+1,0] - sunpos[0])/endradxy)*longmask
             endlongangle = endlongangle*180/np.pi
             # finding the initial value of the distribution function based on the interpolated distributions
-            endvelcoords = [backtraj[kn+1,5]/1000,backtraj[kn+1,4]/1000,backtraj[kn+1,3]/1000]
-            if endlongangle >= 0 and endlongangle <= 45:
-                anglepct = (endlongangle)/45
-                initpsd = interp1(endvelcoords)*(1 - anglepct) + interp2(endvelcoords)*anglepct
-            elif endlongangle > 45 and endlongangle <= 90:
-                anglepct = (endlongangle - 45)/45
-                initpsd = interp2(endvelcoords)*(1 - anglepct) + interp3(endvelcoords)*anglepct
-            elif endlongangle > 90 and endlongangle <= 135:
-                anglepct = (endlongangle - 90)/45
-                initpsd = interp3(endvelcoords)*(1 - anglepct) + interp4(endvelcoords)*anglepct
-            elif endlongangle > 135 and endlongangle <= 180:
-                anglepct = (endlongangle - 135)/45
-                initpsd = interp4(endvelcoords)*(1 - anglepct) + interp5(endvelcoords)*anglepct
-            elif endlongangle > 180 and endlongangle <= 225:
-                anglepct = (endlongangle - 180)/45
-                initpsd = interp5(endvelcoords)*(1 - anglepct) + interp6(endvelcoords)*anglepct
-            elif endlongangle > 225 and endlongangle <= 270:
-                anglepct = (endlongangle - 225)/45
-                initpsd = interp6(endvelcoords)*(1 - anglepct) + interp7(endvelcoords)*anglepct
-            elif endlongangle > 270 and endlongangle <= 315:
-                anglepct = (endlongangle - 270)/45
-                initpsd = interp7(endvelcoords)*(1 - anglepct) + interp8(endvelcoords)*anglepct
-            elif endlongangle > 315 and endlongangle <= 360:
-                anglepct = (endlongangle - 315)/45
-                initpsd = interp8(endvelcoords)*(1 - anglepct) + interp1(endvelcoords)*anglepct
+            endvelcoords = [backtraj[kn+1,5],backtraj[kn+1,4],backtraj[kn+1,3]]
+            initpsd = psdprimsec(endvelcoords[2], endvelcoords[1], endvelcoords[0])
 
             vsolarwindms = 400000 # solar wind speed in m/s
             vsolarwindcms = vsolarwindms*100 # solar wind speed in cm/s
