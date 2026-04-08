@@ -201,7 +201,7 @@ fifthorderoffset = 2.5*oneyear
 firstorderoffset = .5*oneyear
 fifthordertwocyclesagooffset = 2.5*oneyear - 22.4*oneyear
 
-desiredoffset = fifthorderoffset
+desiredoffset = 0
 
 secondsoffset = seconds-desiredoffset
 

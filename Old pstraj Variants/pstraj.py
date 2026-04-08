@@ -25,7 +25,7 @@ oneyear = 3.15545454545*10**7
 
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = -0.75*oneyear # time to start backtracing
+finalt = -2*oneyear # time to start backtracing
 #6.36674976e9 force free for cosexprp
 initialt = -1*10**(12) # time in the past to which the code should backtrace
 tstep = 10000 # general time resolution
@@ -39,7 +39,7 @@ refdist = 100 # upwind reference distance for backtraced trajectories, in au
 # https://ibex.princeton.edu/sites/g/files/toruqf1596/files/moebius_et_al_2012.pdf
 # above gives angle of ecliptic relative to ISM flow
 sunpos = np.array([0,0,0])
-theta = 150 # angle with respect to upwind axis of target point
+theta = 45 # angle with respect to upwind axis of target point
 ibexrad = 1 # radial distance of target point from Sun
 ibexx = ibexrad*np.cos(theta*np.pi/180)
 ibexy = ibexrad*np.sin(theta*np.pi/180)
@@ -849,7 +849,7 @@ if mode==3:
                         vrmax = np.append(vrmax, max(currentvr))
                         vrmin = np.append(vrmin, min(currentvr))
                         # integrand for the photoionization and charge exchange ionization losses
-                        btintegrand = PIrate2/currentvr*(r1/currentrad)**2 + cxirate/currentvr*(r1/currentrad)**2
+                        btintegrand = PIrate2/currentvr*(r1/currentrad)**2 #+ cxirate/currentvr*(r1/currentrad)**2
                         # calculation of attenuation factor
                         attfact = scipy.integrate.simpson(btintegrand, x=currentrad)
                         # retaining variables corresponding to vx, vy, t at the target point
@@ -872,7 +872,7 @@ print('Finished')
 
 if mode==3:
     # writing data to a file - need to change each time or it will overwrite previous file
-    file = open("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/datafiles/cosexprp_5pi6_-p75_center_cosexp+cxpi_tclose300_r=1au.txt", 'w')
+    file = open("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Thesis Materials/Data/cosexprp_pi4_-2yr_center_cosexppi_tclose300_r=1au.txt", 'w')
     #file = open("/Users/ldyke/Desktop/Dartmouth/HSResearch/Code/Kepler/Python Orbit Code/datafiles/p1fluccosexprp_35pi36_0y_direct_cosexppi_tclose400.txt", "w")
     for i in range(farvx.size):
         # writes vx, vy, and attenuated NPSD value
@@ -885,6 +885,7 @@ if mode==3:
     f.set_figheight(6)
     fsize = 18
     plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='rainbow') # linear scale
+    #plt.scatter(farvx[:]/1000, farvy[:]/1000, c=maxwcolor[:], marker='o', cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-30),vmax=10**(-6)))
     plt.rcParams.update({'font.size': fsize})
     cb = plt.colorbar()
     #cb.set_label('Time at which orbit passes through 100 au (s)')

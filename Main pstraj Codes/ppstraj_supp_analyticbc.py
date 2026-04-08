@@ -20,13 +20,13 @@ file from which the code imports data.
 
 #####################################################################################################################################
 
-inputfilename = "C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/lostpoints_312deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres"
+inputfilename = "C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/lostpoints_300deg_ibexshifted_1monthshift_lya_analyticbc_datamu_nofilter_newpi_3500vres"
 inputfile = np.loadtxt(inputfilename + ".txt", delimiter=',')
-theta = 312 # angle with respect to upwind axis of target point
+theta = 300 # angle with respect to upwind axis of target point
 oneyear = 3.15545454545*10**7
 # 120749800 for first force free
 # 226250200 for second force free
-finalt = 22/60*oneyear # time to start backtracing
+finalt = 21/60*oneyear # time to start backtracing
 
 # Set of initial conditions in velocity space
 # vx/vy initial conditions are sampled on a grid with chosen resolution
@@ -312,14 +312,14 @@ fifthorderoffset = 2.5*oneyear
 firstorderoffset = .5*oneyear
 fifthordertwocyclesagooffset = 2.5*oneyear - 22.4*oneyear
 
-desiredoffset = fifthorderoffset
+desiredoffset = 0
 
 secondsoffset = seconds-desiredoffset
 
 #loopoffset = -32.408
 loopoffset = -54.80
 
-irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-desiredoffset], values=filteredia)
+irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-desiredoffset], values=irradiance)
 
 #####################################################################################################################################
 

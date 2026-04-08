@@ -37,7 +37,7 @@ look direction, to further mimic what iBEX could observe
 
 #####################################################################################################################################
 
-fname = "312deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres"
+fname = "312deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres"
 theta = 312 # angle with respect to the upwind axis of the target point
 
 #file = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/" + fname + ".txt", delimiter=',')
