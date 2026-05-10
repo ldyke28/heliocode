@@ -37,8 +37,8 @@ look direction, to further mimic what iBEX could observe
 
 #####################################################################################################################################
 
-fname = "312deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres"
-theta = 312 # angle with respect to the upwind axis of the target point
+fname = "312deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres"
+theta =  312 # angle with respect to the upwind axis of the target point
 
 #file = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/" + fname + ".txt", delimiter=',')
 #suppfile = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/Newest3DData/lostpoints_" + fname + "_revised.txt", delimiter=',')
@@ -108,7 +108,7 @@ ibexvahwr = ibexvawr/2
 # set of velocity magnitudes to make shells of points
 # CHANGE THIS FOR DIFFERENT TARGET POINT FOR BETTER ACCURACY
 #testvmag = np.arange(25000, 100000, 5000)
-testvmag = np.arange(20000, 80000, 2000)
+testvmag = np.arange(20000, 80000, 4000)
 # minimum vmag to allow, to prevent very low PSD value points from being included
 minvmag = 22
 
@@ -217,9 +217,9 @@ interpvdfpsds = scipy.interpolate.RegularGridInterpolator((newvx, newvy, newvz),
 #print(interpvdf([-31000,-4000, 5000]))
 
 # setting an array of values for azimuthal/polar angles for sampling points
-#testphi = np.linspace(0, 2*np.pi, 200)
+#testphi = np.linspace(np.pi/2, 3*np.pi/2, 100)
 testtheta = np.linspace(-np.pi/2, np.pi/2, 100)
-testphi = np.linspace(thetarad-np.pi/2-ibexvahwr, thetarad-np.pi/2+ibexvahwr, 15)
+testphi = np.linspace(thetarad-np.pi/2-ibexvahwr, thetarad-np.pi/2+ibexvahwr, 30)
 
 
 # initializing arrays to store values of points on shells used for processing
@@ -237,7 +237,8 @@ for i in tqdm(range(testphi.size)):
             currentvy = testvmag[k]*np.sin(testphi[i])*np.cos(testtheta[j]) - yshiftfactor
             currentvz = testvmag[k]*np.sin(testtheta[j])
             currentvmag = np.sqrt(currentvx**2 + currentvy**2 + currentvz**2)
-            if currentvmag >= minvmag*1000:
+            #if currentvmag >= minvmag*1000:
+            if interpvdf([currentvx, currentvy, currentvz]) >= 10**(-10):
                 testvx = np.append(testvx, currentvx)
                 testvy = np.append(testvy, currentvy)
                 testvz = np.append(testvz, currentvz)
@@ -346,6 +347,7 @@ for k in tqdm(range(phi.size)):
             if phibounds[i] <= phi[k] < phibounds[i+1] and thetabounds[j] <= theta[k] < thetabounds[j+1]:
                 # adding the value of the PSD to the associated value for the cell and exiting the loop
                 #psdtracker[i,j] += particleflux[k]
+
                 psdtracker[i,j] += testpf[k]
                 bincounter[i,j] += 1
                 phifiletracker = np.append(phifiletracker, phi[k])

@@ -57,37 +57,37 @@ def eVtov(esaenergy):
 
 fname = "gallicompanalytic2010"
 
-"""file1 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/228deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file2 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/234deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file3 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/240deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file4 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/246deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file5 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/252deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file6 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/258deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file7 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/264deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file8 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/270deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file9 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/276deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file10 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/282deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file11 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/288deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file12 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/294deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file13 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/300deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file14 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/306deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file15 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/312deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')"""
+file1 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/228deg_ibexshifted_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
+file2 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/234deg_ibexshifted_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
+file3 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/240deg_ibexshifted_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
+file4 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/246deg_ibexshifted_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
+file5 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/252deg_ibexshifted_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
+file6 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/258deg_ibexshifted_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
+file7 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/264deg_ibexshifted_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
+file8 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/270deg_ibexshifted_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
+file9 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/276deg_ibexshifted_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
+file10 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/282deg_ibexshifted_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
+file11 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/288deg_ibexshifted_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
+file12 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/294deg_ibexshifted_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
+file13 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/300deg_ibexshifted_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
+file14 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/306deg_ibexshifted_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
+file15 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/312deg_ibexshifted_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
 
-file1 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/228deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
-file2 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/234deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
-file3 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/240deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
-file4 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/246deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
-file5 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/252deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
-file6 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/258deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
-file7 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/264deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
-file8 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/271deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
-file9 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/276deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
-file10 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/282deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
-file11 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/288deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
-file12 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/294deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
-file13 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/300deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
-file14 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/306deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
-file15 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/312deg_ibexshifted_1monthshift_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+"""file1 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/228deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file2 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/234deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file3 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/240deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file4 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/246deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file5 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/252deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file6 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/258deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file7 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/264deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file8 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/271deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file9 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/276deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file10 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/282deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file11 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/288deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file12 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/294deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file13 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/300deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file14 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/306deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file15 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/312deg_ibexshifted_lya_Federicodist_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')"""
 
 
 
@@ -374,20 +374,24 @@ for k in tqdm(range(phi.size)):
         if checker == True:
             break"""
 
+phichoice = adjphibg
+thetachoice = adjthetabg
+
+
 # arrays to track flux values and bin counts in each ESA range
-pftrackeresa1 = np.zeros((adjphibg.size, adjthetabg.size))
-bincounteresa1 = np.zeros((adjphibg.size, adjthetabg.size))
-pftrackeresa2 = np.zeros((adjphibg.size, adjthetabg.size))
-bincounteresa2 = np.zeros((adjphibg.size, adjthetabg.size))
-pftrackeresa3 = np.zeros((adjphibg.size, adjthetabg.size))
-bincounteresa3 = np.zeros((adjphibg.size, adjthetabg.size))
-# arrays to track flux values and bin counts in each ESA range
+pftrackeresa1 = np.zeros((phichoice.size, thetachoice.size))
+bincounteresa1 = np.zeros((phichoice.size, thetachoice.size))
+pftrackeresa2 = np.zeros((phichoice.size, thetachoice.size))
+bincounteresa2 = np.zeros((phichoice.size, thetachoice.size))
+pftrackeresa3 = np.zeros((phichoice.size, thetachoice.size))
+bincounteresa3 = np.zeros((phichoice.size, thetachoice.size))
+"""# arrays to track flux values and bin counts in each ESA range
 pftrackeresa1 = np.zeros((adjphibg10.size, adjthetabg10.size))
 bincounteresa1 = np.zeros((adjphibg10.size, adjthetabg10.size))
 pftrackeresa2 = np.zeros((adjphibg10.size, adjthetabg10.size))
 bincounteresa2 = np.zeros((adjphibg10.size, adjthetabg10.size))
 pftrackeresa3 = np.zeros((adjphibg10.size, adjthetabg10.size))
-bincounteresa3 = np.zeros((adjphibg10.size, adjthetabg10.size))
+bincounteresa3 = np.zeros((adjphibg10.size, adjthetabg10.size))"""
 
 phi = -phi
 phi = 180/np.pi*phi
@@ -401,17 +405,17 @@ theta = theta*180/np.pi
 
 print(adjphibg)
 print(theta)
-"""for k in tqdm(range(phi.size)):
+for k in tqdm(range(phi.size)):
     checker = False
-    for i in range(adjphibg.size-1):
-        for j in range(adjthetabg.size-1):
-            if adjphibg[i] <= phi[k] < adjphibg[i+1] and adjthetabg[j] <= theta[k] < adjthetabg[j+1]:
+    for i in range(phichoice.size-1):
+        for j in range(thetachoice.size-1):
+            if phichoice[i] <= phi[k] < phichoice[i+1] and thetachoice[j] <= theta[k] < thetachoice[j+1]:
                 if esa1lowv < vmagskms[k] < esa12:
                     #if flux[k] >= pftrackeresa1[i,j]:
                     #    pftrackeresa1[i,j] = flux[k]
-                    #pftrackeresa1[i,j] += flux[k]
+                    pftrackeresa1[i,j] += flux[k]
                     bincounteresa1[i,j] += 1
-                    pftrackeresa1[i,j] += flux[k]*sampledE
+                    #pftrackeresa1[i,j] += flux[k]*sampledE
                     #bincounteresa1[i,j] += vmagskms[k]
                 elif esa12 < vmagskms[k] < esa23:
                     pftrackeresa2[i,j] += flux[k]
@@ -423,10 +427,10 @@ print(theta)
                 bincounter[i,j] += 1
                 checker = True
         if checker == True:
-            break"""
+            break
 
 
-for k in tqdm(range(phi.size)):
+"""for k in tqdm(range(phi.size)):
     checker = False
     for i in range(adjphibg10.size-1):
         for j in range(adjthetabg10.size-1):
@@ -448,10 +452,10 @@ for k in tqdm(range(phi.size)):
                 bincounter[i,j] += 1
                 checker = True
         if checker == True:
-            break
+            break"""
 
-#Long1,Latg1 = np.meshgrid(adjphibg,adjthetabg)
-Long1,Latg1 = np.meshgrid(adjphibg10,adjthetabg10)
+Long1,Latg1 = np.meshgrid(phichoice,thetachoice)
+#Long1,Latg1 = np.meshgrid(adjphibg10,adjthetabg10)
 # normalizing by bin count
 pftrackeresa1 = pftrackeresa1/bincounteresa1
 pftrackeresa2 = pftrackeresa2/bincounteresa2
@@ -467,29 +471,46 @@ adjthetab = np.linspace(-90, 90, int(180/ibexvaw+1))
 # making a grid from the above
 Lon,Lat = np.meshgrid(adjphib,adjthetab)
 
-#Long,Latg = np.meshgrid(-adjphibg,adjthetabg)
-Long,Latg = np.meshgrid(-adjphibg10,adjthetabg10)
+Long,Latg = np.meshgrid(-phichoice,thetachoice)
+#Long,Latg = np.meshgrid(-adjphibg10,adjthetabg10)
 
 pftrackeresa1 = np.transpose(pftrackeresa1) # transposing the PSD value array to work with the grid
 pftrackeresa2 = np.transpose(pftrackeresa2)
 pftrackeresa3 = np.transpose(pftrackeresa3)
 psdtracker = np.transpose(psdtracker)
 
-psdgallidiff = galliflux102-(pftrackeresa1*(esas[1]-esas[0]))
-psdmaxavg = (galliflux102 + (pftrackeresa1*(esas[1]-esas[0])))/2
+fluxchoice = galliflux092
+
+psdgallidiff = fluxchoice-(pftrackeresa1*(esas[1]-esas[0]))
+psdmaxavg = (fluxchoice + (pftrackeresa1*(esas[1]-esas[0])))/2
 psdmax = np.zeros((np.size(pftrackeresa1,0), np.size(pftrackeresa1,1)))
 for i in range(np.size(psdmax, 0)):
     for j in range(np.size(psdmax, 1)):    
-        psdmax[i, j] = max(galliflux102[i, j], pftrackeresa1[i, j]*(esas[1]-esas[0]))
-psddiffpercentage = np.abs(psdgallidiff)/psdmax
+        psdmax[i, j] = max(fluxchoice[i, j], pftrackeresa1[i, j]*(esas[1]-esas[0]))
+psddiffpercentage = np.abs(psdgallidiff)/fluxchoice
 #psdgallidiff = galliflux102-pftrackeresa1
 pgdtp = np.transpose(psdgallidiff)
 
-file = open("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026DataTextFiles/" + fname + ".txt", 'w')
+simItot = 0
+galliItot = 0
+for i in range(np.size(pftrackeresa1, 0)):
+    for j in range(np.size(pftrackeresa1, 1)):
+        if not np.isnan(pftrackeresa1[i,j]):
+            simItot += pftrackeresa1[i,j]*(esas[1]-esas[0])
+# Find a way to only calculate these in overlapping regions
+for i in range(np.size(fluxchoice, 0)):
+    for j in range(np.size(fluxchoice, 1)):
+        if not np.isnan(fluxchoice[i,j]):
+            galliItot += fluxchoice[i,j]
+
+print("The total intensity added across all bins from simulations is: " + str(simItot))
+print("The total intensity added across all bins from data is: " + str(galliItot))
+
+"""file = open("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026DataTextFiles/" + fname + ".txt", 'w')
 for i in range(adjphibg10.size):
     for j in range(adjthetabg10.size):
         file.write(str(adjphibg10[i]) + ',' + str(adjthetabg10[j]) + ',' + str(pgdtp[i,j]) + '\n')
-file.close()
+file.close()"""
 
 
 
@@ -506,14 +527,15 @@ lonlats = [ [15,0, '-120$^{\circ}$'], [eclipticzero,45, '45$^{\circ}$'], [eclipt
             [eclipticzero,30, '30$^{\circ}$'], [eclipticzero,75, '75$^{\circ}$'], [eclipticzero,60, '60$^{\circ}$'], [eclipticzero,-15, '-15$^{\circ}$'],
             [eclipticzero,-30, '-30$^{\circ}$'], [eclipticzero,-60, '-60$^{\circ}$'], [eclipticzero,-75, '-75$^{\circ}$'], [-75,0, '-30$^{\circ}$'], [-45,0, '-60$^{\circ}$'],
             [45,0, '-150$^{\circ}$'], [75,0, '180$^{\circ}$'], [105,0, '150$^{\circ}$'], [135,0, '120$^{\circ}$'], [-135,0, '30$^{\circ}$'], [-165,0, '60$^{\circ}$']]
-fig = plt.figure(figsize=(8,6))
+fig = plt.figure(figsize=(10,6))
 # Create plot figure and axes
 ax = plt.axes(projection=ccrs.Mollweide())
 
 # Plot the graticule
-#im2 = ax.pcolormesh(Long,Latg,galliflux092, cmap='rainbow', transform=rotated_pole2, alpha=0.5)
+#im2 = ax.pcolormesh(Long,Latg,fluxchoice, cmap='rainbow', transform=rotated_pole2, alpha=0.5)
 #im = ax.pcolormesh(Long,Latg,pftrackeresa1*(esas[1]-esas[0]), cmap='rainbow', transform=rotated_pole2)
-im = ax.pcolormesh(Long,Latg,psdgallidiff, cmap='berlin', transform=rotated_pole2, vmin=-10**(5),vmax=10**(5))
+im = ax.pcolormesh(Long,Latg,pftrackeresa2*(esas[2]-esas[1]), cmap='rainbow', transform=rotated_pole2)
+#im = ax.pcolormesh(Long,Latg,psdgallidiff, cmap='berlin', transform=rotated_pole2, vmin=-10**(5),vmax=10**(5))
 #im = ax.pcolormesh(Long,Latg,psddiffpercentage, cmap='rainbow', transform=rotated_pole2, vmin=0,vmax=1)
 ax.gridlines(crs=rotated_pole2, draw_labels=False, 
              xlocs=range(-165,165,30), 
@@ -526,16 +548,17 @@ ax.set_global()
 plt.xlabel("Heliolongitude Angle $\phi$")
 plt.ylabel("Heliolatitude Angle θ")
 cb = fig.colorbar(im, ax=ax, fraction=0.026, pad=0.04)
-cb.set_label('Difference in Intensity as Percentage of Maximum Bin Intensity')
-#cb.set_label('Intensity at Detector (cm$^{-2}$ s$^{-1}$ sr$^{-1}$)')
+#cb.set_label('Difference in Intensity as Percentage of Maximum Bin Intensity')
+cb.set_label('Intensity at Detector (cm$^{-2}$ s$^{-1}$ sr$^{-1}$)')
 plt.show()
 
-fig = plt.figure(figsize=(8,6))
+fig = plt.figure(figsize=(10,6))
 # Create plot figure and axes
 ax = plt.axes(projection=ccrs.Mollweide())
 
 # Plot the graticule
-im = ax.pcolormesh(Long,Latg,pftrackeresa2*(esas[2]-esas[1]), cmap='rainbow', transform=rotated_pole2)
+#im = ax.pcolormesh(Long,Latg,pftrackeresa2*(esas[2]-esas[1]), cmap='rainbow', transform=rotated_pole2)
+im = ax.pcolormesh(Long,Latg,psddiffpercentage, cmap='rainbow', transform=rotated_pole2, norm=matplotlib.colors.LogNorm())
 ax.gridlines(crs=rotated_pole2, draw_labels=False, 
              xlocs=range(-165,165,30), 
              ylocs=range(-90,90,15)) #draw_labels=True NOT allowed
@@ -547,15 +570,18 @@ ax.set_global()
 plt.xlabel("Heliolongitude Angle $\phi$")
 plt.ylabel("Heliolatitude Angle θ")
 cb = fig.colorbar(im, ax=ax, fraction=0.026, pad=0.04)
-cb.set_label('Intensity at Detector (cm$^{-2}$ s$^{-1}$ sr$^{-1}$)')
+#cb.set_label('Difference in Intensity at Detector (cm$^{-2}$ s$^{-1}$ sr$^{-1}$)')
+cb.set_label('Difference in Intensity at Detector as Percentage of Data Intensity')
 plt.show()
 
-fig = plt.figure(figsize=(8,6))
+fig = plt.figure(figsize=(10,6))
 # Create plot figure and axes
 ax = plt.axes(projection=ccrs.Mollweide())
 
 # Plot the graticule
-im = ax.pcolormesh(Long,Latg,pftrackeresa3*(esas[3]-esas[2]), cmap='rainbow', transform=rotated_pole2)
+#im = ax.pcolormesh(Long,Latg,pftrackeresa3*(esas[3]-esas[2]), cmap='rainbow', transform=rotated_pole2)
+#im = ax.pcolormesh(Long,Latg,pftrackeresa1*(esas[1]-esas[0]), cmap='rainbow', transform=rotated_pole2)
+im = ax.pcolormesh(Long,Latg,psdgallidiff, cmap='berlin', transform=rotated_pole2, vmin=-10**(5),vmax=10**(5))
 ax.gridlines(crs=rotated_pole2, draw_labels=False, 
              xlocs=range(-165,165,30), 
              ylocs=range(-90,90,15)) #draw_labels=True NOT allowed
@@ -567,5 +593,5 @@ ax.set_global()
 plt.xlabel("Heliolongitude Angle $\phi$")
 plt.ylabel("Heliolatitude Angle θ")
 cb = fig.colorbar(im, ax=ax, fraction=0.026, pad=0.04)
-cb.set_label('Intensity at Detector (cm$^{-2}$ s$^{-1}$ sr$^{-1}$)')
+cb.set_label('Difference in Intensity at Detector (cm$^{-2}$ s$^{-1}$ sr$^{-1}$)')
 plt.show()

@@ -167,8 +167,8 @@ for i in range(seconds.size):
         irradianceavg = np.append(irradianceavg, [oldirradianceavg[i]])
         secondsnew = np.append(secondsnew, [seconds[i]])
 
-secondsnew = secondsnew - 1.9*10**9
-seconds = seconds - 1.9*10**9
+secondsnew = secondsnew - 1.955664*10**9
+seconds = seconds - 1.955664*10**9
 secondstoyears = 1/(86400*365)
 
 wm2toph = 6.12*10**(13)
@@ -264,19 +264,19 @@ def psdprim(vx, vy, vz):
     vy = -vy/1000
     vz = -vz/1000
     fperpy1 = np.sqrt(1/(np.pi * pthetaperpy1**2)) * (scipy.special.gamma(pkappa1perpy)/(np.sqrt(pkappa1perpy - 1.5)*scipy.special.gamma((pkappa1perpy - 0.5)))) * \
-        (1 + 1/(pkappa1perpy - 1.5) * vy**2/pthetaperpy1**2)**(-pkappa1perpy)
+        (1 + 1/(pkappa1perpy - 1.5) * (vy-puperpy)**2/pthetaperpy1**2)**(-pkappa1perpy)
     #fperpy2 = np.sqrt(1/(np.pi * pthetaperpy2**2)) * (scipy.special.gamma(pkappa2perpy)/(np.sqrt(pkappa2perpy - 1.5)*scipy.special.gamma((pkappa2perpy - 0.5)))) * \
     #    (1 + 1/(pkappa2perpy - 1.5) * vy**2/pthetaperpy1**2)**(-pkappa2perpy)
     fperpy2 = np.sqrt(1/(np.pi * pthetaperpy2**2)) * \
-        np.exp(-vy**2/pthetaperpy2**2)
+        np.exp(-(vy-puperpy)**2/pthetaperpy2**2)
     #fperpz1 = np.sqrt(1/(np.pi * pthetaperpz1**2)) * (scipy.special.gamma(pkappa1perpz)/(np.sqrt(pkappa1perpz - 1.5)*scipy.special.gamma((pkappa1perpz - 0.5)))) * \
     #    (1 + 1/(pkappa1perpz - 1.5) * vz**2/pthetaperpz1**2)**(-pkappa1perpz)
     fperpz1 = np.sqrt(1/(np.pi * pthetaperpz1**2)) * \
-        np.exp(-vz**2/pthetaperpz1**2)
+        np.exp(-(vz-puperpz)**2/pthetaperpz1**2)
     #fperpz2 = np.sqrt(1/(np.pi * pthetaperpz2**2)) * (scipy.special.gamma(pkappa2perpz)/(np.sqrt(pkappa2perpz - 1.5)*scipy.special.gamma((pkappa2perpz - 0.5)))) * \
     #    (1 + 1/(pkappa2perpz - 1.5) * vz**2/pthetaperpz2**2)**(-pkappa2perpz)
     fperpz2 = np.sqrt(1/(np.pi * pthetaperpz2**2)) * \
-        np.exp(-vz**2/pthetaperpz2**2)
+        np.exp(-(vz-puperpz)**2/pthetaperpz2**2)
 
     # assuming symmetrical speed scale parameters in sunward/antisunward directions
     fpar1 = (pthetapar1 * np.sqrt(np.pi*(kappa1par - 1.5)) * scipy.special.gamma(kappa1par - 0.5)/scipy.special.gamma(kappa1par))**(-1) * \
@@ -309,13 +309,13 @@ weightpar4 = 0.104
 upar4 = 9.73
 Tpar4 = 13030
 
-superpy = 16.48
+superpy = 0.32
 sT1perpy = 12540
 skappa1perpy = 18
 sT2perpy = 11580
 skappa2perpy = 16
 
-superpz = 16.8
+superpz = 0
 sT1perpz = 9970
 skappa1perpz = 12
 sT2perpz = sT1perpz
@@ -339,15 +339,19 @@ def psdsec(vx, vy, vz):
     fpar2 = 1/(2*np.pi*kB*Tpar2/mH)**(0.5) * np.exp(-((vx - upar2)**2)*1000000/(2*np.pi*kB*Tpar2/mH))
     fpar3 = 1/(2*np.pi*kB*Tpar3/mH)**(0.5) * np.exp(-((vx - upar3)**2)*1000000/(2*np.pi*kB*Tpar3/mH))
     fpar4 = 1/(2*np.pi*kB*Tpar4/mH)**(0.5) * np.exp(-((vx - upar4)**2)*1000000/(2*np.pi*kB*Tpar4/mH))
+    #fpar1 = 1
+    #fpar2 = 1
+    #fpar3 = 1
+    #fpar4 = 1
 
     fperpy1 = np.sqrt(1/(np.pi * sthetaperpy1**2)) * (scipy.special.gamma(skappa1perpy)/(np.sqrt(skappa1perpy - 1.5)*scipy.special.gamma((skappa1perpy - 0.5)))) * \
-        (1 + 1/(skappa1perpy - 1.5) * vy**2/sthetaperpy1**2)**(-skappa1perpy)
+        (1 + 1/(skappa1perpy - 1.5) * (vy-superpy)**2/sthetaperpy1**2)**(-skappa1perpy)
     fperpy2 = np.sqrt(1/(np.pi * sthetaperpy2**2)) * (scipy.special.gamma(skappa2perpy)/(np.sqrt(skappa2perpy - 1.5)*scipy.special.gamma((skappa2perpy - 0.5)))) * \
-        (1 + 1/(skappa2perpy - 1.5) * vy**2/sthetaperpy1**2)**(-skappa2perpy)
+        (1 + 1/(skappa2perpy - 1.5) * (vy-superpy)**2/sthetaperpy1**2)**(-skappa2perpy)
     fperpz1 = np.sqrt(1/(np.pi * sthetaperpz1**2)) * (scipy.special.gamma(skappa1perpz)/(np.sqrt(skappa1perpz - 1.5)*scipy.special.gamma((skappa1perpz - 0.5)))) * \
-        (1 + 1/(skappa1perpz - 1.5) * vz**2/sthetaperpz1**2)**(-skappa1perpz)
+        (1 + 1/(skappa1perpz - 1.5) * (vz-superpz)**2/sthetaperpz1**2)**(-skappa1perpz)
     fperpz2 = np.sqrt(1/(np.pi * sthetaperpz2**2)) * (scipy.special.gamma(skappa2perpz)/(np.sqrt(skappa2perpz - 1.5)*scipy.special.gamma((skappa2perpz - 0.5)))) * \
-        (1 + 1/(skappa2perpz - 1.5) * vz**2/sthetaperpz2**2)**(-skappa2perpz)
+        (1 + 1/(skappa2perpz - 1.5) * (vz-superpz)**2/sthetaperpz2**2)**(-skappa2perpz)
     
     #print(fpar1)
     #print(fpar2)
@@ -357,7 +361,7 @@ def psdsec(vx, vy, vz):
     #print(fperpy2)
     #print(fperpz1)
     #print(fperpz2)
-    nHratio = 0.224
+    nHratio = 0.521
     return nHinf * nHratio * (weightpar1*fpar1 + weightpar2*fpar2 + weightpar3*fpar3 + weightpar4*fpar4) * (fperpy1 + fperpy2) * (fperpz1 + fperpz2)
 
 def psdprimsec(vx, vy, vz):
@@ -445,7 +449,7 @@ def lya_abs(t,x,y,z,vr):
     #print(irradianceinterp([ttemp]))
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
     # scalefactor should match divisor in first term of addfactor
-    scalefactor = .333
+    scalefactor = 0.925
     
     # parameters of function
     A_K = 6.523*(1 + 0.619*tdependence)
@@ -458,7 +462,7 @@ def lya_abs(t,x,y,z,vr):
     b_bkg = 0.035*(1 + 0.184*tdependence)
     a_bkg = 0.411**(-4) *(1 - 1.333*tdependence)
 
-    r_E = 0.6
+    r_E = 1
     r2 = 1
     F_R = A_R / (del_R * np.sqrt(2 * np.pi)) *np.exp(-(np.square((vr/1000) - (m_K + dm))) / (2*(del_R ** 2)))
     F_bkg = np.add(a_bkg*(vr/1000)*0.000001,b_bkg)
@@ -466,7 +470,7 @@ def lya_abs(t,x,y,z,vr):
 
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
     #print(scalefactor*(F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval))
-    return scalefactor*(F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval)
+    return scalefactor*(F_K-F_R+F_bkg)*(1 - absval)
 
 
 # odeint documentation: https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.odeint.html
@@ -706,7 +710,7 @@ for n in range(ydiv-1):
                                     latangleecl = np.pi/2 + zmask*np.arcsin(np.abs(zecliptic - sunpos[2])/currentrad[:])
 
                                     # integrand for the photoionization losses, with photoionization adjusted based on heliographic latitude angle
-                                    btintegrand = PIrate2/currentvr*(r1/currentrad)**2*(.85*(np.sin(latangleecl))**2 + (np.cos(latangleecl))**2) + + cxirate/currentvr*(r1/currentrad)**2
+                                    btintegrand = cxirate/currentvr*(r1/currentrad)**2 + PIrate2/currentvr*(r1/currentrad)**2*(.85*(np.sin(latangleecl))**2 + (np.cos(latangleecl))**2) 
 
                                     # calculation of attenuation factor
                                     attfact = scipy.integrate.simpson(btintegrand, x=currentrad)

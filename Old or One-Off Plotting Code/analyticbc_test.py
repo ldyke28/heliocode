@@ -1,10 +1,6 @@
 import numpy as np
 from scipy.integrate import odeint
 import scipy
-from mpi4py import MPI
-import os
-import warnings
-import h5py
 from scipy.signal import butter, lfilter, freqz
 import time
 import matplotlib.pyplot as plt
@@ -139,19 +135,19 @@ def psdprim(vx, vy, vz):
     vy = -vy/1000
     vz = -vz/1000
     fperpy1 = np.sqrt(1/(np.pi * pthetaperpy1**2)) * (scipy.special.gamma(pkappa1perpy)/(np.sqrt(pkappa1perpy - 1.5)*scipy.special.gamma((pkappa1perpy - 0.5)))) * \
-        (1 + 1/(pkappa1perpy - 1.5) * vy**2/pthetaperpy1**2)**(-pkappa1perpy)
+        (1 + 1/(pkappa1perpy - 1.5) * (vy-puperpy)**2/pthetaperpy1**2)**(-pkappa1perpy)
     #fperpy2 = np.sqrt(1/(np.pi * pthetaperpy2**2)) * (scipy.special.gamma(pkappa2perpy)/(np.sqrt(pkappa2perpy - 1.5)*scipy.special.gamma((pkappa2perpy - 0.5)))) * \
     #    (1 + 1/(pkappa2perpy - 1.5) * vy**2/pthetaperpy1**2)**(-pkappa2perpy)
     fperpy2 = np.sqrt(1/(np.pi * pthetaperpy2**2)) * \
-        np.exp(-vy**2/pthetaperpy2**2)
+        np.exp(-(vy-puperpy)**2/pthetaperpy2**2)
     #fperpz1 = np.sqrt(1/(np.pi * pthetaperpz1**2)) * (scipy.special.gamma(pkappa1perpz)/(np.sqrt(pkappa1perpz - 1.5)*scipy.special.gamma((pkappa1perpz - 0.5)))) * \
     #    (1 + 1/(pkappa1perpz - 1.5) * vz**2/pthetaperpz1**2)**(-pkappa1perpz)
     fperpz1 = np.sqrt(1/(np.pi * pthetaperpz1**2)) * \
-        np.exp(-vz**2/pthetaperpz1**2)
+        np.exp(-(vz-puperpz)**2/pthetaperpz1**2)
     #fperpz2 = np.sqrt(1/(np.pi * pthetaperpz2**2)) * (scipy.special.gamma(pkappa2perpz)/(np.sqrt(pkappa2perpz - 1.5)*scipy.special.gamma((pkappa2perpz - 0.5)))) * \
     #    (1 + 1/(pkappa2perpz - 1.5) * vz**2/pthetaperpz2**2)**(-pkappa2perpz)
     fperpz2 = np.sqrt(1/(np.pi * pthetaperpz2**2)) * \
-        np.exp(-vz**2/pthetaperpz2**2)
+        np.exp(-(vz-puperpz)**2/pthetaperpz2**2)
 
     # assuming symmetrical speed scale parameters in sunward/antisunward directions
     fpar1 = (pthetapar1 * np.sqrt(np.pi*(kappa1par - 1.5)) * scipy.special.gamma(kappa1par - 0.5)/scipy.special.gamma(kappa1par))**(-1) * \
@@ -184,13 +180,13 @@ weightpar4 = 0.104
 upar4 = 9.73
 Tpar4 = 13030
 
-superpy = 16.48
+superpy = 0.32
 sT1perpy = 12540
 skappa1perpy = 18
 sT2perpy = 11580
 skappa2perpy = 16
 
-superpz = 16.8
+superpz = 0
 sT1perpz = 9970
 skappa1perpz = 12
 sT2perpz = sT1perpz
@@ -220,13 +216,13 @@ def psdsec(vx, vy, vz):
     #fpar4 = 1
 
     fperpy1 = np.sqrt(1/(np.pi * sthetaperpy1**2)) * (scipy.special.gamma(skappa1perpy)/(np.sqrt(skappa1perpy - 1.5)*scipy.special.gamma((skappa1perpy - 0.5)))) * \
-        (1 + 1/(skappa1perpy - 1.5) * vy**2/sthetaperpy1**2)**(-skappa1perpy)
+        (1 + 1/(skappa1perpy - 1.5) * (vy-superpy)**2/sthetaperpy1**2)**(-skappa1perpy)
     fperpy2 = np.sqrt(1/(np.pi * sthetaperpy2**2)) * (scipy.special.gamma(skappa2perpy)/(np.sqrt(skappa2perpy - 1.5)*scipy.special.gamma((skappa2perpy - 0.5)))) * \
-        (1 + 1/(skappa2perpy - 1.5) * vy**2/sthetaperpy1**2)**(-skappa2perpy)
+        (1 + 1/(skappa2perpy - 1.5) * (vy-superpy)**2/sthetaperpy1**2)**(-skappa2perpy)
     fperpz1 = np.sqrt(1/(np.pi * sthetaperpz1**2)) * (scipy.special.gamma(skappa1perpz)/(np.sqrt(skappa1perpz - 1.5)*scipy.special.gamma((skappa1perpz - 0.5)))) * \
-        (1 + 1/(skappa1perpz - 1.5) * vz**2/sthetaperpz1**2)**(-skappa1perpz)
+        (1 + 1/(skappa1perpz - 1.5) * (vz-superpz)**2/sthetaperpz1**2)**(-skappa1perpz)
     fperpz2 = np.sqrt(1/(np.pi * sthetaperpz2**2)) * (scipy.special.gamma(skappa2perpz)/(np.sqrt(skappa2perpz - 1.5)*scipy.special.gamma((skappa2perpz - 0.5)))) * \
-        (1 + 1/(skappa2perpz - 1.5) * vz**2/sthetaperpz2**2)**(-skappa2perpz)
+        (1 + 1/(skappa2perpz - 1.5) * (vz-superpz)**2/sthetaperpz2**2)**(-skappa2perpz)
     
     #print(fpar1)
     #print(fpar2)
@@ -236,7 +232,7 @@ def psdsec(vx, vy, vz):
     #print(fperpy2)
     #print(fperpz1)
     #print(fperpz2)
-    nHratio = 0.224
+    nHratio = 0.521
     return nHinf * nHratio * (weightpar1*fpar1 + weightpar2*fpar2 + weightpar3*fpar3 + weightpar4*fpar4) * (fperpy1 + fperpy2) * (fperpz1 + fperpz2)
 
 def psdprimsec(vx, vy, vz):
@@ -295,19 +291,19 @@ for i in tqdm(range(vxstart1.size)):
 fig = plt.figure()
 ax = plt.axes()
 #im = ax.pcolormesh(vxplot1,vyplot1,testdistsprim, cmap='rainbow')
-im = plt.scatter(vxplot1, vyplot1, c=testdistsprim, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11), vmax=10**(-5)))
-plt.xlabel("vx")
-plt.ylabel("vy")
+im = plt.scatter(vxplot1/1000, vyplot1/1000, c=testdistsprim, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11), vmax=10**(-5)))
+plt.xlabel("$v_x$ (km s$^{-1}$)")
+plt.ylabel("$v_y$ (km s$^{-1}$)")
 cb = fig.colorbar(im, ax=ax)
-cb.set_label('Primary PSD')
+cb.set_label('Primary PSD (cm$^{-3}$ km$^{-3}$ s$^{3}$)')
 plt.show()
 
 fig = plt.figure()
 ax = plt.axes()
 #im = ax.pcolormesh(vxplot1,vyplot1,testdistsprim, cmap='rainbow')
-im = plt.scatter(vxplot1, vyplot1, c=testdistssec, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11), vmax=10**(-5)))
-plt.xlabel("vx")
-plt.ylabel("vy")
+im = plt.scatter(vxplot1/1000, vyplot1/1000, c=testdistssec, cmap='rainbow', norm=matplotlib.colors.LogNorm(vmin=10**(-11), vmax=10**(-5)))
+plt.xlabel("$v_x$ (km s$^{-1}$)")
+plt.ylabel("$v_y$ (km s$^{-1}$)")
 cb = fig.colorbar(im, ax=ax)
-cb.set_label('Secondary PSD')
+cb.set_label('Secondary PSD  (cm$^{-3}$ km$^{-3}$ s$^{3}$)')
 plt.show()

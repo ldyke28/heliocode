@@ -27,7 +27,7 @@ tstepfar = 200000 # time resolution for far regime
 phase = 0 # phase for implementing rotation of target point around sun
 refdist = 70 # upwind reference distance for backtraced trajectories, in au
 
-file = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Time Dependent Irradiance Data/complya.csv", delimiter=',')
+file = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Time Dependent Irradiance Data/complya.csv", delimiter=',')
 
 day = file[:,0]
 irradiance = file[:,1]
@@ -93,14 +93,23 @@ filterediaoffset2 = butter_lowpass_filter(irradianceoffset, cutoff, fs, 5)
 filteredia = filterediaoffset + offset
 filteredia2 = filterediaoffset2 + offset
 
+fig, ax = plt.subplots()
 
-
-plt.plot(seconds*secondstoyears-0.5, filteredia*wm2toph/(10**(11)), alpha = 0.7,color='b')
+plt.plot(seconds*secondstoyears, irradiance*wm2toph/(10**(11)), alpha=0.7)
+#plt.plot(seconds*secondstoyears-0.5, filteredia*wm2toph/(10**(11)), alpha = 0.7,color='b')
 plt.plot(seconds*secondstoyears - 2.5, filteredia2*wm2toph/(10**(11)), alpha=0.7, color='r')
-#plt.plot(seconds*secondstoyears, filteredia2*wm2toph, alpha=0.5)
+
+def torealyear(year):
+    return year + 2008 + 11/12
+
+def fromrealyear(year):
+    return year - 2008 - 11/12
+
 #plt.ylim([3*10**(11),7.25*10**(11)])
 plt.xlabel("Time (yrs)")
 plt.ylabel("10$^{11}$ Irradiance (ph cm$^{-2}$ s$^{-1}$)")
+secax = ax.secondary_xaxis('top', functions=(torealyear, fromrealyear))
+secax.set_xlabel('Year')
 plt.show()
 
 pspec, frequencies = plt.psd(irradiance, 256, fs)

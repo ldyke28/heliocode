@@ -57,23 +57,23 @@ def eVtov(esaenergy):
 
 fname = "modelcomp2010"
 
-file1 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/228deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file2 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/234deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file3 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/240deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file4 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/246deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file5 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/252deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file6 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/258deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file7 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/264deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file8 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/270deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file9 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/276deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file10 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/282deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file11 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/288deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file12 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/294deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file13 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/300deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file14 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/306deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
-file15 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/312deg_ibexshifted2010_lya_analyticbc_datamu_order5_newpi_3500vres_ibexview.txt", delimiter=',')
+file1 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/228deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres_ibexview.txt", delimiter=',')
+file2 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/234deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres_ibexview.txt", delimiter=',')
+file3 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/240deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres_ibexview.txt", delimiter=',')
+file4 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/246deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres_ibexview.txt", delimiter=',')
+file5 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/252deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres_ibexview.txt", delimiter=',')
+file6 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/258deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres_ibexview.txt", delimiter=',')
+file7 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/264deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres_ibexview.txt", delimiter=',')
+file8 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/271deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres_ibexview.txt", delimiter=',')
+file9 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/276deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres_ibexview.txt", delimiter=',')
+file10 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/282deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres_ibexview.txt", delimiter=',')
+file11 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/288deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres_ibexview.txt", delimiter=',')
+file12 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/294deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres_ibexview.txt", delimiter=',')
+file13 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/300deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres_ibexview.txt", delimiter=',')
+file14 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/306deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres_ibexview.txt", delimiter=',')
+file15 = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/312deg_ibexshifted_lya_analyticbc_datamu_nofilter_newpi_3500vres_ibexview.txt", delimiter=',')
 
-file1f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/228deg_ibexshifted2010_lya_Federicodist_datamu_3500vres_ibexview.txt", delimiter=',')
+"""file1f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/228deg_ibexshifted2010_lya_Federicodist_datamu_3500vres_ibexview.txt", delimiter=',')
 file2f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/234deg_ibexshifted2010_lya_Federicodist_datamu_3500vres_ibexview.txt", delimiter=',')
 file3f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/240deg_ibexshifted2010_lya_Federicodist_datamu_3500vres_ibexview.txt", delimiter=',')
 file4f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/246deg_ibexshifted2010_lya_Federicodist_datamu_3500vres_ibexview.txt", delimiter=',')
@@ -87,8 +87,23 @@ file11f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs
 file12f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/294deg_ibexshifted2010_lya_Federicodist_datamu_3500vres_ibexview.txt", delimiter=',')
 file13f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/300deg_ibexshifted2010_lya_Federicodist_datamu_3500vres_ibexview.txt", delimiter=',')
 file14f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/306deg_ibexshifted2010_lya_Federicodist_datamu_3500vres_ibexview.txt", delimiter=',')
-#file15f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/312deg_ibexshifted2010_lya_Federicodist_datamu_3500vres_ibexview.txt", delimiter=',')
+#file15f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/312deg_ibexshifted2010_lya_Federicodist_datamu_3500vres_ibexview.txt", delimiter=',')"""
 
+file1f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/228deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file2f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/234deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file3f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/240deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file4f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/246deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file5f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/252deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file6f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/258deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file7f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/264deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file8f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/270p5deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file9f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/276deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file10f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/282deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file11f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/288deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file12f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/294deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file13f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/300deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file14f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/306deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
+file15f = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Cluster Runs/2026Data/312deg_ibexshifted_1monthlater_lya_analyticbc_datamu_nofilter_3500vres_ibexview.txt", delimiter=',')
 
 
 phi = np.array([])
@@ -281,13 +296,14 @@ for i in range(np.shape(file14f)[0]):
     fluxf = np.append(fluxf, file14f[i,2])
     vmagf = np.append(vmagf, file14f[i,3])
 
-"""for i in range(np.shape(file15f)[0]):
+for i in range(np.shape(file15f)[0]):
     phif = np.append(phif, file15f[i,0])
     thetaf = np.append(thetaf, file15f[i,1])
     fluxf = np.append(fluxf, file15f[i,2])
-    vmagf = np.append(vmagf, file15f[i,3])"""
+    vmagf = np.append(vmagf, file15f[i,3])
 
 phi = -phi
+phif = -phif
 #print(flux)
 
 
@@ -502,7 +518,7 @@ lonlats = [ [15,0, '-120$^{\circ}$'], [eclipticzero,45, '45$^{\circ}$'], [eclipt
             [eclipticzero,30, '30$^{\circ}$'], [eclipticzero,75, '75$^{\circ}$'], [eclipticzero,60, '60$^{\circ}$'], [eclipticzero,-15, '-15$^{\circ}$'],
             [eclipticzero,-30, '-30$^{\circ}$'], [eclipticzero,-60, '-60$^{\circ}$'], [eclipticzero,-75, '-75$^{\circ}$'], [-75,0, '-30$^{\circ}$'], [-45,0, '-60$^{\circ}$'],
             [45,0, '-150$^{\circ}$'], [75,0, '180$^{\circ}$'], [105,0, '150$^{\circ}$'], [135,0, '120$^{\circ}$'], [-135,0, '30$^{\circ}$'], [-165,0, '60$^{\circ}$']]
-fig = plt.figure(figsize=(8,6))
+fig = plt.figure(figsize=(10,6))
 # Create plot figure and axes
 ax = plt.axes(projection=ccrs.Mollweide())
 
@@ -521,10 +537,10 @@ ax.set_global()
 plt.xlabel("Heliolongitude Angle $\phi$")
 plt.ylabel("Heliolatitude Angle θ")
 cb = fig.colorbar(im, ax=ax, fraction=0.026, pad=0.04)
-cb.set_label('Intensity at Detector (cm$^{-2}$ s$^{-1}$ sr$^{-1}$)')
+cb.set_label('Difference in Intensity at Detector (cm$^{-2}$ s$^{-1}$ sr$^{-1}$)')
 plt.show()
 
-fig = plt.figure(figsize=(8,6))
+fig = plt.figure(figsize=(10,6))
 # Create plot figure and axes
 ax = plt.axes(projection=ccrs.Mollweide())
 
@@ -544,7 +560,7 @@ cb = fig.colorbar(im, ax=ax, fraction=0.026, pad=0.04)
 cb.set_label('Intensity at Detector (cm$^{-2}$ s$^{-1}$ sr$^{-1}$)')
 plt.show()
 
-fig = plt.figure(figsize=(8,6))
+fig = plt.figure(figsize=(10,6))
 # Create plot figure and axes
 ax = plt.axes(projection=ccrs.Mollweide())
 

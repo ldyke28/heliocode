@@ -166,8 +166,8 @@ for i in range(seconds.size):
         irradianceavg = np.append(irradianceavg, [oldirradianceavg[i]])
         secondsnew = np.append(secondsnew, [seconds[i]])
 
-secondsnew = secondsnew - 1.9*10**9
-seconds = seconds - 1.9*10**9
+secondsnew = secondsnew - 1.955664*10**9
+seconds = seconds - 1.955664*10**9
 secondstoyears = 1/(86400*365)
 
 wm2toph = 6.12*10**(13)
@@ -205,7 +205,7 @@ secondsoffset = seconds-fifthorderoffset
 #loopoffset = -32.408
 loopoffset = -54.80
 
-irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[secondsoffset], values=filteredia)
+irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds], values=irradiance)
 
 #####################################################################################################################################
 # IMPORTING AND INTERPOLATING BOUNDARY DISTRIBUTIONS FROM THE UAH GROUP'S FRAMEWORK
@@ -382,7 +382,7 @@ def lya_abs(t,x,y,z,vr):
     #print(irradianceinterp([ttemp]))
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
     # scalefactor should match divisor in first term of addfactor
-    scalefactor = .333
+    scalefactor = 1.1
     
     # parameters of function
     A_K = 6.523*(1 + 0.619*tdependence)
@@ -403,7 +403,7 @@ def lya_abs(t,x,y,z,vr):
 
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
     #print(scalefactor*(F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval))
-    return scalefactor*(F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval)
+    return scalefactor*(F_K-F_R+F_bkg)*(1 - absval)
 
 
 # odeint documentation: https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.odeint.html

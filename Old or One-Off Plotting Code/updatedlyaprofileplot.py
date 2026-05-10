@@ -46,7 +46,7 @@ noncalcextent = 15 # radius in km/s around the axis of exclusion where we don't 
 # FILTERING AND INTERPOLATING THE LASP IRRADIANCE DATA TO USE FOR THE RADIATION PRESSURE FORCE
 #####################################################################################################################################
 
-irradfile = np.loadtxt("C:/Users/lucas/OneDrive/Documents/Dartmouth/HSResearch/Time Dependent Irradiance Data/complya.csv", delimiter=',')
+irradfile = np.loadtxt("C:/Users/lukeb/Documents/Dartmouth/HSResearch/Time Dependent Irradiance Data/complya.csv", delimiter=',')
 
 day = irradfile[:,0]
 irradiance = irradfile[:,1]
@@ -81,7 +81,7 @@ for i in range(seconds.size):
         irradianceavg = np.append(irradianceavg, [oldirradianceavg[i]])
         secondsnew = np.append(secondsnew, [seconds[i]])
 
-datatimeoffset = 1.955*10**9
+datatimeoffset = 1.955664*10**9
 secondsnew = secondsnew - datatimeoffset
 seconds = seconds - datatimeoffset
 #seconds = seconds - np.max(seconds)
@@ -116,14 +116,14 @@ tgrid = np.meshgrid(secondsnew, indexing='ij') # order will be z, y, x for this
 fifthorderoffset = 2.5*oneyear #- 22.4*oneyear
 firstorderoffset = .5*oneyear
 
-irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-fifthorderoffset], values=filteredia)
+#irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds-0], values=irradiance)
 #irradianceinterp = scipy.interpolate.RegularGridInterpolator(points=[seconds+29.5*oneyear], values=irradiance)
-#irradianceinterp = scipy.interpolate.interp1d(seconds-fifthorderoffset, filteredia, fill_value='extrapolate')
+irradianceinterp = scipy.interpolate.interp1d(seconds-fifthorderoffset, filteredia, fill_value='extrapolate')
 
-tcheck = np.arange(-1*10**9, 6*10**8, 1*10**4)
+tcheck = np.arange(-1*10**9, 2*10**8, 1*10**4)
 interpcheck = np.zeros(tcheck.size)
 for i in range(tcheck.size):
-    interpcheck[i] = irradianceinterp([tcheck[i]])
+    interpcheck[i] = irradianceinterp([tcheck[i]])[0]
 
 #plt.plot((seconds-fifthorderoffset)*secondstoyears, filteredia*wm2toph/(10**(11)), alpha = 0.7,color='b')
 plt.plot((tcheck)*secondstoyears, interpcheck*wm2toph/(10**(11)), alpha = 0.7,color='k')
@@ -203,11 +203,11 @@ def lya_abs_update(t,x,y,z,vr):
             tbounded = True
         else:
             ttemp = ttemp + 1.392*10**(9)
-    tdependence = irradianceinterp([ttemp])*latdep/Itotavg
+    tdependence = irradianceinterp([ttemp])[0]*latdep/Itotavg
     #print(irradianceinterp([ttemp]))
     # an added scale factor to adjust the total irradiance of the integral without changing the shape (adjusts total magnitude by a factor)
     # scalefactor should match divisor in first term of addfactor
-    scalefactor = .333
+    scalefactor = 1.1
     
     # parameters of function
     A_K = 6.523*(1 + 0.619*tdependence)
@@ -222,25 +222,27 @@ def lya_abs_update(t,x,y,z,vr):
     #print(a_bkg)
     r_E = 1
     r2 = 1
-    F_R = A_R / (del_R * np.sqrt(2 * np.pi)) *np.exp(-(np.square((vr/1000) - (m_K + dm))) / (2*(del_R ** 2)))
+    F_R = A_R / (del_R * np.sqrt(2 * np.pi)) *np.exp(-(np.square((vr/1000) - (m_K + dm))) / (2*(del_R**2)))
     F_bkg = a_bkg*(vr/1000) + b_bkg
     F_K = A_K * (1 + ((vr/1000) - m_K)**2 / (2 * K * ((del_K) ** 2)))**(-K-1)
 
     #(F_K-F_R+F_bkg)/((r_E/r)**2)
     #return scalefactor*(F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval)
-    return (F_K-F_R+F_bkg)/(r_E**2/(r2**2))*(1 - absval)
+    return scalefactor*(F_K-F_R+F_bkg)#*(1 - absval)
 
-t = 0
-t2 = oneyear*1.1
-t3 = oneyear*2.2
-t4 = oneyear*3.3
-t5 = oneyear*4.4
-t6 = oneyear*5.5
-t7 = oneyear*6.6
-t8 = oneyear*7.7
-t9 = oneyear*8.8
-t10 = oneyear*9.9
-t11 = oneyear*11
+shiftfactor = -12*oneyear 
+
+t = 0 + shiftfactor
+t2 = oneyear*1.1 + shiftfactor
+t3 = oneyear*2.2 + shiftfactor
+t4 = oneyear*3.3 + shiftfactor
+t5 = oneyear*4.4 + shiftfactor
+t6 = oneyear*5.5 + shiftfactor
+t7 = oneyear*6.6 + shiftfactor
+t8 = oneyear*7.7 + shiftfactor
+t9 = oneyear*8.8 + shiftfactor
+t10 = oneyear*9.9 + shiftfactor
+t11 = oneyear*11 + shiftfactor
 
 trange = np.arange(0, 11*oneyear, 11*oneyear/11)
 
@@ -309,6 +311,7 @@ ax.legend()
 plt.xticks(fontsize=fsize)
 plt.yticks(fontsize=fsize)
 plt.ylim(bottom=0)
+plt.yticks(np.arange(0,2,step=0.1))
 plt.grid()
 plt.xlim(-200,200)
 plt.ylim(0,2)
