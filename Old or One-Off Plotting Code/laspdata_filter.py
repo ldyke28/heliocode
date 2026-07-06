@@ -59,8 +59,8 @@ for i in range(seconds.size):
         irradianceavg = np.append(irradianceavg, [oldirradianceavg[i]])
         secondsnew = np.append(secondsnew, [seconds[i]])
 
-secondsnew = secondsnew - 1.946*10**9
-seconds = seconds - 1.946*10**9
+secondsnew = secondsnew - 1.955664*10**9
+seconds = seconds - 1.955664*10**9
 secondstoyears = 1/(86400*365)
 
 wm2toph = 6.12*10**(13)
@@ -95,15 +95,15 @@ filteredia2 = filterediaoffset2 + offset
 
 fig, ax = plt.subplots()
 
-plt.plot(seconds*secondstoyears, irradiance*wm2toph/(10**(11)), alpha=0.7)
-#plt.plot(seconds*secondstoyears-0.5, filteredia*wm2toph/(10**(11)), alpha = 0.7,color='b')
+#plt.plot(seconds*secondstoyears, irradiance*wm2toph/(10**(11)), alpha=0.7)
+plt.plot(seconds*secondstoyears-0.5, filteredia*wm2toph/(10**(11)), alpha = 0.7,color='b')
 plt.plot(seconds*secondstoyears - 2.5, filteredia2*wm2toph/(10**(11)), alpha=0.7, color='r')
 
 def torealyear(year):
-    return year + 2008 + 11/12
+    return year + 2008 + 11.677/12
 
 def fromrealyear(year):
-    return year - 2008 - 11/12
+    return year - 2008 - 11.677/12
 
 #plt.ylim([3*10**(11),7.25*10**(11)])
 plt.xlabel("Time (yrs)")
